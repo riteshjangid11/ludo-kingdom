@@ -1,0 +1,6 @@
+{
+  "appId": "com.ludokingdom.app",
+  "appName": "Ludo Kingdom",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

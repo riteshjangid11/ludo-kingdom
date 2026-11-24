@@ -1,0 +1,21 @@
+{
+  "name": "Ludo Kingdom",
+  "short_name": "Ludo Kingdom",
+  "description": "Royal 3D Ludo game with Pearl Palace theme, Kingdom Cup, and offline AI bots.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1636",
+  "theme_color": "#0b1636",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+

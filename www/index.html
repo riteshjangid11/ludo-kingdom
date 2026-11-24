@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b1636" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Ludo Kingdom</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-classic dice-skin-classic token-skin-pin speed-medium">
+
+  <!-- Global Confetti & Fireworks Canvas -->
+  <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+
+  <!-- ==================== 1. SPLASH / LOADING SCREEN ==================== -->
+  <section id="splash-screen" class="screen active">
+    <div class="splash-content">
+      <div class="logo-badge splash-logo">
+        <span class="crown-icon">👑</span>
+        <div class="logo-letters">
+          <span class="l-red">L</span><span class="l-yellow">U</span><span class="l-green">D</span><span class="l-blue">O</span>
+        </div>
+        <div class="logo-sub">KINGDOM</div>
+      </div>
+
+      <div class="splash-dice-anim">🎲</div>
+
+      <div class="progress-wrapper">
+        <div class="progress-track">
+          <div id="splash-bar" class="progress-fill"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="splash-status">Loading Studio Packs...</span>
+          <span id="splash-percent">0%</span>
+        </div>
+      </div>
+
+      <p id="splash-tip" class="splash-tip">Tip: Open Themes on the right side of the lobby to explore 3D worlds!</p>
+    </div>
+  </section>
+
+  <!-- ==================== 2. HOME LOBBY SCREEN ==================== -->
+  <section id="home-screen" class="screen">
+    <div class="lobby-bg-art" aria-hidden="true"></div>
+    <div id="lobby-sparkles" class="lobby-sparkles" aria-hidden="true"></div>
+
+    <!-- Top Header: Compact Profile Edit (Left) & Compact Settings (Right) -->
+    <header class="lobby-header">
+      <button id="btn-profile-edit" class="corner-btn" aria-label="Profile Edit">
+        <div class="corner-circle">
+          <span class="corner-icon">👤</span>
+          <span class="edit-badge">✏️</span>
+        </div>
+        <span class="corner-label">PROFILE<br />EDIT</span>
+      </button>
+
+      <div class="logo-badge home-logo">
+        <span class="crown-icon">👑</span>
+        <div class="logo-letters">
+          <span class="l-red">L</span><span class="l-yellow">U</span><span class="l-green">D</span><span class="l-blue">O</span>
+        </div>
+        <div class="logo-sub">KINGDOM</div>
+      </div>
+
+      <button id="btn-settings" class="corner-btn" aria-label="Settings">
+        <div class="corner-circle">
+          <span class="corner-icon">⚙️</span>
+        </div>
+        <span class="corner-label">SETTINGS</span>
+      </button>
+    </header>
+
+    <!-- Right-Side Floating Themes Button (Slightly Above Middle → Full Screen) -->
+    <button id="btn-open-themes" class="side-themes-btn" aria-label="Themes & Collection">
+      <span class="side-themes-icon">🎨</span>
+      <span class="side-themes-lbl">THEMES</span>
+    </button>
+
+    <!-- Main Lobby Body: Profile Card + Only PLAY & PLAY ONLINE -->
+    <main class="lobby-main">
+      <div class="profile-card" id="card-open-profile">
+        <div class="avatar-ring">
+          <span class="avatar-crown">👑</span>
+          <div id="home-avatar" class="avatar-circle">🤴</div>
+        </div>
+        <div class="player-name-row">
+          <div id="home-player-name" class="player-name">Player_123</div>
+          <span id="home-rank-badge" class="rank-pill-mini">🥉 Bronze</span>
+        </div>
+        <div class="player-stats-pill">
+          <span class="coin-icon">🪙</span>
+          <span>LVL <strong id="home-player-level">1</strong></span>
+          <span class="divider">|</span>
+          <span><strong id="home-player-coins">1,000</strong> Coins</span>
+        </div>
+      </div>
+
+      <!-- Saved Matches Resume Shortcut -->
+      <button id="btn-resume-match" class="btn-resume hidden">
+        <span id="resume-btn-label">▶ SAVED MATCHES (1)</span>
+      </button>
+
+      <!-- Single Primary PLAY Button (Opens Vs Bot / Pass & Play / Tournament) -->
+      <button id="btn-play-main" class="btn-play-now">
+        <span class="play-dice-float">🎲</span>
+        <span class="play-star left">⭐</span>
+        <span class="play-text">PLAY</span>
+        <span class="play-star right">⭐</span>
+      </button>
+
+      <!-- PLAY ONLINE Button -->
+      <button id="btn-play-online" class="btn-mode btn-online-main">🌐 PLAY ONLINE</button>
+    </main>
+
+    <!-- Clean Bottom Bar: Shop + Mini Daily Reward + Spin & Missions (No Social Strip) -->
+    <footer class="lobby-footer">
+      <div class="footer-meta-row">
+        <button class="gems-pill" id="btn-open-shop">
+          <span class="gem-icon">🛒</span>
+          <div class="gems-text">
+            <strong>Shop</strong>
+            <span><span id="home-gems">50</span> Gems</span>
+          </div>
+        </button>
+
+        <div class="quick-pill-group">
+          <button id="btn-daily-bonus" class="daily-mini-btn" title="Daily Reward" aria-label="Daily Reward">
+            <span id="daily-badge" class="notify-dot tiny-dot">!</span>
+            <span>🎁</span>
+          </button>
+
+          <button id="btn-lucky-spin" class="feature-pill">
+            <span id="spin-badge" class="notify-dot mini-dot hidden">!</span>
+            <span>🎡 Spin</span>
+          </button>
+
+          <button id="btn-missions" class="feature-pill">
+            <span id="missions-badge" class="notify-dot mini-dot hidden">!</span>
+            <span>🎯 Missions</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="copyright">© 2026 Ludo Kingdom Studio</div>
+    </footer>
+  </section>
+
+  <!-- ==================== 3. FULL-SCREEN THEMES & COLLECTION SCREEN ==================== -->
+  <section id="themes-screen" class="screen">
+    <header class="themes-topbar">
+      <button id="btn-themes-back" class="themes-back-btn" aria-label="Back to Home">⬅</button>
+      <h2 class="themes-screen-title">Themes</h2>
+      <div class="themes-balances">
+        <span class="inv-bal-chip">🪙 <strong id="themes-coins">1,000</strong></span>
+        <button id="btn-themes-to-shop" class="themes-cart-btn" aria-label="Open Shop">🛒</button>
+        <span class="inv-bal-chip">💎 <strong id="themes-gems">50</strong></span>
+      </div>
+    </header>
+
+    <!-- 3-Category Icon Strip: Themes, Dice, Emojis (Pieces locked directly to Themes) -->
+    <div id="themes-tabs" class="themes-icon-strip">
+      <button class="inv-cat-btn active" data-tab="themes" title="Themes">🎨</button>
+      <button class="inv-cat-btn" data-tab="dice" title="Dice">🎲</button>
+      <button class="inv-cat-btn" data-tab="emojis" title="Emojis">😎</button>
+    </div>
+
+    <!-- Red Ribbon Category Title -->
+    <div class="inv-ribbon-wrap">
+      <div id="themes-ribbon-title" class="inv-red-ribbon">Themes</div>
+    </div>
+
+    <div id="themes-sub-note" class="themes-sub-note">Every theme includes its own exclusive matching pieces</div>
+
+    <!-- Scrollable Ludo King Style Preview Card Grid -->
+    <div class="themes-grid-scroll">
+      <div id="themes-grid" class="lk-card-grid"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 4. CLEAN GAME BOARD SCREEN ==================== -->
+  <section id="game-screen" class="screen">
+    <!-- Slow Subtle Ambient Canvas & Scenery -->
+    <div class="theme-bg-motion" aria-hidden="true"></div>
+    <canvas id="theme-bg-canvas" class="theme-bg-canvas" aria-hidden="true"></canvas>
+    <div id="theme-scenery" class="theme-scenery" aria-hidden="true"></div>
+
+    <!-- Top Positional Corner Docks (Built dynamically per board rotation) -->
+    <div class="players-row top-row">
+      <div id="slot-tl" class="corner-slot slot-left"></div>
+      <div id="slot-tr" class="corner-slot slot-right"></div>
+    </div>
+
+    <!-- Enlarged Center 15x15 Ludo Board + Combo Banner -->
+    <div class="board-stage">
+      <div id="ludo-board" class="ludo-board" aria-label="Ludo Board">
+        <!-- Generated by game.js using board-data.js -->
+      </div>
+      <div id="combo-banner" class="combo-banner hidden" aria-hidden="true"></div>
+    </div>
+
+    <!-- Bottom Positional Corner Docks (Human always sits in Bottom-Left vs Bots) -->
+    <div class="players-row bottom-row">
+      <div class="bottom-left-cluster">
+        <div id="slot-bl" class="corner-slot slot-left"></div>
+        <!-- Emoji & Quick Chat Button Directly Beside Your Bottom-Left Profile -->
+        <button id="btn-emoji-toggle" class="btn-emoji-inline" aria-label="Chat & Emojis">😊</button>
+      </div>
+      <div id="slot-br" class="corner-slot slot-right"></div>
+    </div>
+
+    <!-- Compact Floating Action Row: Re-Roll + Single ••• Menu (Music, Sound, Save/Resume, Home) -->
+    <div class="game-floating-bar">
+      <!-- Emoji & Quick Chat Popover (Anchored above bottom-left) -->
+      <div id="emoji-popover" class="emoji-popover hidden" aria-label="Reactions and Quick Chat">
+        <div id="emoji-bar" class="emoji-grid-row"></div>
+        <div id="quick-chat-bar" class="quick-chat-row">
+          <button class="chat-pill-btn" data-chat="Nice Move! 🔥">Nice Move! 🔥</button>
+          <button class="chat-pill-btn" data-chat="Close Call! 😅">Close Call! 😅</button>
+          <button class="chat-pill-btn" data-chat="Hurry Up! ⏳">Hurry Up! ⏳</button>
+          <button class="chat-pill-btn" data-chat="Good Game! 👏">Good Game! 👏</button>
+          <button class="chat-pill-btn" data-chat="Watch Out! 👀">Watch Out! 👀</button>
+        </div>
+      </div>
+
+      <!-- Single ••• Game Menu Popover -->
+      <div id="game-menu-popover" class="game-menu-popover hidden" aria-label="Game Menu">
+        <button id="btn-menu-music" class="menu-item-btn">🎵 Music: On</button>
+        <button id="btn-menu-sound" class="menu-item-btn">🔊 Sound: On</button>
+        <button id="btn-menu-save" class="menu-item-btn">💾 Save &amp; Resume Later</button>
+        <button id="btn-menu-home" class="menu-item-btn danger">🏠 Home</button>
+      </div>
+
+      <div class="floating-controls-row">
+        <button id="btn-game-menu" class="btn-game-dots" aria-label="Game Menu">•••</button>
+        <button id="btn-reroll" class="btn-reroll hidden" title="Re-roll dice once per match">✨ Re-Roll (5💎)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MODALS (POPUPS) ==================== -->
+
+  <!-- Modal: Play Mode Picker (Opened by Home PLAY Button) -->
+  <div id="modal-play-picker" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Choose Play Mode 🎲</h2>
+        <button class="modal-close" data-close="modal-play-picker">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="play-picker-stack">
+          <button id="btn-pick-vs-bot" class="picker-mode-btn picker-bot">
+            <span class="picker-icon">🤖</span>
+            <div class="picker-text">
+              <strong>Play vs Computer</strong>
+              <small>Battle 1, 2 or 3 AI bots</small>
+            </div>
+          </button>
+
+          <button id="btn-pick-pass-play" class="picker-mode-btn picker-pass">
+            <span class="picker-icon">👥</span>
+            <div class="picker-text">
+              <strong>Pass &amp; Play</strong>
+              <small>Single or Team Up (2v2)</small>
+            </div>
+          </button>
+
+          <button id="btn-pick-tournament" class="picker-mode-btn picker-cup">
+            <span class="picker-icon">🏆</span>
+            <div class="picker-text">
+              <strong>Tournament (Kingdom Cup)</strong>
+              <small>3 Knockout Rounds • Grand Jackpot</small>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Shop (Coins, Gems & Special Offer Bundles ONLY) -->
+  <div id="modal-shop" class="modal-overlay hidden">
+    <div class="modal-box modal-wide inventory-modal">
+      <div class="modal-header inventory-header">
+        <h2>Shop 🛒</h2>
+        <div class="inv-header-balances">
+          <span class="inv-bal-chip">🪙 <strong id="shop-coins">1,000</strong></span>
+          <span class="inv-bal-chip">💎 <strong id="shop-gems">50</strong></span>
+        </div>
+        <button class="modal-close" data-close="modal-shop">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="shop-tabs" class="shop-tabs three-tabs">
+          <button class="shop-tab active" data-tab="bundles">🎁 Offers</button>
+          <button class="shop-tab" data-tab="coins">🪙 Coins</button>
+          <button class="shop-tab" data-tab="gems">💎 Gems</button>
+        </div>
+
+        <div id="shop-grid" class="shop-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Profile Edit, Royal Rank & Match History -->
+  <div id="modal-profile" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2>Player Profile</h2>
+        <button class="modal-close" data-close="modal-profile">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="profile-tabs" class="shop-tabs two-tabs">
+          <button class="shop-tab active" data-ptab="edit">Profile &amp; Rank</button>
+          <button class="shop-tab" data-ptab="history">Match History</button>
+        </div>
+
+        <div id="profile-tab-edit">
+          <div class="photo-upload-row">
+            <div id="profile-photo-preview" class="profile-photo-preview">🤴</div>
+            <div class="photo-upload-actions">
+              <label for="input-profile-photo" class="btn-secondary small-btn">📷 Gallery Photo</label>
+              <input id="input-profile-photo" type="file" accept="image/*" class="hidden" />
+              <button id="btn-remove-photo" type="button" class="btn-danger small-btn hidden">Remove Photo</button>
+            </div>
+          </div>
+
+          <div id="profile-rank-card" class="rank-progress-card">
+            <div class="rank-card-top">
+              <strong id="profile-rank-title">🥉 Bronze</strong>
+              <span id="profile-rank-next">3 wins to Silver</span>
+            </div>
+            <div class="mission-bar-track">
+              <div id="profile-rank-bar" class="mission-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <label class="field-label" for="input-player-name">Player Name</label>
+          <input id="input-player-name" type="text" maxlength="14" class="text-input" placeholder="Enter your name" />
+
+          <label class="field-label">Choose Avatar</label>
+          <div id="avatar-grid" class="avatar-grid"></div>
+
+          <div class="stats-grid">
+            <div class="stat-tile">
+              <span class="stat-val" id="stat-matches">0</span>
+              <span class="stat-lbl">Matches</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-val" id="stat-wins">0</span>
+              <span class="stat-lbl">Wins</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-val" id="stat-cups">0</span>
+              <span class="stat-lbl">🏆 Cups</span>
+            </div>
+          </div>
+
+          <button id="btn-save-profile" class="btn-primary full-width">Save Profile</button>
+        </div>
+
+        <div id="profile-tab-history" class="hidden">
+          <div id="match-history-list" class="history-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Kingdom Cup -->
+  <div id="modal-cup" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2>🏆 Kingdom Cup</h2>
+        <button class="modal-close" data-close="modal-cup">✕</button>
+      </div>
+      <div class="modal-body center-text">
+        <div class="cup-jackpot-banner">
+          <span>GRAND JACKPOT</span>
+          <strong>🪙 3,000 Coins + 💎 40 Gems</strong>
+        </div>
+
+        <div id="cup-bracket" class="cup-bracket">
+          <div class="cup-stage" id="cup-stage-1">
+            <span class="cup-stage-num">Round 1</span>
+            <strong>Quarterfinal</strong>
+            <small>2P • Easy Bot</small>
+          </div>
+          <span class="cup-arrow">➜</span>
+          <div class="cup-stage" id="cup-stage-2">
+            <span class="cup-stage-num">Round 2</span>
+            <strong>Semifinal</strong>
+            <small>3P • Normal</small>
+          </div>
+          <span class="cup-arrow">➜</span>
+          <div class="cup-stage" id="cup-stage-3">
+            <span class="cup-stage-num">Round 3</span>
+            <strong>Grand Final</strong>
+            <small>4P • Pro Bots</small>
+          </div>
+        </div>
+
+        <div id="cup-options-box">
+          <label class="field-label left-align">Cup Format</label>
+          <div id="cup-game-type" class="choice-row two-col">
+            <button class="choice-btn active" data-cuptype="quick">⚡ Quick (2 Tokens)</button>
+            <button class="choice-btn" data-cuptype="classic">Classic (4 Tokens)</button>
+          </div>
+
+          <label class="field-label left-align">Your Color</label>
+          <div id="cup-color-picker" class="color-row">
+            <button class="color-dot blue active" data-color="blue" aria-label="Blue"></button>
+            <button class="color-dot red" data-color="red" aria-label="Red"></button>
+            <button class="color-dot green" data-color="green" aria-label="Green"></button>
+            <button class="color-dot yellow" data-color="yellow" aria-label="Yellow"></button>
+          </div>
+        </div>
+
+        <p id="cup-status-note" class="online-desc">Win 3 knockout rounds in a row to lift the Kingdom Cup!</p>
+
+        <button id="btn-cup-start" class="btn-primary full-width">Start Round 1 🏆</button>
+        <button id="btn-cup-reset" class="btn-secondary full-width hidden" style="margin-top:8px;">Restart Cup from Round 1</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Saved Matches Manager -->
+  <div id="modal-saved-matches" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2>💾 Saved Matches</h2>
+        <button class="modal-close" data-close="modal-saved-matches">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="saved-matches-list" class="saved-matches-list"></div>
+        <button id="btn-delete-all-saves" class="btn-danger full-width hidden">🗑️ Delete All Saved Matches</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Daily Lucky Spin Wheel -->
+  <div id="modal-spin" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2>Lucky Spin Wheel 🎡</h2>
+        <button class="modal-close" data-close="modal-spin">✕</button>
+      </div>
+      <div class="modal-body center-text">
+        <div class="shop-balance-bar">
+          <div class="balance-chip">🪙 <strong id="spin-coins">1,000</strong></div>
+          <div class="balance-chip">💎 <strong id="spin-gems">50</strong></div>
+          <div class="balance-chip">🎟️ <strong id="spin-tickets">1</strong></div>
+        </div>
+
+        <div class="wheel-stage">
+          <div class="wheel-pointer" aria-hidden="true">▼</div>
+          <div id="spin-wheel" class="spin-wheel">
+            <div class="wheel-center-hub">👑</div>
+          </div>
+        </div>
+
+        <p id="spin-status-text" class="online-desc">1 Free Spin daily! Buy extra spins below anytime.</p>
+        <button id="btn-spin-now" class="btn-primary full-width">SPIN NOW 🎡</button>
+
+        <div class="spin-buy-section">
+          <div class="spin-buy-title">Get Extra Spins</div>
+          <div class="spin-buy-grid">
+            <button class="spin-buy-btn" data-spins="1" data-cost="20" data-currency="gems">+1 Spin • 💎 20</button>
+            <button class="spin-buy-btn" data-spins="1" data-cost="500" data-currency="coins">+1 Spin • 🪙 500</button>
+            <button class="spin-buy-btn" data-spins="3" data-cost="50" data-currency="gems">+3 Spins • 💎 50</button>
+            <button class="spin-buy-btn" data-spins="3" data-cost="1200" data-currency="coins">+3 Spins • 🪙 1,200</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Daily Missions & Achievements -->
+  <div id="modal-missions" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2>Missions &amp; Goals 🎯</h2>
+        <button class="modal-close" data-close="modal-missions">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="missions-tabs" class="shop-tabs two-tabs">
+          <button class="shop-tab active" data-mtab="daily">Daily Missions</button>
+          <button class="shop-tab" data-mtab="achievements">Achievements</button>
+        </div>
+        <div id="missions-list" class="missions-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings (Includes Social Links Moved from Home Screen) -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="modal-close" data-close="modal-settings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <div>
+            <strong>Sound Effects</strong>
+            <p class="setting-desc">Realistic dice clacks, hops &amp; chimes</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-sound" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Royal Music</strong>
+            <p class="setting-desc">Gentle synthesized background melody</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-music" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Phone Vibration</strong>
+            <p class="setting-desc">Haptic feedback on rolls &amp; captures</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-vibration" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>15s Turn Timer</strong>
+            <p class="setting-desc">Auto-plays turn if timer runs out</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-timer" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Game Speed</strong>
+            <p class="setting-desc">Piece movement &amp; AI pace</p>
+          </div>
+          <select id="select-speed" class="select-input">
+            <option value="slow">Slow</option>
+            <option value="medium" selected>Medium</option>
+            <option value="fast">Fast</option>
+          </select>
+        </div>
+
+        <hr class="modal-divider" />
+
+        <label class="field-label">Connect &amp; Share</label>
+        <div class="social-bar settings-social-bar">
+          <button id="btn-social-fb" class="social-btn fb" aria-label="Facebook">f</button>
+          <button id="btn-social-ig" class="social-btn ig" aria-label="Instagram">📷</button>
+          <button id="btn-social-wa" class="social-btn wa" aria-label="WhatsApp">💬</button>
+          <button id="btn-social-share" class="social-btn share" aria-label="Share Game">🔗</button>
+        </div>
+
+        <button id="btn-install-app" class="btn-primary full-width hidden" style="margin-top:10px;">📲 Install Ludo Kingdom App</button>
+
+        <hr class="modal-divider" />
+
+        <button id="btn-reset-data" class="btn-danger full-width">Reset Stats, Coins &amp; Shop</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Match Setup (Vs Bot OR Pass & Play with Single / Team Up 2v2) -->
+  <div id="modal-setup" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="setup-title">Match Setup</h2>
+        <button class="modal-close" data-close="modal-setup">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Pass & Play Style Choice: Single vs Team Up (2v2) -->
+        <div id="setup-pass-style-section" class="hidden">
+          <label class="field-label">Pass &amp; Play Style</label>
+          <div id="setup-pass-style" class="choice-row two-col">
+            <button class="choice-btn active" data-passstyle="single">👤 Single</button>
+            <button class="choice-btn" data-passstyle="team">🤝 Team Up (2v2)</button>
+          </div>
+        </div>
+
+        <label class="field-label">Game Format</label>
+        <div id="setup-game-type" class="choice-row two-col">
+          <button class="choice-btn active" data-gametype="classic">Classic (4 Tokens)</button>
+          <button class="choice-btn" data-gametype="quick">⚡ Quick (2 Tokens)</button>
+        </div>
+
+        <div id="setup-team-section" class="hidden">
+          <label class="field-label">Team Mode</label>
+          <div id="setup-team-play" class="choice-row two-col">
+            <button class="choice-btn active" data-teamplay="local">👥 4 Friends Local</button>
+            <button class="choice-btn" data-teamplay="bot">🤖 With Bot Partner</button>
+          </div>
+
+          <div id="setup-team-pair-wrap" class="hidden">
+            <label class="field-label">Choose Your Team</label>
+            <div id="setup-team-pair" class="choice-row two-col">
+              <button class="choice-btn active" data-teampair="ry">🔴 Red + 🟡 Yellow</button>
+              <button class="choice-btn" data-teampair="gb">🟢 Green + 🔵 Blue</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="setup-player-count-section">
+          <label class="field-label">Number of Players</label>
+          <div id="setup-player-count" class="choice-row">
+            <button class="choice-btn active" data-count="2">2 Players</button>
+            <button class="choice-btn" data-count="3">3 Players</button>
+            <button class="choice-btn" data-count="4">4 Players</button>
+          </div>
+        </div>
+
+        <div id="setup-difficulty-section">
+          <label class="field-label">AI Bot Difficulty</label>
+          <div id="setup-difficulty-picker" class="choice-row">
+            <button class="choice-btn" data-diff="easy">Easy</button>
+            <button class="choice-btn active" data-diff="normal">Normal</button>
+            <button class="choice-btn" data-diff="pro">🔥 Pro</button>
+          </div>
+        </div>
+
+        <div id="setup-color-section">
+          <label class="field-label">Your Color (Always Bottom-Left)</label>
+          <div id="setup-color-picker" class="color-row">
+            <button class="color-dot blue active" data-color="blue" aria-label="Blue"></button>
+            <button class="color-dot red" data-color="red" aria-label="Red"></button>
+            <button class="color-dot green" data-color="green" aria-label="Green"></button>
+            <button class="color-dot yellow" data-color="yellow" aria-label="Yellow"></button>
+          </div>
+        </div>
+
+        <div id="setup-stake-section">
+          <label class="field-label">Entry Stake &amp; Prize Pool</label>
+          <div id="setup-stake-picker" class="choice-row four-col">
+            <button class="choice-btn active" data-stake="0">Free</button>
+            <button class="choice-btn" data-stake="100">🪙 100</button>
+            <button class="choice-btn" data-stake="500">🪙 500</button>
+            <button class="choice-btn" data-stake="1000">🪙 1K</button>
+          </div>
+          <p id="setup-prize-preview" class="prize-preview">Free Match • 1st Place Reward: +250 Coins 🪙</p>
+        </div>
+
+        <div id="setup-names-container" class="names-container"></div>
+
+        <button id="btn-start-match" class="btn-primary full-width">Start Match 🎲</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Play Online -->
+  <div id="modal-online" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Play Online</h2>
+        <button class="modal-close" data-close="modal-online">✕</button>
+      </div>
+      <div class="modal-body center-text">
+        <div class="big-emoji">🌐</div>
+        <h3 class="online-heading">Online Multiplayer Coming Soon</h3>
+        <p class="online-desc">
+          Room codes and live matchmaking will be activated in the next update. Try <strong>Play vs Computer</strong>, <strong>Pass &amp; Play</strong>, or <strong>Kingdom Cup</strong> right now!
+        </p>
+        <div class="online-preview-btns">
+          <button class="btn-disabled" disabled>Create Room</button>
+          <button class="btn-disabled" disabled>Join Room</button>
+        </div>
+        <button class="btn-primary full-width" data-close="modal-online">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Daily Reward -->
+  <div id="modal-rewards" class="modal-overlay hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2>🎁 Daily Rewards</h2>
+        <button class="modal-close" data-close="modal-rewards">✕</button>
+      </div>
+      <div class="modal-body center-text">
+        <div id="streak-grid" class="streak-grid"></div>
+        <p id="reward-status-text" class="online-desc">Log in daily to claim your reward toward the Day 7 Mega Jackpot!</p>
+        <button id="btn-claim-reward" class="btn-primary full-width">Claim Today's Reward 🎁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Exit Match Confirmation -->
+  <div id="modal-exit-confirm" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Leave Match?</h2>
+        <button class="modal-close" data-close="modal-exit-confirm">✕</button>
+      </div>
+      <div class="modal-body center-text">
+        <div class="big-emoji">🚪</div>
+        <p id="exit-confirm-desc" class="online-desc">Save this match to your Saved Matches list, or quit completely.</p>
+        <div class="exit-actions-stack">
+          <button id="btn-exit-save" class="btn-primary full-width">💾 Save for Later &amp; Home</button>
+          <div class="win-actions">
+            <button id="btn-exit-stay" class="btn-secondary" data-close="modal-exit-confirm">Stay</button>
+            <button id="btn-exit-leave" class="btn-danger">Quit Match</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Victory & Podium Rankings -->
+  <div id="modal-win" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-body center-text">
+        <div id="win-trophy-icon" class="big-emoji">🏆</div>
+        <h2 id="win-title">Match Finished!</h2>
+        <p id="win-subtitle" class="online-desc">Final Standings</p>
+
+        <div id="win-rankings-list" class="rankings-list"></div>
+
+        <div id="win-coins-earned" class="reward-pill">+250 Coins Earned! 🪙</div>
+        <div class="win-actions">
+          <button id="btn-play-again" class="btn-primary">Play Again</button>
+          <button id="btn-win-home" class="btn-secondary">Home</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Scripts in Exact Load Order -->
+  <script src="board-data.js"></script>
+  <script src="ui.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
