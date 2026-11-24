@@ -47,18 +47,28 @@ jobs:
           ./gradlew assembleRelease
 
       - name: Sign release APK
-        id: sign_app
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          signedApkName: LudoKingdom-release.apk
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > release.keystore
+          BUILD_TOOLS=$(ls -d ${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools/* | sort -V | tail -n 1)
+          UNSIGNED_APK=$(ls android/app/build/outputs/apk/release/*.apk | head -n 1)
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED_APK" aligned.apk
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks release.keystore \
+            --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass "pass:$KEYSTORE_PASSWORD" \
+            --key-pass "pass:$KEY_PASSWORD" \
+            --out LudoKingdom-release.apk \
+            aligned.apk
+          "$BUILD_TOOLS/apksigner" verify LudoKingdom-release.apk
+          rm -f release.keystore aligned.apk
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
           name: LudoKingdom-APK
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          path: LudoKingdom-release.apk
