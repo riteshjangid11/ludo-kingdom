@@ -32,9 +32,9 @@ jobs:
       - name: Generate app icon and splash screen
         run: |
           sudo apt-get update
-          sudo apt-get install -y librsvg2-bin
+          sudo apt-get install -y imagemagick
           mkdir -p assets
-          rsvg-convert -w 1024 -h 1024 www/icon.svg -o assets/logo.png
+          convert "www/icon.webp[0]" -resize 1024x1024! assets/logo.png
           npx @capacitor/assets generate --android
 
       - name: Sync web files to Android
