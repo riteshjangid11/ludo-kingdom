@@ -89,14 +89,37 @@ window.LUDO_GAME = (() => {
   const TURN_LIMIT_MS = 15000;
   const REROLL_GEM_COST = 5;
 
-  // ==================== WEB AUDIO SOUND ENGINE (REALISTIC DICE CLACK) ====================
+  // ==================== MELODIOUS AUDIO & CUSTOM MP3 SOUND ENGINE ====================
   const SFX = (() => {
     let ctx = null;
     let noiseBuffer = null;
+    let captureStopTimer = null;
+    let winningActive = false;
+
+    const CAPTURE_MAX_MS = 3000;
+    const HOP_SCALE = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
+
+    function createTrack(src, { loop = false, volume = 0.85 } = {}) {
+      const audio = new Audio(src);
+      audio.preload = "auto";
+      audio.loop = loop;
+      audio.volume = volume;
+      return audio;
+    }
+
+    const tracks = {
+      capture: createTrack("./capture.mp3", { loop: false, volume: 0.88 }),
+      home: createTrack("./get-home.mp3", { loop: false, volume: 0.88 }),
+      winning: createTrack("./winning.mp3", { loop: true, volume: 0.82 })
+    };
+
+    function isSoundEnabled() {
+      const settings = window.LUDO_UI ? window.LUDO_UI.getSettings() : { sound: true };
+      return settings.sound !== false;
+    }
 
     function getCtx() {
-      const settings = window.LUDO_UI ? window.LUDO_UI.getSettings() : { sound: true };
-      if (!settings.sound) return null;
+      if (!isSoundEnabled()) return null;
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return null;
       if (!ctx) ctx = new AudioCtx();
@@ -106,32 +129,54 @@ window.LUDO_GAME = (() => {
 
     function getNoiseBuffer(ac) {
       if (noiseBuffer && noiseBuffer.sampleRate === ac.sampleRate) return noiseBuffer;
-      const len = Math.floor(ac.sampleRate * 0.045);
+      const len = Math.floor(ac.sampleRate * 0.042);
       const buf = ac.createBuffer(1, len, ac.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < len; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.35));
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.32));
       }
       noiseBuffer = buf;
       return buf;
     }
 
-    function playTone(freq, duration, type = "sine", volume = 0.14, delay = 0) {
+    // Warm marimba / bell / harp note with soft attack & gentle 2nd harmonic
+    function playMelodicNote(freq, duration = 0.16, volume = 0.12, delay = 0, harmonicMix = 0.22) {
       const ac = getCtx();
       if (!ac) return;
       const now = ac.currentTime + delay;
-      const osc = ac.createOscillator();
-      const gain = ac.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(volume, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-      osc.connect(gain);
-      gain.connect(ac.destination);
-      osc.start(now);
-      osc.stop(now + duration);
+
+      const osc1 = ac.createOscillator();
+      const gain1 = ac.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(freq, now);
+
+      gain1.gain.setValueAtTime(0.0001, now);
+      gain1.gain.linearRampToValueAtTime(volume, now + 0.008);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      osc1.connect(gain1);
+      gain1.connect(ac.destination);
+      osc1.start(now);
+      osc1.stop(now + duration + 0.02);
+
+      if (harmonicMix > 0) {
+        const osc2 = ac.createOscillator();
+        const gain2 = ac.createGain();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(freq * 2, now);
+
+        gain2.gain.setValueAtTime(0.0001, now);
+        gain2.gain.linearRampToValueAtTime(volume * harmonicMix, now + 0.006);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.65);
+
+        osc2.connect(gain2);
+        gain2.connect(ac.destination);
+        osc2.start(now);
+        osc2.stop(now + duration * 0.7 + 0.02);
+      }
     }
 
+    // Warm wooden dice rattle tap
     function playDiceHit(ac, delay, pitch, vol) {
       const now = ac.currentTime + delay;
 
@@ -141,11 +186,11 @@ window.LUDO_GAME = (() => {
       const filter = ac.createBiquadFilter();
       filter.type = "bandpass";
       filter.frequency.setValueAtTime(pitch, now);
-      filter.Q.setValueAtTime(4.2, now);
+      filter.Q.setValueAtTime(3.6, now);
 
       const nGain = ac.createGain();
-      nGain.gain.setValueAtTime(vol, now);
-      nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.042);
+      nGain.gain.setValueAtTime(vol * 0.75, now);
+      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.036);
 
       src.connect(filter);
       filter.connect(nGain);
@@ -154,67 +199,208 @@ window.LUDO_GAME = (() => {
 
       const osc = ac.createOscillator();
       const oGain = ac.createGain();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(pitch * 0.24, now);
-      osc.frequency.exponentialRampToValueAtTime(pitch * 0.14, now + 0.032);
-      oGain.gain.setValueAtTime(vol * 0.45, now);
-      oGain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(pitch * 0.32, now);
+      osc.frequency.exponentialRampToValueAtTime(pitch * 0.21, now + 0.045);
+      oGain.gain.setValueAtTime(0.0001, now);
+      oGain.gain.linearRampToValueAtTime(vol * 0.42, now + 0.004);
+      oGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.052);
 
       osc.connect(oGain);
       oGain.connect(ac.destination);
       osc.start(now);
-      osc.stop(now + 0.038);
+      osc.stop(now + 0.056);
+    }
+
+    function stopTrack(audio) {
+      if (!audio) return;
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch {}
+    }
+
+    function stopCapture() {
+      if (captureStopTimer) {
+        clearTimeout(captureStopTimer);
+        captureStopTimer = null;
+      }
+      stopTrack(tracks.capture);
+    }
+
+    function stopHome() {
+      stopTrack(tracks.home);
+    }
+
+    function stopWin() {
+      winningActive = false;
+      stopTrack(tracks.winning);
+    }
+
+    function stopAll() {
+      stopCapture();
+      stopHome();
+      stopWin();
+    }
+
+    function isCapturePlaying() {
+      const a = tracks.capture;
+      return Boolean(a && !a.paused && !a.ended && a.currentTime > 0);
+    }
+
+    function syncSettings() {
+      if (!isSoundEnabled()) {
+        stopCapture();
+        stopHome();
+        try { tracks.winning.pause(); } catch {}
+        return;
+      }
+      const winModal = document.getElementById("modal-win");
+      const winVisible = winModal && !winModal.classList.contains("hidden");
+      if (winningActive && winVisible && !document.hidden && tracks.winning.paused) {
+        tracks.winning.play().catch(() => {});
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        stopCapture();
+        stopHome();
+        try { tracks.winning.pause(); } catch {}
+      } else {
+        const winModal = document.getElementById("modal-win");
+        const winVisible = winModal && !winModal.classList.contains("hidden");
+        if (winningActive && winVisible && isSoundEnabled()) {
+          tracks.winning.play().catch(() => {});
+        }
+      }
+    }
+
+    function unlockAudio() {
+      if (isSoundEnabled()) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          if (!ctx) ctx = new AudioCtx();
+          if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        }
+      }
+      Object.values(tracks).forEach((t) => {
+        try { t.load(); } catch {}
+      });
     }
 
     return {
+      unlockAudio,
+      stopCapture,
+      stopHome,
+      stopWin,
+      stopAll,
+      syncSettings,
+      handleVisibilityChange,
       dice() {
         const ac = getCtx();
         if (!ac) return;
         const hits = [
-          { d: 0.0, p: 1750, v: 0.26 },
-          { d: 0.075, p: 2150, v: 0.22 },
-          { d: 0.16, p: 1620, v: 0.24 },
-          { d: 0.26, p: 1980, v: 0.19 },
-          { d: 0.37, p: 1480, v: 0.15 }
+          { d: 0.0, p: 1380, v: 0.22 },
+          { d: 0.075, p: 1680, v: 0.19 },
+          { d: 0.16, p: 1290, v: 0.2 },
+          { d: 0.255, p: 1560, v: 0.16 },
+          { d: 0.355, p: 1180, v: 0.14 }
         ];
-        hits.forEach((h) => playDiceHit(ac, h.d, h.p + (Math.random() * 140 - 70), h.v));
+        hits.forEach((h) => playDiceHit(ac, h.d, h.p + (Math.random() * 110 - 55), h.v));
       },
       reroll() {
-        playTone(587, 0.08, "sine", 0.13, 0);
-        playTone(880, 0.12, "sine", 0.13, 0.06);
-        playTone(1174, 0.16, "triangle", 0.12, 0.12);
+        const notes = [587.33, 739.99, 880.0, 1174.66, 1479.98];
+        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.1, idx * 0.055, 0.28));
       },
-      hop() { playTone(540, 0.065, "sine", 0.12); },
+      hop(stepIdx = 0) {
+        const freq = HOP_SCALE[Math.max(0, stepIdx) % HOP_SCALE.length];
+        playMelodicNote(freq, 0.14, 0.13, 0, 0.22);
+      },
       unlock() {
-        playTone(440, 0.09, "triangle", 0.14, 0);
-        playTone(660, 0.14, "triangle", 0.14, 0.08);
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.11, idx * 0.055, 0.26));
       },
       safe() {
-        playTone(660, 0.09, "sine", 0.1, 0);
-        playTone(880, 0.12, "sine", 0.1, 0.07);
+        const notes = [587.33, 739.99, 880.0, 1174.66];
+        notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.095, idx * 0.05, 0.3));
       },
       capture() {
-        playTone(640, 0.08, "sawtooth", 0.12, 0);
-        playTone(390, 0.12, "sawtooth", 0.12, 0.07);
-        playTone(210, 0.19, "sawtooth", 0.12, 0.15);
+        if (!isSoundEnabled()) return;
+        stopCapture();
+        const a = tracks.capture;
+        try {
+          a.currentTime = 0;
+          const p = a.play();
+          captureStopTimer = setTimeout(() => stopCapture(), CAPTURE_MAX_MS);
+          if (p && typeof p.catch === "function") {
+            p.catch(() => {
+              stopCapture();
+              playMelodicNote(523.25, 0.12, 0.12, 0, 0.25);
+              playMelodicNote(392.0, 0.15, 0.12, 0.07, 0.22);
+              playMelodicNote(261.63, 0.24, 0.13, 0.14, 0.18);
+            });
+          }
+        } catch {
+          playMelodicNote(523.25, 0.12, 0.12, 0, 0.25);
+          playMelodicNote(392.0, 0.15, 0.12, 0.07, 0.22);
+          playMelodicNote(261.63, 0.24, 0.13, 0.14, 0.18);
+        }
       },
-      slideTick() { playTone(320, 0.032, "sine", 0.05); },
+      slideTick() {
+        if (isCapturePlaying()) return;
+        playMelodicNote(440.0, 0.06, 0.045, 0, 0.15);
+      },
       home() {
-        playTone(523, 0.1, "triangle", 0.14, 0);
-        playTone(659, 0.1, "triangle", 0.14, 0.09);
-        playTone(784, 0.2, "triangle", 0.15, 0.18);
+        if (!isSoundEnabled()) return;
+        stopHome();
+        const a = tracks.home;
+        try {
+          a.currentTime = 0;
+          const p = a.play();
+          if (p && typeof p.catch === "function") {
+            p.catch(() => {
+              const notes = [523.25, 659.25, 783.99, 1046.5];
+              notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.12, idx * 0.07, 0.28));
+            });
+          }
+        } catch {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.12, idx * 0.07, 0.28));
+        }
       },
       forfeit() {
-        playTone(280, 0.14, "sawtooth", 0.1, 0);
-        playTone(190, 0.22, "sawtooth", 0.1, 0.14);
+        const notes = [392.0, 329.63, 261.63];
+        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.1, idx * 0.11, 0.14));
       },
       emoji() {
-        playTone(720, 0.06, "sine", 0.09, 0);
-        playTone(920, 0.08, "sine", 0.08, 0.05);
+        playMelodicNote(783.99, 0.11, 0.085, 0, 0.25);
+        playMelodicNote(1046.5, 0.15, 0.085, 0.06, 0.25);
+      },
+      playerFinish() {
+        const notes = [523.25, 659.25, 783.99, 987.77, 1046.5];
+        notes.forEach((n, idx) => playMelodicNote(n, 0.28, 0.12, idx * 0.08, 0.3));
       },
       win() {
-        const notes = [523, 659, 784, 1046];
-        notes.forEach((n, idx) => playTone(n, 0.22, "triangle", 0.16, idx * 0.12));
+        if (!isSoundEnabled()) return;
+        stopCapture();
+        stopHome();
+        winningActive = true;
+        const a = tracks.winning;
+        a.loop = true;
+        try {
+          a.currentTime = 0;
+          const p = a.play();
+          if (p && typeof p.catch === "function") {
+            p.catch(() => {
+              const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+              notes.forEach((n, idx) => playMelodicNote(n, 0.32, 0.14, idx * 0.11, 0.3));
+            });
+          }
+        } catch {
+          const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+          notes.forEach((n, idx) => playMelodicNote(n, 0.32, 0.14, idx * 0.11, 0.3));
+        }
       }
     };
   })();
@@ -225,6 +411,7 @@ window.LUDO_GAME = (() => {
   let sessionId = 0;
   let tokenEls = {};
   let turnTimerInterval = null;
+  let autoMoveTimer = null;
   let comboBannerTimer = null;
   let emojiTimers = {};
   let prevConsecutiveSixes = 0;
@@ -315,7 +502,7 @@ window.LUDO_GAME = (() => {
   function getSettings() {
     return window.LUDO_UI
       ? window.LUDO_UI.getSettings()
-      : { sound: true, music: true, vibration: true, timer: true, speed: "medium", theme: "classic", tokenSkin: "pin" };
+      : { sound: true, music: true, vibration: true, timer: true, autoMove: true, speed: "medium", theme: "classic", tokenSkin: "pin", frame: "bronze" };
   }
 
   function getSpeed() {
@@ -446,14 +633,29 @@ window.LUDO_GAME = (() => {
     return true;
   }
 
-  function showRerollBtn() {
-    const btn = document.getElementById("btn-reroll");
-    if (btn) btn.classList.remove("hidden");
+  function clearAutoMoveTimer() {
+    if (autoMoveTimer) {
+      clearTimeout(autoMoveTimer);
+      autoMoveTimer = null;
+    }
+  }
+
+  function showRerollBtn(color) {
+    // Keep legacy bottom-right pill permanently hidden; show compact chip directly on dice slot
+    const legacyBtn = document.getElementById("btn-reroll");
+    if (legacyBtn) legacyBtn.classList.add("hidden");
+
+    document.querySelectorAll(".dice-reroll-chip").forEach((el) => el.classList.add("hidden"));
+    const targetColor = color || getCurrentColor();
+    if (!targetColor) return;
+    const chip = document.getElementById(`reroll-chip-${targetColor}`);
+    if (chip) chip.classList.remove("hidden");
   }
 
   function hideRerollBtn() {
-    const btn = document.getElementById("btn-reroll");
-    if (btn) btn.classList.add("hidden");
+    const legacyBtn = document.getElementById("btn-reroll");
+    if (legacyBtn) legacyBtn.classList.add("hidden");
+    document.querySelectorAll(".dice-reroll-chip").forEach((el) => el.classList.add("hidden"));
   }
 
   function handleRerollClick() {
@@ -468,6 +670,7 @@ window.LUDO_GAME = (() => {
 
     state.rerollUsed[color] = true;
     state.consecutiveSixes = prevConsecutiveSixes;
+    clearAutoMoveTimer();
     hideRerollBtn();
     clearTurnTimer();
     clearLandingPreviews();
@@ -479,6 +682,98 @@ window.LUDO_GAME = (() => {
     state.phase = "WAITING_ROLL";
     renderTokens([]);
     rollDice(color, sessionId);
+  }
+
+  // ==================== HD 3D DICE SKIN APPLICATION (HERO PNG + *_face.webp CUBE FACES) ====================
+  const faceTileCache = new Map();
+
+  function loadFaceTileAsset(skinId) {
+    const url = `./assets/dice/${skinId}_face.webp`;
+    if (faceTileCache.has(url)) return faceTileCache.get(url);
+
+    const promise = new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ ok: true, src: url });
+      img.onerror = () => resolve({ ok: false, src: "" });
+      img.src = url;
+    });
+
+    faceTileCache.set(url, promise);
+    return promise;
+  }
+
+  function applyFaceTileImagesToCube(diceBtn, tileSrc) {
+    if (!diceBtn || !tileSrc) return;
+    diceBtn.querySelectorAll(".cube-face").forEach((face) => {
+      let tileImg = face.querySelector(".dice-face-tile-img");
+      if (!tileImg) {
+        tileImg = document.createElement("img");
+        tileImg.className = "dice-face-tile-img";
+        tileImg.alt = "";
+        tileImg.setAttribute("aria-hidden", "true");
+        face.insertBefore(tileImg, face.firstChild);
+      }
+      tileImg.src = tileSrc;
+    });
+    diceBtn.classList.add("hd-textured");
+  }
+
+  function clearFaceTileImagesFromCube(diceBtn) {
+    if (!diceBtn) return;
+    diceBtn.classList.remove("hd-textured");
+    diceBtn.querySelectorAll(".dice-face-tile-img").forEach((el) => el.remove());
+  }
+
+  function applyDiceSkinToBox(diceBtn, skinId) {
+    if (!diceBtn) return;
+    const activeSkin = skinId || getSettings().diceSkin || "classic";
+    diceBtn.dataset.diceSkin = activeSkin;
+
+    const oldBg = diceBtn.querySelector(".dice-hd-art-bg");
+    if (oldBg) oldBg.remove();
+    const oldHero = diceBtn.querySelector(".dice-hd-hero-img");
+    if (oldHero) oldHero.remove();
+    clearFaceTileImagesFromCube(diceBtn);
+
+    diceBtn.classList.remove("has-hd-skin", "hd-loaded");
+
+    if (
+      window.LUDO_UI &&
+      typeof window.LUDO_UI.isHDDiceSkin === "function" &&
+      window.LUDO_UI.isHDDiceSkin(activeSkin)
+    ) {
+      diceBtn.classList.add("has-hd-skin");
+
+      // 1. Load flat blank HD face tile (*_face.webp) for all 6 spinning & landed cube faces
+      loadFaceTileAsset(activeSkin).then((tileRes) => {
+        if (!tileRes.ok || !diceBtn.isConnected || diceBtn.dataset.diceSkin !== activeSkin) return;
+        applyFaceTileImagesToCube(diceBtn, tileRes.src);
+      });
+
+      // 2. Load angled HD 3D dice PNG for idle / ready-to-roll hero state
+      if (typeof window.LUDO_UI.loadDiceAsset === "function") {
+        window.LUDO_UI.loadDiceAsset(activeSkin).then((res) => {
+          if (!res.ok || !diceBtn.isConnected || diceBtn.dataset.diceSkin !== activeSkin) return;
+          if (!diceBtn.querySelector(".dice-hd-hero-img")) {
+            const heroImg = document.createElement("img");
+            heroImg.className = "dice-hd-hero-img";
+            heroImg.src = res.src;
+            heroImg.alt = "";
+            heroImg.setAttribute("aria-hidden", "true");
+            diceBtn.appendChild(heroImg);
+          }
+          diceBtn.classList.add("hd-loaded");
+        });
+      }
+    }
+  }
+
+  function refreshDiceSkins(skinId) {
+    const activeSkin = skinId || getSettings().diceSkin || "classic";
+    BD.COLORS.forEach((color) => {
+      const diceBtn = document.getElementById(`dice-${color}`);
+      if (diceBtn) applyDiceSkinToBox(diceBtn, activeSkin);
+    });
   }
 
   // ==================== 3D CUBE DICE FACTORY & SPIN ====================
@@ -513,6 +808,7 @@ window.LUDO_GAME = (() => {
 
     stage.appendChild(cube);
     diceBtn.appendChild(stage);
+    applyDiceSkinToBox(diceBtn);
 
     diceBtn.addEventListener("click", () => {
       if (!state.active || state.phase !== "WAITING_ROLL") return;
@@ -527,6 +823,7 @@ window.LUDO_GAME = (() => {
     const diceBtn = document.getElementById(`dice-${color}`);
     if (!diceBtn) return;
     diceBtn.classList.remove("rolling");
+    diceBtn.classList.add("dice-idle-hero");
 
     diceSpins[color] = { x: 0, y: 0 };
     const cube = diceBtn.querySelector(".dice-cube");
@@ -549,25 +846,34 @@ window.LUDO_GAME = (() => {
     const durationMs = getSpeed().spin;
     const angle = FACE_ANGLES[targetValue] || FACE_ANGLES[1];
 
-    diceSpins[color].x += 1 + Math.floor(Math.random() * 2);
-    diceSpins[color].y += 1 + Math.floor(Math.random() * 2);
+    diceSpins[color].x += 2 + Math.floor(Math.random() * 2);
+    diceSpins[color].y += 2 + Math.floor(Math.random() * 2);
 
     const finalX = diceSpins[color].x * 360 + angle.x;
     const finalY = diceSpins[color].y * 360 + angle.y;
 
-    diceBtn.classList.remove("rolling");
-    void diceBtn.offsetWidth;
-    if (stage) stage.style.animationDuration = `${durationMs}ms`;
-    diceBtn.classList.add("rolling");
+    diceBtn.style.setProperty("--dice-spin-ms", `${durationMs}ms`);
+    diceBtn.classList.remove("rolling", "dice-idle-hero");
+    if (stage) {
+      stage.classList.remove("dice-tumble-active");
+      void stage.offsetWidth;
+    }
 
     cube.style.transitionDuration = `${durationMs}ms`;
     cube.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
+
+    diceBtn.classList.add("rolling");
+    if (stage) {
+      stage.style.animationDuration = `${durationMs}ms`;
+      void stage.offsetWidth;
+    }
 
     return durationMs;
   }
 
   // ==================== 15-SECOND TURN TIMER ====================
   function clearTurnTimer() {
+    clearAutoMoveTimer();
     if (turnTimerInterval) {
       clearInterval(turnTimerInterval);
       turnTimerInterval = null;
@@ -851,7 +1157,7 @@ window.LUDO_GAME = (() => {
       yard.className = `yard yard-${color} yard-pos-${slotKey}`;
       yard.id = `yard-${color}`;
 
-      if (state.activeColors.includes(color) && state.players[color]) {
+      if (state.mode === "online" && state.activeColors.includes(color) && state.players[color]) {
         const lbl = document.createElement("span");
         lbl.className = "yard-label";
         lbl.textContent = state.players[color].name;
@@ -956,9 +1262,15 @@ window.LUDO_GAME = (() => {
       const isRightSide = slotKey === "tr" || slotKey === "br";
       const isBot = Boolean(player.isBot);
 
+      const isOnline = state.mode === "online";
+      const showOnlineOpponentName = isOnline && Boolean(player.isOnlineOpponent);
+
       const panel = document.createElement("div");
       panel.id = `panel-${color}`;
-      panel.className = `player-panel panel-${color}` + (isBot ? " bot-compact" : "");
+      panel.className =
+        `player-panel panel-${color}` +
+        (isBot ? " bot-compact" : " compact-minimal") +
+        (showOnlineOpponentName ? " has-online-name" : "");
 
       // Floating Emoji / Quick Chat Bubble
       const bubble = document.createElement("div");
@@ -987,17 +1299,49 @@ window.LUDO_GAME = (() => {
         }
         panel.appendChild(rankSpan);
       } else {
-        // Human Profile Dock (Always Bottom-Left vs Bots, or All Corners in Pass & Play)
+        // Minimal Human Dock: Ornate Square Avatar + Dice Slot with Compact Re-Roll Chip (No Name Offline/AI)
+        const diceSlotWrap = document.createElement("div");
+        diceSlotWrap.className = "dice-slot-wrap";
+        diceSlotWrap.appendChild(diceBtn);
+
+        const rerollChip = document.createElement("button");
+        rerollChip.type = "button";
+        rerollChip.id = `reroll-chip-${color}`;
+        rerollChip.className = "dice-reroll-chip hidden";
+        rerollChip.title = "Re-roll dice (5 Gems)";
+        rerollChip.setAttribute("aria-label", "Re-roll dice for 5 Gems");
+        rerollChip.textContent = "↻ 5💎";
+        rerollChip.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleRerollClick();
+        });
+        diceSlotWrap.appendChild(rerollChip);
+
         const info = document.createElement("div");
         info.className = "p-info" + (isRightSide ? " right-align" : "");
 
+        const frameBox = document.createElement("div");
+        frameBox.className = "avatar-frame-box frame-46";
+
         const avatarEl = document.createElement("span");
         avatarEl.id = `avatar-${color}`;
-        avatarEl.className = "p-avatar";
+        avatarEl.className = "p-avatar square-avatar-inner";
         if (window.LUDO_UI && typeof window.LUDO_UI.renderAvatar === "function") {
           window.LUDO_UI.renderAvatar(avatarEl, player.avatar);
         } else {
           avatarEl.textContent = player.avatar || "🤴";
+        }
+
+        const frameOverlay = document.createElement("div");
+        const activeFrame = player.frame || getSettings().frame || "bronze";
+        frameOverlay.id = `frame-${color}`;
+        frameOverlay.className = `frame-overlay frame-${activeFrame}`;
+        frameOverlay.setAttribute("aria-hidden", "true");
+
+        frameBox.appendChild(avatarEl);
+        frameBox.appendChild(frameOverlay);
+        if (window.LUDO_UI && typeof window.LUDO_UI.applyFrameVisual === "function") {
+          window.LUDO_UI.applyFrameVisual(frameOverlay, activeFrame);
         }
 
         const meta = document.createElement("div");
@@ -1006,7 +1350,7 @@ window.LUDO_GAME = (() => {
         const nameEl = document.createElement("span");
         nameEl.id = `name-${color}`;
         nameEl.className = "p-name";
-        nameEl.textContent = player.name;
+        nameEl.textContent = showOnlineOpponentName ? player.name : "";
 
         const teamEl = document.createElement("span");
         teamEl.id = `team-${color}`;
@@ -1017,25 +1361,25 @@ window.LUDO_GAME = (() => {
           teamEl.className = "p-team-tag hidden";
         }
 
+        meta.appendChild(nameEl);
+        meta.appendChild(teamEl);
+
         const rankEl = document.createElement("span");
         rankEl.id = `rank-${color}`;
         rankEl.className = "p-rank hidden";
 
-        meta.appendChild(nameEl);
-        meta.appendChild(teamEl);
-        meta.appendChild(rankEl);
-
         if (isRightSide) {
           info.appendChild(meta);
-          info.appendChild(avatarEl);
-          panel.appendChild(diceBtn);
+          info.appendChild(frameBox);
+          panel.appendChild(diceSlotWrap);
           panel.appendChild(info);
         } else {
-          info.appendChild(avatarEl);
+          info.appendChild(frameBox);
           info.appendChild(meta);
           panel.appendChild(info);
-          panel.appendChild(diceBtn);
+          panel.appendChild(diceSlotWrap);
         }
+        panel.appendChild(rankEl);
       }
 
       // Slim Turn Timer Progress Strip
@@ -1301,7 +1645,7 @@ window.LUDO_GAME = (() => {
     state.phase = "GAME_OVER";
     state.active = false;
     updateTurnUI();
-    SFX.win();
+    SFX.stopCapture();
     vibrate([40, 40, 80, 40, 120]);
 
     let finalColors;
@@ -1330,6 +1674,7 @@ window.LUDO_GAME = (() => {
     await wait(520);
     if (mySession !== sessionId) return;
 
+    SFX.win();
     if (window.LUDO_UI && typeof window.LUDO_UI.recordMatchResult === "function") {
       window.LUDO_UI.recordMatchResult({
         saveId: state.saveId,
@@ -1391,6 +1736,7 @@ window.LUDO_GAME = (() => {
 
     state.phase = "ROLLING";
     updateTurnUI();
+    SFX.stopCapture();
     SFX.dice();
     if (!player.isBot) vibrate(18);
 
@@ -1408,6 +1754,15 @@ window.LUDO_GAME = (() => {
     if (rolled === 6 && !player.isBot) trackMission("roll6", 1);
 
     if (rolled === 6) {
+      if (!player.isBot) vibrate([22, 30, 38]);
+      if (diceBtn) {
+        diceBtn.classList.remove("rolled-six");
+        void diceBtn.offsetWidth;
+        diceBtn.classList.add("rolled-six");
+        setTimeout(() => {
+          if (diceBtn.isConnected) diceBtn.classList.remove("rolled-six");
+        }, 950);
+      }
       state.consecutiveSixes += 1;
       if (state.consecutiveSixes >= 3) {
         SFX.forfeit();
@@ -1430,17 +1785,19 @@ window.LUDO_GAME = (() => {
     const offerReroll = canOfferReroll(turnColor, rolled);
     const playerGems = window.LUDO_UI ? window.LUDO_UI.getProfile().gems : 0;
 
+    const hasAffordableReroll = offerReroll && playerGems >= REROLL_GEM_COST;
+
     if (movable.length === 0) {
       state.consecutiveSixes = 0;
 
-      if (offerReroll && playerGems >= REROLL_GEM_COST) {
+      if (hasAffordableReroll) {
         state.phase = "WAITING_REROLL";
-        showRerollBtn();
+        showRerollBtn(turnColor);
         startTurnTimer(turnColor, mySession, () => {
           if (!state.active || mySession !== sessionId || state.phase !== "WAITING_REROLL") return;
           hideRerollBtn();
           advanceToNextPlayer(mySession);
-        }, 2800);
+        }, 2400);
         return;
       }
 
@@ -1462,17 +1819,35 @@ window.LUDO_GAME = (() => {
     }
 
     renderLandingPreviews(ctrlColor, movable, rolled);
-    if (offerReroll) showRerollBtn();
 
+    const autoMoveEnabled = getSettings().autoMove !== false;
     const allInYard = movable.every((idx) => state.tokens[ctrlColor][idx] === -1);
-    if (allInYard || (movable.length === 1 && (!offerReroll || playerGems < REROLL_GEM_COST))) {
-      hideRerollBtn();
-      clearLandingPreviews();
-      await wait(spd.autoMoveWait);
-      if (!state.active || mySession !== sessionId) return;
-      executeMove(turnColor, ctrlColor, movable[0], mySession);
+
+    if (autoMoveEnabled && (allInYard || movable.length === 1)) {
+      if (allInYard || !hasAffordableReroll) {
+        hideRerollBtn();
+        clearLandingPreviews();
+        autoMoveTimer = setTimeout(() => {
+          autoMoveTimer = null;
+          if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
+          executeMove(turnColor, ctrlColor, movable[0], mySession);
+        }, spd.autoMoveWait);
+        return;
+      }
+
+      // Single movable piece + affordable Re-Roll: show compact chip on dice briefly, then auto-move automatically
+      showRerollBtn(turnColor);
+      autoMoveTimer = setTimeout(() => {
+        autoMoveTimer = null;
+        if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
+        hideRerollBtn();
+        clearLandingPreviews();
+        executeMove(turnColor, ctrlColor, movable[0], mySession);
+      }, 1150);
       return;
     }
+
+    if (hasAffordableReroll) showRerollBtn(turnColor);
 
     startTurnTimer(turnColor, mySession, () => {
       if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
@@ -1532,7 +1907,7 @@ window.LUDO_GAME = (() => {
         const prevStep = state.tokens[ctrlColor][tokenIndex];
         spawnHopSparkle(ctrlColor, tokenIndex, prevStep);
         state.tokens[ctrlColor][tokenIndex] = startStep + s;
-        SFX.hop();
+        SFX.hop(s - 1);
         triggerHopArc(ctrlColor, tokenIndex, spd.hop);
         renderTokens([]);
         await wait(spd.hop);
@@ -1569,7 +1944,7 @@ window.LUDO_GAME = (() => {
             await finalizeMatch(mySession, teamId);
             return;
           }
-          SFX.win();
+          SFX.playerFinish();
           if (window.LUDO_UI) {
             window.LUDO_UI.launchConfetti(55);
             window.LUDO_UI.showToast(`${state.players[ctrlColor].name} finished! Helping partner now 🤝`);
@@ -1589,7 +1964,7 @@ window.LUDO_GAME = (() => {
           return;
         }
 
-        SFX.win();
+        SFX.playerFinish();
         if (window.LUDO_UI) {
           window.LUDO_UI.launchConfetti(55);
           window.LUDO_UI.showToast(`${state.players[ctrlColor].name} secured ${RANK_BADGES[placeIdx]}!`);
@@ -1699,6 +2074,7 @@ window.LUDO_GAME = (() => {
     clearLandingPreviews();
     clearComboBanner();
     hideRerollBtn();
+    SFX.stopAll();
     capturesThisTurn = 0;
 
     state = createEmptyState();
@@ -1721,6 +2097,7 @@ window.LUDO_GAME = (() => {
     state.turnIndex = 0;
     state.tokens = BD.createInitialTokens(state.gameType);
 
+    document.body.classList.toggle("mode-online", state.mode === "online");
     computeBoardRotation();
     buildBoardDOM();
     setupPlayerPanels();
@@ -1739,6 +2116,7 @@ window.LUDO_GAME = (() => {
     clearLandingPreviews();
     clearComboBanner();
     hideRerollBtn();
+    SFX.stopAll();
     capturesThisTurn = 0;
 
     state = createEmptyState();
@@ -1768,6 +2146,7 @@ window.LUDO_GAME = (() => {
       state.turnIndex = nextIdx >= 0 ? nextIdx : 0;
     }
 
+    document.body.classList.toggle("mode-online", state.mode === "online");
     computeBoardRotation();
     buildBoardDOM();
     setupPlayerPanels();
@@ -1787,6 +2166,8 @@ window.LUDO_GAME = (() => {
     clearLandingPreviews();
     clearComboBanner();
     hideRerollBtn();
+    SFX.stopAll();
+    document.body.classList.remove("mode-online");
     state.active = false;
     state.phase = "IDLE";
 
@@ -1859,9 +2240,11 @@ window.LUDO_GAME = (() => {
       });
     }
 
-    document.querySelectorAll("#quick-chat-bar .chat-pill-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (!state.active) return;
+    const quickChatBar = document.getElementById("quick-chat-bar");
+    if (quickChatBar) {
+      quickChatBar.addEventListener("click", (e) => {
+        const btn = e.target.closest(".chat-pill-btn");
+        if (!btn || !state.active) return;
         const msg = btn.dataset.chat;
         const senderColor = getReactionSenderColor();
         if (msg && senderColor) {
@@ -1871,9 +2254,27 @@ window.LUDO_GAME = (() => {
           scheduleBotChatReply(senderColor, msg);
         }
       });
+    }
+
+    const winModal = document.getElementById("modal-win");
+    if (winModal) {
+      winModal.addEventListener("click", (e) => {
+        if (e.target.closest("button")) SFX.stopWin();
+      });
+    }
+
+    const unlockOnce = () => {
+      SFX.unlockAudio();
+      document.removeEventListener("pointerdown", unlockOnce);
+    };
+    document.addEventListener("pointerdown", unlockOnce);
+
+    document.addEventListener("visibilitychange", () => {
+      SFX.handleVisibilityChange();
     });
 
     window.addEventListener("pagehide", () => {
+      SFX.stopAll();
       if (isMatchActive()) persistMatchSnapshot();
     });
   }
@@ -1887,7 +2288,24 @@ window.LUDO_GAME = (() => {
     stopMatch,
     isMatchActive,
     getCurrentSaveId,
+    stopWinningAudio: () => SFX.stopWin(),
+    stopCaptureAudio: () => SFX.stopCapture(),
+    stopAllAudio: () => SFX.stopAll(),
+    syncAudioSettings: () => SFX.syncSettings(),
     refreshPieceSkins,
+    refreshDiceSkins,
+    refreshPlayerFrames(frameId) {
+      const f = frameId || getSettings().frame || "bronze";
+      BD.COLORS.forEach((color) => {
+        const el = document.getElementById(`frame-${color}`);
+        if (!el) return;
+        if (window.LUDO_UI && typeof window.LUDO_UI.applyFrameVisual === "function") {
+          window.LUDO_UI.applyFrameVisual(el, f);
+        } else {
+          el.className = `frame-overlay frame-${f}`;
+        }
+      });
+    },
     getState: () => JSON.parse(JSON.stringify(state))
   };
 })();

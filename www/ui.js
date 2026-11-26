@@ -60,38 +60,80 @@ window.LUDO_UI = (() => {
     "🦊", "🐼", "🐉", "🥷", "👑"
   ];
 
-  // ==================== FULL-SCREEN THEMES, DICE & EMOJIS CATALOG ====================
-  // Only "classic" (Default) is free. All custom/3D themes are secondary unlockables.
+  // ==================== FULL-SCREEN THEMES, DICE, FRAMES & EMOJIS CATALOG ====================
+  // 3 Normal Themes + 5 Custom HD Themes
   const THEMES_CATALOG = [
     { id: "classic", name: "Default", bg: "linear-gradient(135deg,#1d75c8,#0d458a)", boardBg: "#ffffff", price: 0, currency: "coins" },
-    { id: "candy", name: "Candy Land", isStudio: true, bg: "linear-gradient(135deg,#74c7ff,#ff85c0,#ffe352)", boardBg: "#ffeef8", price: 600, currency: "coins" },
-    { id: "egypt", name: "Golden Egypt", isStudio: true, bg: "linear-gradient(135deg,#ffe58f,#b57e2d)", boardBg: "#f5e2a8", price: 800, currency: "coins" },
-    { id: "oasis", name: "Dubai Oasis", isStudio: true, bg: "linear-gradient(135deg,#1d74b8,#f3dec1)", boardBg: "#f3dec1", price: 20, currency: "gems" },
-    { id: "halloween", name: "Halloween", isStudio: true, bg: "linear-gradient(135deg,#2c144f,#ff8c1a)", boardBg: "#24153d", price: 750, currency: "coins" },
-    { id: "winter", name: "Winter Land", isStudio: true, bg: "linear-gradient(135deg,#0c264d,#7dd3fc,#ffffff)", boardBg: "#e6f6ff", price: 750, currency: "coins" },
-    { id: "pearl", name: "Pearl Palace", bg: "linear-gradient(135deg,#3d4899,#d7c7e8,#0f6ca6)", boardBg: "#dfd5ec", price: 500, currency: "coins" },
-    { id: "lava", name: "Lava World", bg: "linear-gradient(135deg,#2b0d09,#ff571a,#ffd54f)", boardBg: "#1b0e0e", price: 900, currency: "coins" },
-    { id: "galaxy", name: "Galaxy", bg: "linear-gradient(135deg,#0d072b,#8a4cff,#4ddbff)", boardBg: "#10092e", price: 25, currency: "gems" },
-    { id: "neon", name: "Cyber Neon", bg: "linear-gradient(135deg,#0e1633,#25f4ee,#ff2e93)", boardBg: "#080d20", price: 30, currency: "gems" },
-    { id: "dark", name: "Royal Dark", bg: "linear-gradient(135deg,#1c2c56,#0b1636)", boardBg: "#162244", price: 450, currency: "coins" }
+    { id: "lava", name: "Lava World", bg: "linear-gradient(135deg,#2b0d09,#ff571a,#ffd54f)", boardBg: "#1b0e0e", price: 3000, currency: "coins" },
+    { id: "galaxy", name: "Galaxy", bg: "linear-gradient(135deg,#0d072b,#8a4cff,#4ddbff)", boardBg: "#10092e", price: 3500, currency: "coins" },
+    { id: "candy", name: "Candy Land", isStudio: true, bg: "linear-gradient(135deg,#74c7ff,#ff85c0,#ffe352)", boardBg: "#ffeef8", price: 6000, currency: "coins" },
+    { id: "winter", name: "Winter Land", isStudio: true, bg: "linear-gradient(135deg,#0c264d,#7dd3fc,#ffffff)", boardBg: "#e6f6ff", price: 8000, currency: "coins" },
+    { id: "halloween", name: "Halloween", isStudio: true, bg: "linear-gradient(135deg,#2c144f,#ff8c1a)", boardBg: "#24153d", price: 10000, currency: "coins" },
+    { id: "egypt", name: "Golden Egypt", isStudio: true, bg: "linear-gradient(135deg,#ffe58f,#b57e2d)", boardBg: "#f5e2a8", price: 50, currency: "gems" },
+    { id: "oasis", name: "Dubai Oasis", isStudio: true, bg: "linear-gradient(135deg,#1d74b8,#f3dec1)", boardBg: "#f3dec1", price: 75, currency: "gems" }
   ];
 
+  // 3 Normal Dice + 8 Full HD 3D Dice
   const DICE_CATALOG = [
-    { id: "classic", name: "Default", top: "#ffffff", bot: "#d8e1f2", pip: "#14203b", price: 0, currency: "coins" },
-    { id: "gold", name: "Royal Gold", top: "#fff2b0", bot: "#d4961a", pip: "#3b2200", price: 750, currency: "coins" },
-    { id: "diya", name: "Diya", top: "#ff4d88", bot: "#8a0f3d", pip: "#ffe793", price: 850, currency: "coins" },
-    { id: "tricolour", name: "Tri-Colour", top: "#ff9933", bot: "#138808", pip: "#0b1636", price: 900, currency: "coins" },
-    { id: "pumpkin", name: "Pumpkin", top: "#ff9d2e", bot: "#b84a00", pip: "#260d00", price: 800, currency: "coins" },
-    { id: "football", name: "Football", top: "#f8fafc", bot: "#94a3b8", pip: "#0f172a", price: 800, currency: "coins" },
-    { id: "ruby", name: "Ruby", top: "#ff5c6c", bot: "#9e0b22", pip: "#ffffff", price: 1200, currency: "coins" },
-    { id: "neon", name: "Cyber Neon", top: "#18234a", bot: "#090e24", pip: "#25f4ee", price: 25, currency: "gems" }
+    { id: "classic", name: "Default", top: "#ffffff", bot: "#d8e1f2", border: "#8a9bc4", pip: "#14203b", pipOne: "#e53935", glow: "rgba(255,224,102,0.7)", price: 0, currency: "coins" },
+    { id: "tricolour", name: "Tri-Colour", top: "#ff9933", bot: "#138808", border: "#ffffff", pip: "#0b1636", pipOne: "#000080", glow: "rgba(255,165,51,0.75)", price: 750, currency: "coins" },
+    { id: "ruby", name: "Ruby", top: "#ff5c6c", bot: "#9e0b22", border: "#ffd166", pip: "#ffffff", pipOne: "#ffe793", glow: "rgba(255,76,108,0.8)", price: 1200, currency: "coins" },
+    { id: "royal_crown", name: "Royal Crown", isHD: true, top: "#fff6bd", bot: "#b87408", border: "#ffe885", pip: "#3d1c00", pipOne: "#b91c1c", glow: "rgba(255,215,0,0.95)", price: 2500, currency: "coins" },
+    { id: "glacier_crystal", name: "Glacier Crystal", isHD: true, top: "#e8faff", bot: "#1e88c7", border: "#bae6fd", pip: "#072c4d", pipOne: "#0284c7", glow: "rgba(125,211,252,0.95)", price: 4500, currency: "coins" },
+    { id: "cursed_relic", name: "Cursed Relic", isHD: true, top: "#522985", bot: "#1a0b2e", border: "#ff9838", pip: "#ffb74d", pipOne: "#4ade80", glow: "rgba(192,132,252,0.95)", price: 5000, currency: "coins" },
+    { id: "magma_obsidian", name: "Magma Obsidian", isHD: true, top: "#382522", bot: "#0e0706", border: "#ff571a", pip: "#ff9e2c", pipOne: "#ff3b1f", glow: "rgba(255,87,26,0.95)", price: 6000, currency: "coins" },
+    { id: "cyber_core", name: "Cyber Core", isHD: true, top: "#15254d", bot: "#050a18", border: "#25f4ee", pip: "#25f4ee", pipOne: "#ff2e93", glow: "rgba(37,244,238,0.95)", price: 6500, currency: "coins" },
+    { id: "pharaoh_gold", name: "Pharaoh's Gold", isHD: true, top: "#ffe08a", bot: "#9e6514", border: "#40e0d0", pip: "#0d5c63", pipOne: "#0891b2", glow: "rgba(245,183,38,0.95)", price: 30, currency: "gems" },
+    { id: "dubai_diamond", name: "Dubai Diamond", isHD: true, top: "#ffffff", bot: "#9fd8f5", border: "#50c878", pip: "#065f46", pipOne: "#0ea5e9", glow: "rgba(110,231,255,0.95)", price: 40, currency: "gems" },
+    { id: "cosmic_nebula", name: "Cosmic Nebula", isHD: true, top: "#4b1d96", bot: "#0c0624", border: "#c084fc", pip: "#7ce8ff", pipOne: "#fde047", glow: "rgba(192,132,252,0.95)", price: 45, currency: "gems" }
+  ];
+
+  // 9 Square Profile Frames
+  const FRAMES_CATALOG = [
+    { id: "bronze", name: "Bronze", price: 0, currency: "coins" },
+    { id: "silver", name: "Silver", price: 750, currency: "coins" },
+    { id: "royal_gold", name: "Royal Gold", price: 1500, currency: "coins" },
+    { id: "glacier_ice", name: "Glacier Ice", price: 3000, currency: "coins" },
+    { id: "magma_obsidian", name: "Magma Obsidian", price: 4000, currency: "coins" },
+    { id: "cyber_neon", name: "Cyber Neon", price: 5500, currency: "coins" },
+    { id: "pharaoh_sand", name: "Pharaoh's Sand", price: 30, currency: "gems" },
+    { id: "dubai_emerald", name: "Dubai Emerald", price: 40, currency: "gems" },
+    { id: "cosmic_void", name: "Cosmic Void", price: 45, currency: "gems" }
   ];
 
   const EMOJI_PACKS = [
-    { id: "classic", name: "Default", emojis: ["😂", "🔥", "👏", "😎", "😭", "😡"], price: 0, currency: "coins" },
-    { id: "royal", name: "Ludo King", emojis: ["👑", "🤑", "🏆", "💎", "🕺", "🤩"], price: 450, currency: "coins" },
-    { id: "festival", name: "Holi & Diya", emojis: ["🪔", "🎨", "🧨", "🥳", "💃", "✨"], price: 600, currency: "coins" },
-    { id: "spooky", name: "Spooky Ice", emojis: ["🎃", "👻", "🥶", "⛄", "💀", "⚡"], price: 15, currency: "gems" }
+    {
+      id: "classic",
+      name: "Default",
+      emojis: ["😂", "🔥", "👏", "😎", "😭", "😡"],
+      chats: ["Nice Move! 🔥", "Close Call! 😅", "Hurry Up! ⏳", "Good Game! 👏", "Watch Out! 👀"],
+      price: 0,
+      currency: "coins"
+    },
+    {
+      id: "royal",
+      name: "Ludo King",
+      emojis: ["👑", "🤑", "🏆", "💎", "🕺", "🤩"],
+      chats: ["Royal Roll! 👑", "Bow to the King! 🏆", "Jackpot Move! 💎", "Well Played! 👏", "My Board! 😎"],
+      price: 450,
+      currency: "coins"
+    },
+    {
+      id: "festival",
+      name: "Holi & Diya",
+      emojis: ["🪔", "🎨", "🧨", "🥳", "💃", "✨"],
+      chats: ["Festive Vibes! 🪔", "Boom! 🧨", "Colorful Move! 🎨", "Party Time! 🥳", "Shining Bright! ✨"],
+      price: 600,
+      currency: "coins"
+    },
+    {
+      id: "spooky",
+      name: "Spooky Ice",
+      emojis: ["🎃", "👻", "🥶", "⛄", "💀", "⚡"],
+      chats: ["Boo! 👻", "Ice Cold! 🥶", "Spooky Roll! 🎃", "Frozen Out! ⛄", "Shocking! ⚡"],
+      price: 15,
+      currency: "gems"
+    }
   ];
 
   // ==================== SHOP CATALOG (OFFER BUNDLES, COINS & GEMS ONLY) ====================
@@ -242,6 +284,193 @@ window.LUDO_UI = (() => {
     return promise;
   }
 
+  // ==================== AUTOMATIC TRANSPARENT LOADER FOR HD DICE & ORNATE FRAMES ====================
+  const HD_DICE_IDS = new Set([
+    "royal_crown", "glacier_crystal", "cursed_relic", "magma_obsidian",
+    "cyber_core", "pharaoh_gold", "dubai_diamond", "cosmic_nebula"
+  ]);
+  const hdAssetCache = new Map();
+
+  function isHDDiceSkin(diceId) {
+    return HD_DICE_IDS.has(diceId);
+  }
+
+  function getDiceAssetUrl(diceId) {
+    return HD_DICE_IDS.has(diceId) ? `./assets/dice/${diceId}.webp` : "";
+  }
+
+  function loadTransparentDarkAsset(url, punchCenter = false) {
+    const cacheKey = `${url}|${punchCenter ? "frame" : "dice"}`;
+    if (hdAssetCache.has(cacheKey)) return hdAssetCache.get(cacheKey);
+
+    const promise = new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const size = 256;
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, size, size);
+
+          const imgData = ctx.getImageData(0, 0, size, size);
+          const d = imgData.data;
+
+          // If the PNG already has real alpha transparency, use original crisp URL directly
+          const tlAlpha = d[(2 * size + 2) * 4 + 3];
+          const centerAlpha = d[(Math.floor(size / 2) * size + Math.floor(size / 2)) * 4 + 3];
+          if (tlAlpha < 230 && (!punchCenter || centerAlpha < 230)) {
+            resolve({ ok: true, src: url });
+            return;
+          }
+
+          const visited = new Uint8Array(size * size);
+          const colorDist = (idx, r, g, b) => {
+            const dr = d[idx] - r;
+            const dg = d[idx + 1] - g;
+            const db = d[idx + 2] - b;
+            return Math.sqrt(dr * dr + dg * dg + db * db);
+          };
+
+          const floodRegion = (seedPoints, maxSeedDist, maxStepDist) => {
+            const stack = [];
+            let sumR = 0, sumG = 0, sumB = 0, count = 0;
+            for (const p of seedPoints) {
+              if (p < 0 || p >= size * size) continue;
+              const idx = p * 4;
+              sumR += d[idx];
+              sumG += d[idx + 1];
+              sumB += d[idx + 2];
+              count += 1;
+            }
+            if (count === 0) return;
+            const sR = sumR / count;
+            const sG = sumG / count;
+            const sB = sumB / count;
+
+            for (const p of seedPoints) {
+              if (p < 0 || p >= size * size || visited[p]) continue;
+              const idx = p * 4;
+              if (colorDist(idx, sR, sG, sB) <= maxSeedDist) {
+                visited[p] = 1;
+                d[idx + 3] = 0;
+                stack.push(p);
+              }
+            }
+
+            while (stack.length > 0) {
+              const p = stack.pop();
+              const pIdx = p * 4;
+              const pR = d[pIdx], pG = d[pIdx + 1], pB = d[pIdx + 2];
+              const x = p % size;
+              const y = (p / size) | 0;
+
+              const neighbors = [];
+              if (x > 0) neighbors.push(p - 1);
+              if (x < size - 1) neighbors.push(p + 1);
+              if (y > 0) neighbors.push(p - size);
+              if (y < size - 1) neighbors.push(p + size);
+
+              for (const n of neighbors) {
+                if (visited[n]) continue;
+                const nIdx = n * 4;
+                if (colorDist(nIdx, sR, sG, sB) <= maxSeedDist && colorDist(nIdx, pR, pG, pB) <= maxStepDist) {
+                  visited[n] = 1;
+                  d[nIdx + 3] = 0;
+                  stack.push(n);
+                }
+              }
+            }
+          };
+
+          // 1. Flood-fill outer background from top & left edges (avoids tiny bottom-right corner mark)
+          const outerSeeds = [];
+          for (let x = 0; x < size; x++) {
+            outerSeeds.push(x);
+            if (x < size * 0.78) outerSeeds.push((size - 1) * size + x);
+          }
+          for (let y = 0; y < size; y++) {
+            outerSeeds.push(y * size);
+            if (y < size * 0.78) outerSeeds.push(y * size + (size - 1));
+          }
+          floodRegion(outerSeeds, 52, 24);
+
+          // 2. For square profile frames, also punch out the solid dark-navy interior window cleanly
+          if (punchCenter) {
+            const c = Math.floor(size / 2);
+            const centerSeeds = [
+              c * size + c,
+              (c - 8) * size + c,
+              (c + 8) * size + c,
+              c * size + (c - 8),
+              c * size + (c + 8)
+            ];
+            floodRegion(centerSeeds, 52, 24);
+          }
+
+          // 3. Soft 1px edge feathering on pixels touching transparent background
+          const sR = d[0], sG = d[1], sB = d[2];
+          for (let p = 0; p < size * size; p++) {
+            const idx = p * 4;
+            if (d[idx + 3] === 0) continue;
+            if (colorDist(idx, sR, sG, sB) < 68) {
+              const x = p % size;
+              const y = (p / size) | 0;
+              if (
+                (x > 0 && d[(p - 1) * 4 + 3] === 0) ||
+                (x < size - 1 && d[(p + 1) * 4 + 3] === 0) ||
+                (y > 0 && d[(p - size) * 4 + 3] === 0) ||
+                (y < size - 1 && d[(p + size) * 4 + 3] === 0)
+              ) {
+                d[idx + 3] = 90;
+              }
+            }
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+          resolve({ ok: true, src: canvas.toDataURL("image/png") });
+        } catch {
+          // On file:// CORS restriction, dice can still display directly, while frames fall back to CSS border
+          resolve(punchCenter ? { ok: false, src: "" } : { ok: true, src: url });
+        }
+      };
+      img.onerror = () => resolve({ ok: false, src: "" });
+      img.src = url;
+    });
+
+    hdAssetCache.set(cacheKey, promise);
+    return promise;
+  }
+
+  function loadDiceAsset(diceId) {
+    const url = getDiceAssetUrl(diceId);
+    if (!url) return Promise.resolve({ ok: false, src: "" });
+    return loadTransparentDarkAsset(url, false);
+  }
+
+  function applyFrameVisual(overlayEl, frameId) {
+    if (!overlayEl) return;
+    const fId = frameId || "bronze";
+    overlayEl.dataset.targetFrame = fId;
+    overlayEl.className = `frame-overlay frame-${fId}`;
+    overlayEl.innerHTML = "";
+    const parentBox = overlayEl.closest(".avatar-frame-box");
+    if (parentBox) parentBox.classList.remove("has-png-frame");
+
+    loadTransparentDarkAsset(`./assets/frames/${fId}.webp`, true).then((res) => {
+      if (!res.ok || !overlayEl.isConnected || overlayEl.dataset.targetFrame !== fId) return;
+      overlayEl.classList.add("has-png-frame");
+      if (parentBox) parentBox.classList.add("has-png-frame");
+      const img = document.createElement("img");
+      img.className = "frame-png-img";
+      img.src = res.src;
+      img.alt = "";
+      overlayEl.innerHTML = "";
+      overlayEl.appendChild(img);
+    });
+  }
+
   function checkStudioBackdropExists(themeId) {
     if (!STUDIO_PACKS.has(themeId)) {
       document.body.classList.remove("has-studio-bg");
@@ -250,7 +479,7 @@ window.LUDO_UI = (() => {
     const probe = new Image();
     probe.onload = () => document.body.classList.add("has-studio-bg");
     probe.onerror = () => document.body.classList.remove("has-studio-bg");
-    probe.src = `./assets/${themeId}/bg.jpg`;
+    probe.src = `./assets/${themeId}/bg.webp`;
   }
 
   function getTokenSVG(skinId = "pin", color = "red") {
@@ -361,7 +590,7 @@ window.LUDO_UI = (() => {
     containerEl.innerHTML = getTokenSVG(skinId, color);
 
     if (STUDIO_PACKS.has(skinId)) {
-      const spriteUrl = `./assets/${skinId}/piece-${color}.jpg`;
+      const spriteUrl = `./assets/${skinId}/piece-${color}.webp`;
       loadTransparentSprite(spriteUrl).then((res) => {
         if (!res.ok || !containerEl.isConnected) return;
         const img = document.createElement("img");
@@ -612,15 +841,18 @@ window.LUDO_UI = (() => {
         music: true,
         vibration: true,
         timer: true,
+        autoMove: true,
         speed: "medium",
         theme: "classic",
         diceSkin: "classic",
         tokenSkin: "pin",
+        frame: "bronze",
         emojiPack: "classic"
       },
       inventory: {
         themes: ["classic"],
         dice: ["classic"],
+        frames: ["bronze"],
         emojis: ["classic"],
         bundlesClaimed: []
       },
@@ -671,6 +903,8 @@ window.LUDO_UI = (() => {
   let wheelRotation = 0;
   let isSpinning = false;
   let deferredInstallPrompt = null;
+  let shopReturnScreen = "home-screen";
+  let pendingPurchaseAction = null;
 
   // ==================== AVATAR / PHOTO RENDERER ====================
   function isImageAvatar(val) {
@@ -760,29 +994,44 @@ window.LUDO_UI = (() => {
       const base = cloneDefaults();
 
       const validThemeIds = new Set(THEMES_CATALOG.map((t) => t.id));
+      const validDiceIds = new Set(DICE_CATALOG.map((d) => d.id));
+      const validFrameIds = new Set(FRAMES_CATALOG.map((f) => f.id));
+      const validEmojiIds = new Set(EMOJI_PACKS.map((e) => e.id));
+
       const mergedSettings = { ...base.settings, ...(parsed.settings || {}) };
       if (mergedSettings.speed === "normal") mergedSettings.speed = "medium";
       if (!["slow", "medium", "fast"].includes(mergedSettings.speed)) mergedSettings.speed = "medium";
       if (mergedSettings.theme === "classicpin") mergedSettings.theme = "classic";
       if (!validThemeIds.has(mergedSettings.theme)) mergedSettings.theme = "classic";
+      if (!validDiceIds.has(mergedSettings.diceSkin)) mergedSettings.diceSkin = "classic";
+      if (!validFrameIds.has(mergedSettings.frame)) mergedSettings.frame = "bronze";
+      if (!validEmojiIds.has(mergedSettings.emojiPack)) mergedSettings.emojiPack = "classic";
+      if (typeof mergedSettings.autoMove !== "boolean") mergedSettings.autoMove = true;
       mergedSettings.tokenSkin = getPieceSkinForTheme(mergedSettings.theme);
 
-      // Preserve all previously purchased themes seamlessly while keeping classic unlocked
       const rawThemes = ((parsed.inventory && parsed.inventory.themes) || [])
         .map((id) => (id === "classicpin" ? "classic" : id))
         .filter((id) => validThemeIds.has(id));
-
-      // If migrating from an older build where pearl/dark were auto-granted, keep what the user bought
       const mergedThemes = Array.from(new Set(["classic", ...rawThemes]));
       if (!mergedThemes.includes(mergedSettings.theme)) mergedThemes.push(mergedSettings.theme);
+
+      const rawDice = ((parsed.inventory && parsed.inventory.dice) || []).filter((id) => validDiceIds.has(id));
+      const mergedDice = Array.from(new Set(["classic", ...rawDice]));
+
+      const rawFrames = ((parsed.inventory && parsed.inventory.frames) || []).filter((id) => validFrameIds.has(id));
+      const mergedFrames = Array.from(new Set(["bronze", ...rawFrames]));
+
+      const rawEmojis = ((parsed.inventory && parsed.inventory.emojis) || []).filter((id) => validEmojiIds.has(id));
+      const mergedEmojis = Array.from(new Set(["classic", ...rawEmojis]));
 
       const merged = {
         profile: { ...base.profile, ...(parsed.profile || {}) },
         settings: mergedSettings,
         inventory: {
           themes: mergedThemes,
-          dice: Array.from(new Set(["classic", ...((parsed.inventory && parsed.inventory.dice) || [])])),
-          emojis: Array.from(new Set(["classic", ...((parsed.inventory && parsed.inventory.emojis) || [])])),
+          dice: mergedDice,
+          frames: mergedFrames,
+          emojis: mergedEmojis,
           bundlesClaimed: Array.isArray(parsed.inventory && parsed.inventory.bundlesClaimed)
             ? [...parsed.inventory.bundlesClaimed]
             : []
@@ -1130,65 +1379,134 @@ window.LUDO_UI = (() => {
     return { init, launchConfetti, launchFireworks };
   })();
 
-  // ==================== ROYAL BACKGROUND MUSIC SYNTHESIZER ====================
+  // ==================== HOME PAGE BACKGROUND MUSIC (MP3) ====================
   const MUSIC = (() => {
-    let ctx = null;
-    let timer = null;
-    let step = 0;
-    let unlocked = false;
+    const bgm = new Audio("./background-music.mp3");
+    bgm.loop = true;
+    bgm.preload = "auto";
+    bgm.volume = 0.55;
 
-    const MELODY = [
-      261.63, 329.63, 392.0, 523.25, 392.0, 329.63,
-      293.66, 349.23, 440.0, 523.25, 440.0, 349.23,
-      261.63, 329.63, 392.0, 440.0, 392.0, 329.63,
-      246.94, 293.66, 392.0, 493.88, 392.0, 293.66
-    ];
+    let retryBound = false;
 
-    function playNote() {
-      if (!appData.settings.music || document.hidden || !ctx || ctx.state === "suspended") return;
-      const freq = MELODY[step % MELODY.length];
-      step += 1;
+    function isLobbyScreenActive() {
+      const active = document.querySelector(".screen.active");
+      if (!active) return false;
+      return active.id !== "game-screen" && active.id !== "splash-screen";
+    }
 
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(0.024, now + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.65);
+    function shouldPlay() {
+      return Boolean(appData.settings.music && !document.hidden && isLobbyScreenActive());
+    }
+
+    function bindGestureRetry() {
+      if (retryBound) return;
+      retryBound = true;
+      const retry = () => {
+        retryBound = false;
+        document.removeEventListener("pointerdown", retry);
+        document.removeEventListener("click", retry);
+        sync();
+      };
+      document.addEventListener("pointerdown", retry, { once: true });
+      document.addEventListener("click", retry, { once: true });
     }
 
     function start() {
-      if (!appData.settings.music || !unlocked) return;
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      if (!ctx) ctx = new AudioCtx();
-      if (ctx.state === "suspended") ctx.resume().catch(() => {});
-      if (!timer) {
-        playNote();
-        timer = setInterval(playNote, 620);
+      if (!shouldPlay()) {
+        stop(false);
+        return;
+      }
+      if (!bgm.paused) return;
+      const p = bgm.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => bindGestureRetry());
       }
     }
 
-    function stop() {
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
-      }
+    function stop(resetPosition = false) {
+      try {
+        bgm.pause();
+        if (resetPosition) bgm.currentTime = 0;
+      } catch {}
+    }
+
+    function sync() {
+      if (shouldPlay()) start();
+      else stop(false);
     }
 
     function unlockAndSync() {
-      unlocked = true;
-      if (appData.settings.music) start();
-      else stop();
+      try {
+        if (bgm.readyState === 0) bgm.load();
+      } catch {}
+      sync();
     }
 
-    return { start, stop, unlockAndSync };
+    return { start, stop, sync, unlockAndSync };
+  })();
+
+  // ==================== MELODIOUS UI SOUND EFFECTS ====================
+  const UI_SFX = (() => {
+    let ctx = null;
+
+    function getCtx() {
+      if (!appData.settings.sound) return null;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      if (!ctx) ctx = new AudioCtx();
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      return ctx;
+    }
+
+    function playChime(freq, duration = 0.14, volume = 0.08, delay = 0, harmonicMix = 0.24) {
+      const ac = getCtx();
+      if (!ac) return;
+      const now = ac.currentTime + delay;
+
+      const osc1 = ac.createOscillator();
+      const gain1 = ac.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(freq, now);
+      gain1.gain.setValueAtTime(0.0001, now);
+      gain1.gain.linearRampToValueAtTime(volume, now + 0.007);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc1.connect(gain1);
+      gain1.connect(ac.destination);
+      osc1.start(now);
+      osc1.stop(now + duration + 0.02);
+
+      if (harmonicMix > 0) {
+        const osc2 = ac.createOscillator();
+        const gain2 = ac.createGain();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(freq * 2, now);
+        gain2.gain.setValueAtTime(0.0001, now);
+        gain2.gain.linearRampToValueAtTime(volume * harmonicMix, now + 0.006);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.65);
+        osc2.connect(gain2);
+        gain2.connect(ac.destination);
+        osc2.start(now);
+        osc2.stop(now + duration * 0.7 + 0.02);
+      }
+    }
+
+    return {
+      tap() {
+        playChime(659.25, 0.085, 0.048, 0, 0.2);
+      },
+      reward() {
+        const notes = [523.25, 659.25, 783.99, 987.77, 1046.5];
+        notes.forEach((n, idx) => playChime(n, 0.26, 0.095, idx * 0.06, 0.28));
+      },
+      spinStart() {
+        const notes = [440.0, 554.37, 659.25, 880.0];
+        notes.forEach((n, idx) => playChime(n, 0.16, 0.075, idx * 0.05, 0.22));
+      },
+      error() {
+        playChime(392.0, 0.12, 0.075, 0, 0.14);
+        playChime(329.63, 0.18, 0.075, 0.085, 0.14);
+      }
+    };
   })();
 
   // ==================== SPARKLES, HAPTICS, SCREENS & MODALS ====================
@@ -1222,10 +1540,15 @@ window.LUDO_UI = (() => {
     if (target) target.classList.add("active");
 
     if (screenId === "game-screen") {
+      MUSIC.stop(true);
       THEME_FX.setTheme(appData.settings.theme || "classic");
       THEME_FX.start();
     } else {
       THEME_FX.stop();
+      if (window.LUDO_GAME && typeof window.LUDO_GAME.stopWinningAudio === "function") {
+        window.LUDO_GAME.stopWinningAudio();
+      }
+      MUSIC.sync();
     }
   }
 
@@ -1257,7 +1580,7 @@ window.LUDO_UI = (() => {
     toastTimer = setTimeout(() => toast.classList.add("hidden"), 2500);
   }
 
-  // ==================== SPLASH LOADING SCREEN ====================
+  // ==================== SPLASH LOADING SCREEN (4-SECOND MINIMUM DELAY) ====================
   function runSplashScreen() {
     const bar = document.getElementById("splash-bar");
     const status = document.getElementById("splash-status");
@@ -1266,26 +1589,41 @@ window.LUDO_UI = (() => {
 
     if (tip) tip.textContent = SPLASH_TIPS[Math.floor(Math.random() * SPLASH_TIPS.length)];
 
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 16) + 12;
-      if (progress >= 100) progress = 100;
+    const MIN_DURATION_MS = 4000;
+    const startedAt = performance.now ? performance.now() : Date.now();
 
-      if (bar) bar.style.width = `${progress}%`;
-      if (percent) percent.textContent = `${progress}%`;
+    function step() {
+      const now = performance.now ? performance.now() : Date.now();
+      const elapsed = now - startedAt;
+      const ratio = Math.min(1, elapsed / MIN_DURATION_MS);
+
+      let pct;
+      if (ratio < 0.88) {
+        pct = Math.floor((ratio / 0.88) * 95);
+      } else if (ratio < 1) {
+        pct = 95 + Math.floor(((ratio - 0.88) / 0.12) * 5);
+      } else {
+        pct = 100;
+      }
+
+      if (bar) bar.style.width = `${pct}%`;
+      if (percent) percent.textContent = `${pct}%`;
 
       if (status) {
-        if (progress < 35) status.textContent = "Loading Studio Packs...";
-        else if (progress < 75) status.textContent = "Preparing 3D Dice & Sprites...";
-        else if (progress < 100) status.textContent = "Entering Kingdom...";
+        if (pct < 35) status.textContent = "Loading Studio Worlds...";
+        else if (pct < 72) status.textContent = "Preparing 3D Dice & Frames...";
+        else if (pct < 100) status.textContent = "Entering Ludo Kingdom...";
         else status.textContent = "Ready!";
       }
 
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => showScreen("home-screen"), 220);
+      if (ratio < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setTimeout(() => showScreen("home-screen"), 180);
       }
-    }, 85);
+    }
+
+    requestAnimationFrame(step);
   }
 
   // ==================== HOME, EMOJI BAR & SETTINGS SYNC ====================
@@ -1321,31 +1659,65 @@ window.LUDO_UI = (() => {
 
   function renderEquippedEmojiBar() {
     const bar = document.getElementById("emoji-bar");
-    if (!bar) return;
+    const chatBar = document.getElementById("quick-chat-bar");
     const packId = appData.settings.emojiPack || "classic";
     const pack = EMOJI_PACKS.find((p) => p.id === packId) || EMOJI_PACKS[0];
 
-    bar.innerHTML = "";
-    pack.emojis.forEach((emoji) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "emoji-btn";
-      btn.dataset.emoji = emoji;
-      btn.textContent = emoji;
-      bar.appendChild(btn);
-    });
+    if (bar) {
+      bar.innerHTML = "";
+      pack.emojis.forEach((emoji) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "emoji-btn";
+        btn.dataset.emoji = emoji;
+        btn.textContent = emoji;
+        bar.appendChild(btn);
+      });
+    }
+
+    if (chatBar && Array.isArray(pack.chats)) {
+      chatBar.innerHTML = "";
+      pack.chats.forEach((msg) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chat-pill-btn";
+        btn.dataset.chat = msg;
+        btn.textContent = msg;
+        chatBar.appendChild(btn);
+      });
+    }
+  }
+
+  function applyEquippedFrameOverlays() {
+    const activeFrame = appData.settings.frame || "bronze";
+    const homeTopFrame = document.getElementById("home-top-frame");
+    const homeCardFrame = document.getElementById("home-avatar-frame");
+    const profileFrame = document.getElementById("profile-frame-preview");
+
+    if (homeTopFrame) applyFrameVisual(homeTopFrame, activeFrame);
+    if (homeCardFrame) applyFrameVisual(homeCardFrame, activeFrame);
+    if (profileFrame) applyFrameVisual(profileFrame, activeFrame);
+
+    if (window.LUDO_GAME && typeof window.LUDO_GAME.refreshPlayerFrames === "function") {
+      window.LUDO_GAME.refreshPlayerFrames(activeFrame);
+    }
   }
 
   function renderHomeUI() {
     const p = appData.profile;
     const rank = getRankInfo(p.wins);
+    const activeAvatar = getActiveAvatarValue();
 
-    renderAvatar(document.getElementById("home-avatar"), getActiveAvatarValue());
-    document.getElementById("home-player-name").textContent = p.name;
-    document.getElementById("home-rank-badge").textContent = `${rank.current.icon} ${rank.current.name}`;
-    document.getElementById("home-player-level").textContent = getPlayerLevel();
-    document.getElementById("home-player-coins").textContent = p.coins.toLocaleString("en-IN");
-    document.getElementById("home-gems").textContent = p.gems.toLocaleString("en-IN");
+    renderAvatar(document.getElementById("home-avatar"), activeAvatar);
+    renderAvatar(document.getElementById("home-top-avatar"), activeAvatar);
+    applyEquippedFrameOverlays();
+
+    const nameEl = document.getElementById("home-player-name");
+    const rankEl = document.getElementById("home-rank-badge");
+    const lvlEl = document.getElementById("home-player-level");
+    if (nameEl) nameEl.textContent = p.name;
+    if (rankEl) rankEl.textContent = `${rank.current.icon} ${rank.current.name}`;
+    if (lvlEl) lvlEl.textContent = getPlayerLevel();
 
     const dailyBadge = document.getElementById("daily-badge");
     if (dailyBadge) dailyBadge.classList.toggle("hidden", !isDailyRewardAvailable());
@@ -1381,10 +1753,20 @@ window.LUDO_UI = (() => {
     document.body.classList.add(`theme-${activeTheme}`);
 
     document.body.classList.remove(
-      "dice-skin-classic", "dice-skin-gold", "dice-skin-ruby", "dice-skin-neon",
-      "dice-skin-diya", "dice-skin-tricolour", "dice-skin-pumpkin", "dice-skin-football"
+      "dice-skin-classic", "dice-skin-tricolour", "dice-skin-ruby",
+      "dice-skin-royal_crown", "dice-skin-glacier_crystal", "dice-skin-cursed_relic",
+      "dice-skin-magma_obsidian", "dice-skin-cyber_core", "dice-skin-pharaoh_gold",
+      "dice-skin-dubai_diamond", "dice-skin-cosmic_nebula",
+      "dice-skin-gold", "dice-skin-neon", "dice-skin-diya", "dice-skin-pumpkin", "dice-skin-football"
     );
     document.body.classList.add(`dice-skin-${s.diceSkin || "classic"}`);
+
+    document.body.classList.remove(
+      "frame-bronze", "frame-silver", "frame-royal_gold", "frame-glacier_ice",
+      "frame-magma_obsidian", "frame-cyber_neon", "frame-pharaoh_sand",
+      "frame-dubai_emerald", "frame-cosmic_void"
+    );
+    document.body.classList.add(`frame-${s.frame || "bronze"}`);
 
     document.body.classList.remove(
       "token-skin-pin", "token-skin-candy", "token-skin-egypt", "token-skin-oasis",
@@ -1400,11 +1782,13 @@ window.LUDO_UI = (() => {
     renderThemeScenery(activeTheme);
     THEME_FX.setTheme(activeTheme);
     renderEquippedEmojiBar();
+    applyEquippedFrameOverlays();
 
     const toggleSound = document.getElementById("toggle-sound");
     const toggleMusic = document.getElementById("toggle-music");
     const toggleVibration = document.getElementById("toggle-vibration");
     const toggleTimer = document.getElementById("toggle-timer");
+    const toggleAutoMove = document.getElementById("toggle-automove");
     const selectSpeed = document.getElementById("select-speed");
     const menuSound = document.getElementById("btn-menu-sound");
     const menuMusic = document.getElementById("btn-menu-music");
@@ -1413,19 +1797,202 @@ window.LUDO_UI = (() => {
     if (toggleMusic) toggleMusic.checked = s.music;
     if (toggleVibration) toggleVibration.checked = s.vibration;
     if (toggleTimer) toggleTimer.checked = s.timer;
+    if (toggleAutoMove) toggleAutoMove.checked = s.autoMove !== false;
     if (selectSpeed) selectSpeed.value = s.speed || "medium";
     if (menuSound) menuSound.textContent = s.sound ? "🔊 Sound: On" : "🔇 Sound: Off";
     if (menuMusic) menuMusic.textContent = s.music ? "🎵 Music: On" : "🔇 Music: Off";
 
-    if (s.music) MUSIC.start();
-    else MUSIC.stop();
+    MUSIC.sync();
+    if (window.LUDO_GAME && typeof window.LUDO_GAME.syncAudioSettings === "function") {
+      window.LUDO_GAME.syncAudioSettings();
+    }
 
     if (window.LUDO_GAME && typeof window.LUDO_GAME.refreshPieceSkins === "function") {
       window.LUDO_GAME.refreshPieceSkins();
     }
+    if (window.LUDO_GAME && typeof window.LUDO_GAME.refreshDiceSkins === "function") {
+      window.LUDO_GAME.refreshDiceSkins(s.diceSkin || "classic");
+    }
   }
 
-  // ==================== FULL-SCREEN THEMES, DICE & EMOJIS SCREEN ====================
+  // ==================== PURCHASE CONFIRMATION & FULL ITEM PREVIEW ====================
+  function openBuyConfirm({ title, desc, priceText, onConfirm }) {
+    pendingPurchaseAction = typeof onConfirm === "function" ? onConfirm : null;
+    const titleEl = document.getElementById("buy-confirm-title");
+    const descEl = document.getElementById("buy-confirm-desc");
+    const priceEl = document.getElementById("buy-confirm-price");
+    if (titleEl) titleEl.textContent = title || "Confirm Purchase";
+    if (descEl) descEl.textContent = desc || "Do you want to buy this item?";
+    if (priceEl) priceEl.textContent = priceText || "";
+    openModal("modal-buy-confirm");
+  }
+
+  function buildRotating3DDicePreview(item) {
+    const pipPatterns = {
+      1: [4],
+      2: [2, 6],
+      3: [2, 4, 6],
+      4: [0, 2, 6, 8],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 2, 3, 5, 6, 8]
+    };
+
+    const scene = document.createElement("div");
+    scene.className = "preview-dice-scene";
+
+    const cube = document.createElement("div");
+    cube.className = "preview-dice-cube";
+    cube.style.setProperty("--p-top", item.top);
+    cube.style.setProperty("--p-bot", item.bot);
+    cube.style.setProperty("--p-border", item.border || "#ffffff");
+    cube.style.setProperty("--p-pip", item.pip);
+    cube.style.setProperty("--p-pip-one", item.pipOne || item.pip);
+
+    for (let f = 1; f <= 6; f++) {
+      const face = document.createElement("div");
+      face.className = `p-face pf-${f}`;
+      const lit = pipPatterns[f];
+      for (let i = 0; i < 9; i++) {
+        const pip = document.createElement("span");
+        pip.className = lit.includes(i) ? "p-pip on" : "p-pip";
+        face.appendChild(pip);
+      }
+      cube.appendChild(face);
+    }
+
+    scene.appendChild(cube);
+    return scene;
+  }
+
+  function openItemPreview(category, item) {
+    const owned = appData.inventory[category].includes(item.id);
+    const isEquipped =
+      (category === "themes" && appData.settings.theme === item.id) ||
+      (category === "dice" && appData.settings.diceSkin === item.id) ||
+      (category === "frames" && appData.settings.frame === item.id) ||
+      (category === "emojis" && appData.settings.emojiPack === item.id);
+
+    const titleEl = document.getElementById("preview-title");
+    const visualEl = document.getElementById("preview-visual");
+    const subtitleEl = document.getElementById("preview-subtitle");
+    const extraEl = document.getElementById("preview-extra");
+    const actionBtn = document.getElementById("btn-preview-action");
+
+    titleEl.textContent = item.name;
+    visualEl.innerHTML = "";
+    extraEl.innerHTML = "";
+
+    if (category === "themes") {
+      const banner = document.createElement("div");
+      banner.className = "preview-theme-banner portrait-banner";
+      if (item.isStudio) {
+        banner.style.backgroundImage = `url("./assets/${item.id}/bg.webp"), ${item.bg}`;
+      } else {
+        banner.style.background = item.bg;
+      }
+      visualEl.appendChild(banner);
+
+      const piecesRow = document.createElement("div");
+      piecesRow.className = "preview-pieces-row";
+      ["red", "green", "yellow", "blue"].forEach((clr) => {
+        const slot = document.createElement("div");
+        slot.className = "preview-piece-slot";
+        renderPieceVisual(slot, getPieceSkinForTheme(item.id), clr);
+        piecesRow.appendChild(slot);
+      });
+      visualEl.appendChild(piecesRow);
+      subtitleEl.textContent = item.isStudio
+        ? "Full HD Studio world background with 4 exclusive matching 3D pieces."
+        : "Board theme with matching colored pieces and ambient effects.";
+    } else if (category === "dice") {
+      const fallbackCube = buildRotating3DDicePreview(item);
+      visualEl.appendChild(fallbackCube);
+      if (item.isHD) {
+        loadDiceAsset(item.id).then((res) => {
+          if (!res.ok || !fallbackCube.isConnected) return;
+          const hdStage = document.createElement("div");
+          hdStage.className = "preview-dice-hd-stage";
+          if (item.glow) hdStage.style.setProperty("--thumb-glow", item.glow);
+          const img = document.createElement("img");
+          img.className = "preview-dice-hd-img";
+          img.src = res.src;
+          img.alt = item.name;
+          hdStage.appendChild(img);
+          fallbackCube.replaceWith(hdStage);
+        });
+      }
+      subtitleEl.textContent = item.isHD
+        ? "Full HD 3D Dice with signature color glow burst whenever you roll a 6!"
+        : "Classic 3D cube dice skin usable across every board theme.";
+    } else if (category === "frames") {
+      const box = document.createElement("div");
+      box.className = "avatar-frame-box frame-130";
+      const inner = document.createElement("div");
+      inner.className = "square-avatar-inner";
+      renderAvatar(inner, getActiveAvatarValue());
+      const overlay = document.createElement("div");
+      overlay.className = `frame-overlay frame-${item.id}`;
+      box.appendChild(inner);
+      box.appendChild(overlay);
+      visualEl.appendChild(box);
+      applyFrameVisual(overlay, item.id);
+      subtitleEl.textContent = "Square profile frame displayed on your Home card, Profile & In-Game corner.";
+    } else if (category === "emojis") {
+      const eGrid = document.createElement("div");
+      eGrid.className = "preview-emoji-grid";
+      item.emojis.forEach((em) => {
+        const cell = document.createElement("div");
+        cell.className = "preview-emoji-cell";
+        cell.textContent = em;
+        eGrid.appendChild(cell);
+      });
+      visualEl.appendChild(eGrid);
+      subtitleEl.textContent = "Includes all 6 emoji reactions and custom quick-chat lines:";
+
+      if (Array.isArray(item.chats) && item.chats.length > 0) {
+        const chatList = document.createElement("div");
+        chatList.className = "preview-chat-list";
+        item.chats.forEach((line) => {
+          const chip = document.createElement("span");
+          chip.className = "preview-chat-chip";
+          chip.textContent = line;
+          chatList.appendChild(chip);
+        });
+        extraEl.appendChild(chatList);
+      }
+    }
+
+    actionBtn.disabled = false;
+    actionBtn.onclick = null;
+
+    if (isEquipped) {
+      actionBtn.textContent = "Equipped ✓";
+      actionBtn.disabled = true;
+    } else if (owned) {
+      actionBtn.textContent = `Equip ${item.name}`;
+      actionBtn.onclick = () => {
+        equipCollectionItem(category, item);
+        closeModal("modal-item-preview");
+      };
+    } else {
+      const icon = item.currency === "gems" ? "💎" : "🪙";
+      const priceLabel = `${icon} ${item.price.toLocaleString("en-IN")}`;
+      actionBtn.textContent = `Unlock for ${priceLabel}`;
+      actionBtn.onclick = () => {
+        closeModal("modal-item-preview");
+        openBuyConfirm({
+          title: `Buy ${item.name}?`,
+          desc: `Unlock ${item.name} and equip it immediately?`,
+          priceText: priceLabel,
+          onConfirm: () => buyCollectionItem(category, item)
+        });
+      };
+    }
+
+    openModal("modal-item-preview");
+  }
+
+  // ==================== FULL-SCREEN 4-TAB CUSTOMIZATION SCREEN ====================
   function openThemesScreen(tab = "themes") {
     activeThemesTab = tab;
     renderThemesScreen();
@@ -1440,15 +2007,9 @@ window.LUDO_UI = (() => {
       btn.classList.toggle("active", btn.dataset.tab === activeThemesTab);
     });
 
-    const ribbonMap = { themes: "Themes", dice: "Dice", emojis: "Emojis" };
-    const noteMap = {
-      themes: "Every theme automatically comes with its exclusive matching pieces",
-      dice: "Equip any 3D dice skin independently across all boards",
-      emojis: "Choose your active in-game chat reaction emoji pack"
-    };
-
-    document.getElementById("themes-ribbon-title").textContent = ribbonMap[activeThemesTab] || "Themes";
-    document.getElementById("themes-sub-note").textContent = noteMap[activeThemesTab] || "";
+    const titleMap = { themes: "Themes", dice: "Dice", frames: "Frames", emojis: "Emojis" };
+    const screenTitleEl = document.getElementById("themes-screen-title");
+    if (screenTitleEl) screenTitleEl.textContent = titleMap[activeThemesTab] || "Themes";
 
     const grid = document.getElementById("themes-grid");
     grid.innerHTML = "";
@@ -1457,13 +2018,16 @@ window.LUDO_UI = (() => {
       ? THEMES_CATALOG
       : activeThemesTab === "dice"
         ? DICE_CATALOG
-        : EMOJI_PACKS;
+        : activeThemesTab === "frames"
+          ? FRAMES_CATALOG
+          : EMOJI_PACKS;
 
     list.forEach((item) => {
       const owned = appData.inventory[activeThemesTab].includes(item.id);
       const isEquipped =
         (activeThemesTab === "themes" && appData.settings.theme === item.id) ||
         (activeThemesTab === "dice" && appData.settings.diceSkin === item.id) ||
+        (activeThemesTab === "frames" && appData.settings.frame === item.id) ||
         (activeThemesTab === "emojis" && appData.settings.emojiPack === item.id);
 
       const card = document.createElement("div");
@@ -1477,37 +2041,24 @@ window.LUDO_UI = (() => {
       box.className = "lk-card-box";
 
       if (activeThemesTab === "themes") {
-        // Exact Small Visual Preview Thumbnail (Backdrop + Miniature Ludo Board + Matching Piece Corner!)
         const thumb = document.createElement("div");
         thumb.className = "lk-theme-thumb";
         if (item.isStudio) {
-          thumb.style.backgroundImage = `url("./assets/${item.id}/bg.jpg"), ${item.bg}`;
+          thumb.style.backgroundImage = `url("./assets/${item.id}/bg.webp"), ${item.bg}`;
+          const hdTag = document.createElement("span");
+          hdTag.className = "lk-hd-tag";
+          hdTag.textContent = "HD";
+          thumb.appendChild(hdTag);
         } else {
           thumb.style.background = item.bg;
         }
-
-        const miniBoard = document.createElement("div");
-        miniBoard.className = "lk-mini-board";
-        miniBoard.style.background = item.boardBg || "#ffffff";
-        miniBoard.innerHTML = `
-          <span class="lk-mb-r"></span>
-          <span class="lk-mb-g"></span>
-          <span class="lk-mb-c"></span>
-          <span class="lk-mb-b"></span>
-          <span class="lk-mb-y"></span>
-        `;
-        thumb.appendChild(miniBoard);
-
-        const pieceCorner = document.createElement("div");
-        pieceCorner.className = "lk-piece-corner";
-        renderPieceVisual(pieceCorner, getPieceSkinForTheme(item.id), "red");
-        thumb.appendChild(pieceCorner);
-
         box.appendChild(thumb);
       } else if (activeThemesTab === "dice") {
         const diceThumb = document.createElement("div");
-        diceThumb.className = "lk-dice-thumb";
+        diceThumb.className = "lk-dice-thumb" + (item.isHD ? " hd-dice-thumb" : "");
         diceThumb.style.background = `linear-gradient(145deg, ${item.top}, ${item.bot})`;
+        if (item.border) diceThumb.style.borderColor = item.border;
+        if (item.glow) diceThumb.style.setProperty("--thumb-glow", item.glow);
         const pipIndices = [0, 2, 4, 6, 8];
         for (let i = 0; i < 9; i++) {
           const pip = document.createElement("span");
@@ -1516,6 +2067,37 @@ window.LUDO_UI = (() => {
           diceThumb.appendChild(pip);
         }
         box.appendChild(diceThumb);
+        if (item.isHD) {
+          loadDiceAsset(item.id).then((res) => {
+            if (!res.ok || !diceThumb.isConnected) return;
+            const hdWrap = document.createElement("div");
+            hdWrap.className = "lk-dice-hd-wrap";
+            if (item.glow) hdWrap.style.setProperty("--thumb-glow", item.glow);
+            const img = document.createElement("img");
+            img.className = "lk-dice-hd-img";
+            img.src = res.src;
+            img.alt = item.name;
+            hdWrap.appendChild(img);
+            diceThumb.replaceWith(hdWrap);
+          });
+          const hdTag = document.createElement("span");
+          hdTag.className = "lk-hd-tag";
+          hdTag.textContent = "3D HD";
+          box.appendChild(hdTag);
+        }
+      } else if (activeThemesTab === "frames") {
+        box.classList.add("frame-card-box");
+        const framePreview = document.createElement("div");
+        framePreview.className = "avatar-frame-box frame-card";
+        const avInner = document.createElement("div");
+        avInner.className = "square-avatar-inner";
+        renderAvatar(avInner, getActiveAvatarValue());
+        const overlay = document.createElement("div");
+        overlay.className = `frame-overlay frame-${item.id}`;
+        framePreview.appendChild(avInner);
+        framePreview.appendChild(overlay);
+        box.appendChild(framePreview);
+        applyFrameVisual(overlay, item.id);
       } else {
         const emojiThumb = document.createElement("div");
         emojiThumb.className = "lk-emoji-thumb";
@@ -1540,7 +2122,7 @@ window.LUDO_UI = (() => {
       if (isEquipped) {
         const check = document.createElement("div");
         check.className = "lk-check-badge";
-        check.textContent = "✓";
+        check.textContent = "✓ EQUIPPED";
         card.appendChild(check);
       } else if (owned) {
         const pill = document.createElement("div");
@@ -1551,17 +2133,12 @@ window.LUDO_UI = (() => {
         const pill = document.createElement("div");
         pill.className = "lk-action-pill";
         const icon = item.currency === "gems" ? "💎" : "🪙";
-        pill.textContent = `${icon} ${item.price.toLocaleString("en-IN")}`;
+        pill.innerHTML = `<span class="lk-price-icon">${icon}</span><span>${item.price.toLocaleString("en-IN")}</span>`;
         card.appendChild(pill);
       }
 
       card.addEventListener("click", () => {
-        if (isEquipped) return;
-        if (owned) {
-          equipCollectionItem(activeThemesTab, item);
-        } else {
-          buyCollectionItem(activeThemesTab, item);
-        }
+        openItemPreview(activeThemesTab, item);
       });
 
       grid.appendChild(card);
@@ -1571,7 +2148,8 @@ window.LUDO_UI = (() => {
   function buyCollectionItem(category, item) {
     const balanceKey = item.currency === "gems" ? "gems" : "coins";
     if (appData.profile[balanceKey] < item.price) {
-      showToast(`Not enough ${balanceKey}! Open Shop 🛒 for Coins & Gems.`);
+      UI_SFX.error();
+      showToast(`Not enough ${balanceKey}! Tap + to grab more in Shop.`);
       vibrate([30, 40, 30]);
       return;
     }
@@ -1582,6 +2160,7 @@ window.LUDO_UI = (() => {
     }
 
     equipCollectionItem(category, item, true);
+    UI_SFX.reward();
     FX.launchFireworks(1);
     vibrate([25, 30, 50]);
     showToast(`Unlocked & equipped ${item.name}!`);
@@ -1593,6 +2172,7 @@ window.LUDO_UI = (() => {
       appData.settings.tokenSkin = getPieceSkinForTheme(item.id);
     }
     if (category === "dice") appData.settings.diceSkin = item.id;
+    if (category === "frames") appData.settings.frame = item.id;
     if (category === "emojis") appData.settings.emojiPack = item.id;
 
     saveData();
@@ -1602,14 +2182,21 @@ window.LUDO_UI = (() => {
     if (!silent) showToast(`${item.name} equipped!`);
   }
 
-  // ==================== SHOP MODAL (OFFER BUNDLES, COINS & GEMS ONLY) ====================
-  function openShopModal(tab = "bundles") {
+  // ==================== FULL-SCREEN SHOP SCREEN (OFFERS, BUY COINS & BUY GEMS) ====================
+  function openShopScreen(tab = "bundles", returnTo = "home-screen") {
     activeShopTab = tab;
-    renderShopModal();
-    openModal("modal-shop");
+    shopReturnScreen = returnTo || "home-screen";
+    renderShopScreen();
+    showScreen("shop-screen");
   }
 
-  function renderShopModal() {
+  function openShopModal(tab = "bundles") {
+    const activeScreen = document.querySelector(".screen.active");
+    const fromId = activeScreen && activeScreen.id && activeScreen.id !== "shop-screen" ? activeScreen.id : "home-screen";
+    openShopScreen(tab, fromId);
+  }
+
+  function renderShopScreen() {
     document.getElementById("shop-coins").textContent = appData.profile.coins.toLocaleString("en-IN");
     document.getElementById("shop-gems").textContent = appData.profile.gems.toLocaleString("en-IN");
 
@@ -1636,7 +2223,7 @@ window.LUDO_UI = (() => {
 
         const thumb = document.createElement("div");
         thumb.className = "bundle-thumb";
-        thumb.style.backgroundImage = `url("./assets/${b.themeId}/bg.jpg"), ${b.bg}`;
+        thumb.style.backgroundImage = `url("./assets/${b.themeId}/bg.webp"), ${b.bg}`;
         thumb.textContent = "";
 
         const itemsCol = document.createElement("div");
@@ -1657,9 +2244,17 @@ window.LUDO_UI = (() => {
           btn.disabled = true;
         } else {
           const icon = b.currency === "gems" ? "💎" : "🪙";
+          const priceLabel = `${icon} ${b.price.toLocaleString("en-IN")}`;
           btn.className = "shop-btn free-claim";
-          btn.textContent = `Get Offer • ${icon} ${b.price.toLocaleString("en-IN")}`;
-          btn.addEventListener("click", () => buyOfferBundle(b));
+          btn.textContent = `Get Offer • ${priceLabel}`;
+          btn.addEventListener("click", () => {
+            openBuyConfirm({
+              title: b.title,
+              desc: `Unlock ${b.themeName} bundle with bonus rewards?`,
+              priceText: priceLabel,
+              onConfirm: () => buyOfferBundle(b)
+            });
+          });
         }
 
         card.appendChild(top);
@@ -1687,14 +2282,15 @@ window.LUDO_UI = (() => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "shop-btn free-claim";
-      btn.textContent = "Buy FREE ✨";
+      btn.textContent = "Claim FREE ✨";
       btn.addEventListener("click", () => {
         if (activeShopTab === "gems") appData.profile.gems += pack.amount;
         else appData.profile.coins += pack.amount;
         saveData();
         renderHomeUI();
-        renderShopModal();
+        renderShopScreen();
         if (document.getElementById("themes-screen").classList.contains("active")) renderThemesScreen();
+        UI_SFX.reward();
         vibrate(20);
         showToast(`Added ${pack.name}!`);
       });
@@ -1709,7 +2305,8 @@ window.LUDO_UI = (() => {
   function buyOfferBundle(bundle) {
     const balanceKey = bundle.currency === "gems" ? "gems" : "coins";
     if (appData.profile[balanceKey] < bundle.price) {
-      showToast(`Need ${bundle.price} ${balanceKey}! Grab packs in the ${balanceKey === "gems" ? "💎 Gems" : "🪙 Coins"} tab.`);
+      UI_SFX.error();
+      showToast(`Need ${bundle.price} ${balanceKey}! Grab packs in the ${balanceKey === "gems" ? "💎 Buy Gems" : "🪙 Buy Coins"} tab.`);
       vibrate([30, 40, 30]);
       return;
     }
@@ -1731,21 +2328,58 @@ window.LUDO_UI = (() => {
     saveData();
     applySettingsUI();
     renderHomeUI();
-    renderShopModal();
+    renderShopScreen();
     if (document.getElementById("themes-screen").classList.contains("active")) renderThemesScreen();
 
+    UI_SFX.reward();
     FX.launchConfetti(90);
     FX.launchFireworks(2);
     vibrate([25, 30, 60]);
     showToast(`${bundle.title} Unlocked & Equipped!`);
   }
 
-  // ==================== PROFILE, ROYAL RANK & MATCH HISTORY ====================
+  // ==================== PROFILE, ROYAL RANK, AVATAR PICKER & FIXED-HEIGHT HISTORY ====================
   function syncProfilePreview() {
     const previewEl = document.getElementById("profile-photo-preview");
+    const frameEl = document.getElementById("profile-frame-preview");
     const removeBtn = document.getElementById("btn-remove-photo");
     renderAvatar(previewEl, selectedPhotoTemp || selectedAvatarTemp);
+    if (frameEl) applyFrameVisual(frameEl, appData.settings.frame || "bronze");
     if (removeBtn) removeBtn.classList.toggle("hidden", !selectedPhotoTemp);
+  }
+
+  function openAvatarPickerModal() {
+    const grid = document.getElementById("avatar-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    // Slot 1: Gallery Photo picker directly inside Avatars grid
+    const galleryBtn = document.createElement("button");
+    galleryBtn.type = "button";
+    galleryBtn.className = "avatar-option gallery-slot-option" + (selectedPhotoTemp ? " selected" : "");
+    galleryBtn.title = "Choose photo from Gallery";
+    galleryBtn.innerHTML = `<span>📷</span><small>Gallery</small>`;
+    galleryBtn.addEventListener("click", () => {
+      const fileInput = document.getElementById("input-profile-photo");
+      if (fileInput) fileInput.click();
+    });
+    grid.appendChild(galleryBtn);
+
+    PROFILE_AVATARS.forEach((avId) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "avatar-option" + (!selectedPhotoTemp && avId === selectedAvatarTemp ? " selected" : "");
+      renderAvatar(btn, avId);
+      btn.addEventListener("click", () => {
+        selectedAvatarTemp = avId;
+        selectedPhotoTemp = "";
+        syncProfilePreview();
+        closeModal("modal-avatar-picker");
+        showToast("Avatar selected! Tap Save Profile.");
+      });
+      grid.appendChild(btn);
+    });
+    openModal("modal-avatar-picker");
   }
 
   function renderProfileTab() {
@@ -1803,23 +2437,6 @@ window.LUDO_UI = (() => {
       ? `${rank.remaining} win${rank.remaining === 1 ? "" : "s"} to ${rank.next.name}`
       : "Max Rank Reached! 👑";
     document.getElementById("profile-rank-bar").style.width = `${rank.pct}%`;
-
-    const grid = document.getElementById("avatar-grid");
-    grid.innerHTML = "";
-    PROFILE_AVATARS.forEach((avId) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "avatar-option" + (!selectedPhotoTemp && avId === selectedAvatarTemp ? " selected" : "");
-      renderAvatar(btn, avId);
-      btn.addEventListener("click", () => {
-        selectedAvatarTemp = avId;
-        selectedPhotoTemp = "";
-        syncProfilePreview();
-        grid.querySelectorAll(".avatar-option").forEach((el) => el.classList.remove("selected"));
-        btn.classList.add("selected");
-      });
-      grid.appendChild(btn);
-    });
 
     document.getElementById("stat-matches").textContent = p.matches;
     document.getElementById("stat-wins").textContent = p.wins;
@@ -1909,6 +2526,7 @@ window.LUDO_UI = (() => {
     renderHomeUI();
     renderStreakCalendar();
 
+    UI_SFX.reward();
     FX.launchConfetti(day === 7 ? 130 : 65);
     FX.launchFireworks(day === 7 ? 3 : 1);
     vibrate([25, 30, 55]);
@@ -1971,6 +2589,7 @@ window.LUDO_UI = (() => {
       players[color] = {
         name: isHuman ? appData.profile.name : botNames[botIdx++] || `Computer ${botIdx + 1}`,
         avatar: isHuman ? getActiveAvatarValue() : "🤖",
+        frame: isHuman ? (appData.settings.frame || "bronze") : "bronze",
         isBot: !isHuman
       };
     });
@@ -2007,31 +2626,53 @@ window.LUDO_UI = (() => {
   }
 
   function renderSpinModalState() {
-    document.getElementById("spin-coins").textContent = appData.profile.coins.toLocaleString("en-IN");
-    document.getElementById("spin-gems").textContent = appData.profile.gems.toLocaleString("en-IN");
-    document.getElementById("spin-tickets").textContent = String(getTotalAvailableSpins());
+    const availSpins = getTotalAvailableSpins();
+    const spinCoinsEl = document.getElementById("spin-coins");
+    const spinGemsEl = document.getElementById("spin-gems");
+    const spinTicketsEl = document.getElementById("spin-tickets");
+    if (spinCoinsEl) spinCoinsEl.textContent = appData.profile.coins.toLocaleString("en-IN");
+    if (spinGemsEl) spinGemsEl.textContent = appData.profile.gems.toLocaleString("en-IN");
+    if (spinTicketsEl) spinTicketsEl.textContent = String(availSpins);
 
     const btn = document.getElementById("btn-spin-now");
     const status = document.getElementById("spin-status-text");
+    const buySection = document.getElementById("spin-buy-section");
+    const buyOptions = document.getElementById("spin-buy-options");
+    const buyToggleBtn = document.getElementById("btn-toggle-buy-spins");
     if (isSpinning) return;
 
+    // Hide Buy Spins completely whenever player already has 1+ spin available
+    if (buySection) {
+      if (availSpins > 0) {
+        buySection.classList.add("hidden");
+        if (buyOptions) buyOptions.classList.add("hidden");
+        if (buyToggleBtn) buyToggleBtn.textContent = "Buy Spins 🎟️";
+      } else {
+        buySection.classList.remove("hidden");
+      }
+    }
+
     if (isFreeSpinAvailable()) {
-      status.textContent = "Your daily FREE spin is ready! Buy extra spins below anytime.";
+      status.textContent = "Your daily FREE spin is ready!";
       btn.disabled = false;
       btn.textContent = "SPIN FOR FREE 🎡";
     } else if ((appData.profile.spinTickets || 0) > 0) {
-      status.textContent = `You have ${appData.profile.spinTickets} Extra Spin${appData.profile.spinTickets === 1 ? "" : "s"} ready!`;
+      status.textContent = `You have ${appData.profile.spinTickets} Spin${appData.profile.spinTickets === 1 ? "" : "s"} ready!`;
       btn.disabled = false;
       btn.textContent = `USE SPIN (${appData.profile.spinTickets} Left) 🎡`;
     } else {
-      status.textContent = "Daily free spin used. Buy extra spins below or return tomorrow!";
+      status.textContent = "No spins left. Tap Buy Spins below or come back tomorrow!";
       btn.disabled = true;
-      btn.textContent = "No Spins Left — Buy Below";
+      btn.textContent = "No Spins Left";
     }
   }
 
   function openSpinModal() {
     buildSpinWheelLabels();
+    const buyOptions = document.getElementById("spin-buy-options");
+    const buyToggleBtn = document.getElementById("btn-toggle-buy-spins");
+    if (buyOptions) buyOptions.classList.add("hidden");
+    if (buyToggleBtn) buyToggleBtn.textContent = "Buy Spins 🎟️";
     renderSpinModalState();
     openModal("modal-spin");
   }
@@ -2072,6 +2713,7 @@ window.LUDO_UI = (() => {
     btn.textContent = "Spinning...";
     status.textContent = "Good luck! 🍀";
     document.getElementById("spin-tickets").textContent = String(getTotalAvailableSpins());
+    UI_SFX.spinStart();
     vibrate(25);
 
     const prizeIdx = Math.floor(Math.random() * SPIN_PRIZES.length);
@@ -2096,6 +2738,7 @@ window.LUDO_UI = (() => {
       renderSpinModalState();
 
       status.textContent = `Congratulations! You won ${prize.label}! 🎉`;
+      UI_SFX.reward();
       FX.launchConfetti(80);
       FX.launchFireworks(2);
       vibrate([30, 40, 80]);
@@ -2192,6 +2835,7 @@ window.LUDO_UI = (() => {
     saveData();
     renderHomeUI();
     renderMissionsList();
+    UI_SFX.reward();
     FX.launchFireworks(1);
     vibrate([25, 30, 45]);
     showToast(`Claimed ${item.currency === "gems" ? "💎" : "🪙"} +${item.reward}!`);
@@ -2351,6 +2995,7 @@ window.LUDO_UI = (() => {
           players[color] = {
             name: isHuman ? appData.profile.name : isPartner ? "Partner Bot" : `Computer ${oppIdx++ + 1}`,
             avatar: isHuman ? getActiveAvatarValue() : isPartner ? "🤝" : "🤖",
+            frame: isHuman ? (appData.settings.frame || "bronze") : "bronze",
             isBot: !isHuman
           };
         });
@@ -2363,6 +3008,7 @@ window.LUDO_UI = (() => {
           players[color] = {
             name: customNames[color] || `Player ${idx + 1}`,
             avatar: localAvatars[idx % localAvatars.length],
+            frame: idx === 0 ? (appData.settings.frame || "bronze") : "bronze",
             isBot: false
           };
         });
@@ -2401,6 +3047,7 @@ window.LUDO_UI = (() => {
         players[color] = {
           name: isHuman ? appData.profile.name : `Computer ${botNum++}`,
           avatar: isHuman ? getActiveAvatarValue() : "🤖",
+          frame: isHuman ? (appData.settings.frame || "bronze") : "bronze",
           isBot: !isHuman
         };
       });
@@ -2413,6 +3060,7 @@ window.LUDO_UI = (() => {
         players[color] = {
           name: customNames[color] || `Player ${idx + 1}`,
           avatar: localAvatars[idx % localAvatars.length],
+          frame: idx === 0 ? (appData.settings.frame || "bronze") : "bronze",
           isBot: false
         };
       });
@@ -2681,15 +3329,31 @@ window.LUDO_UI = (() => {
     };
     document.addEventListener("pointerdown", unlockOnce);
 
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn || btn.disabled) return;
+      if (btn.classList.contains("dice-box") || btn.classList.contains("token") ||
+          btn.classList.contains("emoji-btn") || btn.classList.contains("chat-pill-btn") ||
+          btn.id === "btn-claim-reward" || btn.id === "btn-spin-now" ||
+          btn.classList.contains("mission-claim-btn")) {
+        return;
+      }
+      UI_SFX.tap();
+    });
+
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
-        MUSIC.stop();
+        MUSIC.stop(false);
         THEME_FX.stop();
       } else {
-        if (appData.settings.music) MUSIC.start();
+        MUSIC.sync();
         const gameScreen = document.getElementById("game-screen");
         if (gameScreen && gameScreen.classList.contains("active")) THEME_FX.start();
       }
+    });
+
+    window.addEventListener("pagehide", () => {
+      MUSIC.stop(false);
     });
 
     // Home Main Play Picker + Play Online
@@ -2709,13 +3373,14 @@ window.LUDO_UI = (() => {
       openCupModal();
     });
 
-    // Full-Screen Themes Screen (Right-Side Button on Home)
+    // Full-Screen 4-Tab Customization Screen
     document.getElementById("btn-open-themes").addEventListener("click", () => openThemesScreen("themes"));
     document.getElementById("btn-themes-back").addEventListener("click", () => {
       renderHomeUI();
       showScreen("home-screen");
     });
-    document.getElementById("btn-themes-to-shop").addEventListener("click", () => openShopModal("bundles"));
+    document.getElementById("btn-themes-add-coins").addEventListener("click", () => openShopScreen("coins", "themes-screen"));
+    document.getElementById("btn-themes-add-gems").addEventListener("click", () => openShopScreen("gems", "themes-screen"));
 
     document.querySelectorAll("#themes-tabs .inv-cat-btn").forEach((tabBtn) => {
       tabBtn.addEventListener("click", () => {
@@ -2724,14 +3389,35 @@ window.LUDO_UI = (() => {
       });
     });
 
-    // Shop (Offers, Coins, Gems Only)
-    document.getElementById("btn-open-shop").addEventListener("click", () => openShopModal("bundles"));
+    // Full-Screen Shop (Offers, Buy Coins, Buy Gems)
+    document.getElementById("btn-open-shop").addEventListener("click", () => openShopScreen("bundles", "home-screen"));
+    document.getElementById("btn-shop-back").addEventListener("click", () => {
+      const target = shopReturnScreen || "home-screen";
+      renderHomeUI();
+      if (target === "themes-screen") renderThemesScreen();
+      showScreen(target);
+    });
     document.querySelectorAll("#shop-tabs .shop-tab").forEach((tabBtn) => {
       tabBtn.addEventListener("click", () => {
         activeShopTab = tabBtn.dataset.tab;
-        renderShopModal();
+        renderShopScreen();
       });
     });
+
+    // Purchase Confirmation Modal
+    document.getElementById("btn-buy-cancel").addEventListener("click", () => {
+      pendingPurchaseAction = null;
+      closeModal("modal-buy-confirm");
+    });
+    document.getElementById("btn-buy-ok").addEventListener("click", () => {
+      const fn = pendingPurchaseAction;
+      pendingPurchaseAction = null;
+      closeModal("modal-buy-confirm");
+      if (typeof fn === "function") fn();
+    });
+
+    // Separate Avatar Picker Button inside Profile
+    document.getElementById("btn-open-avatar-picker").addEventListener("click", openAvatarPickerModal);
 
     // Profile, Rank & History
     document.getElementById("btn-profile-edit").addEventListener("click", () => openProfileModal("edit"));
@@ -2754,6 +3440,7 @@ window.LUDO_UI = (() => {
         selectedPhotoTemp = compressed;
         syncProfilePreview();
         document.querySelectorAll("#avatar-grid .avatar-option").forEach((el) => el.classList.remove("selected"));
+        closeModal("modal-avatar-picker");
         showToast("Photo loaded! Tap Save Profile.");
       } catch {
         showToast("Could not load image. Please pick another photo.");
@@ -2817,6 +3504,17 @@ window.LUDO_UI = (() => {
     // Lucky Spin Wheel & Extra Spins
     document.getElementById("btn-lucky-spin").addEventListener("click", openSpinModal);
     document.getElementById("btn-spin-now").addEventListener("click", handleSpinWheel);
+    const toggleBuySpinsBtn = document.getElementById("btn-toggle-buy-spins");
+    if (toggleBuySpinsBtn) {
+      toggleBuySpinsBtn.addEventListener("click", () => {
+        const opts = document.getElementById("spin-buy-options");
+        if (!opts) return;
+        const willShow = opts.classList.contains("hidden");
+        opts.classList.toggle("hidden", !willShow);
+        toggleBuySpinsBtn.textContent = willShow ? "Hide Spin Packs ▲" : "Buy Spins 🎟️";
+        vibrate(12);
+      });
+    }
     document.querySelectorAll(".spin-buy-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         buyExtraSpins(Number(btn.dataset.spins), Number(btn.dataset.cost), btn.dataset.currency);
@@ -2856,6 +3554,10 @@ window.LUDO_UI = (() => {
     });
     document.getElementById("toggle-timer").addEventListener("change", (e) => {
       appData.settings.timer = e.target.checked;
+      saveData();
+    });
+    document.getElementById("toggle-automove").addEventListener("change", (e) => {
+      appData.settings.autoMove = e.target.checked;
       saveData();
     });
     document.getElementById("select-speed").addEventListener("change", (e) => {
@@ -3052,6 +3754,9 @@ window.LUDO_UI = (() => {
 
     // Victory Modal Actions
     document.getElementById("btn-play-again").addEventListener("click", () => {
+      if (window.LUDO_GAME && typeof window.LUDO_GAME.stopWinningAudio === "function") {
+        window.LUDO_GAME.stopWinningAudio();
+      }
       if (winNextAction === "cup-next") {
         closeModal("modal-win");
         launchCupRound();
@@ -3075,6 +3780,9 @@ window.LUDO_UI = (() => {
     });
 
     document.getElementById("btn-win-home").addEventListener("click", () => {
+      if (window.LUDO_GAME && typeof window.LUDO_GAME.stopWinningAudio === "function") {
+        window.LUDO_GAME.stopWinningAudio();
+      }
       closeModal("modal-win");
       renderHomeUI();
       showScreen("home-screen");
@@ -3093,6 +3801,115 @@ window.LUDO_UI = (() => {
     });
   }
 
+  // ==================== ANDROID BACK BUTTON HANDLER ====================
+  function handleHardwareBack() {
+    const emojiPop = document.getElementById("emoji-popover");
+    if (emojiPop && !emojiPop.classList.contains("hidden")) {
+      emojiPop.classList.add("hidden");
+      return;
+    }
+
+    const menuPop = document.getElementById("game-menu-popover");
+    if (menuPop && !menuPop.classList.contains("hidden")) {
+      menuPop.classList.add("hidden");
+      return;
+    }
+
+    const priorityModals = [
+      "modal-buy-confirm",
+      "modal-item-preview",
+      "modal-avatar-picker",
+      "modal-exit-app",
+      "modal-exit-confirm"
+    ];
+    for (const id of priorityModals) {
+      const el = document.getElementById(id);
+      if (el && !el.classList.contains("hidden")) {
+        if (id === "modal-buy-confirm") pendingPurchaseAction = null;
+        el.classList.add("hidden");
+        return;
+      }
+    }
+
+    const openOverlays = Array.from(document.querySelectorAll(".modal-overlay:not(.hidden)"));
+    if (openOverlays.length > 0) {
+      const topOverlay = openOverlays[openOverlays.length - 1];
+      if (topOverlay.id === "modal-spin" && isSpinning) return;
+      if (topOverlay.id === "modal-win") {
+        if (window.LUDO_GAME && typeof window.LUDO_GAME.stopWinningAudio === "function") {
+          window.LUDO_GAME.stopWinningAudio();
+        }
+        topOverlay.classList.add("hidden");
+        renderHomeUI();
+        showScreen("home-screen");
+        return;
+      }
+      topOverlay.classList.add("hidden");
+      return;
+    }
+
+    const activeScreen = document.querySelector(".screen.active");
+    const screenId = activeScreen ? activeScreen.id : "";
+
+    if (screenId === "splash-screen") return;
+
+    if (screenId === "shop-screen") {
+      const target = shopReturnScreen || "home-screen";
+      renderHomeUI();
+      if (target === "themes-screen") renderThemesScreen();
+      showScreen(target);
+      return;
+    }
+
+    if (screenId === "themes-screen") {
+      renderHomeUI();
+      showScreen("home-screen");
+      return;
+    }
+
+    if (screenId === "game-screen") {
+      const homeBtn = document.getElementById("btn-menu-home");
+      if (homeBtn) homeBtn.click();
+      return;
+    }
+
+    if (screenId === "home-screen") {
+      openModal("modal-exit-app");
+    }
+  }
+
+  function initBackButtonHandler() {
+    const exitBtn = document.getElementById("btn-app-exit-confirm");
+    if (exitBtn) {
+      exitBtn.addEventListener("click", () => {
+        closeModal("modal-exit-app");
+        const capApp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+        if (capApp && typeof capApp.exitApp === "function") {
+          capApp.exitApp();
+        } else {
+          showToast("Close this tab to exit Ludo Kingdom.");
+        }
+      });
+    }
+
+    const capApp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (capApp && typeof capApp.addListener === "function") {
+      capApp.addListener("backButton", () => handleHardwareBack());
+    }
+
+    try {
+      window.history.pushState({ ludoGuard: true }, "");
+      window.addEventListener("popstate", () => {
+        handleHardwareBack();
+        try { window.history.pushState({ ludoGuard: true }, ""); } catch {}
+      });
+    } catch {}
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") handleHardwareBack();
+    });
+  }
+
   function init() {
     FX.init();
     THEME_FX.init();
@@ -3100,6 +3917,7 @@ window.LUDO_UI = (() => {
     applySettingsUI();
     renderHomeUI();
     bindEvents();
+    initBackButtonHandler();
     initPWA();
     runSplashScreen();
   }
@@ -3113,6 +3931,10 @@ window.LUDO_UI = (() => {
     renderPieceVisual,
     getTokenSVG,
     renderAvatar,
+    applyFrameVisual,
+    loadDiceAsset,
+    getDiceAssetUrl,
+    isHDDiceSkin,
     vibrate,
     spendGems,
     trackEvent,

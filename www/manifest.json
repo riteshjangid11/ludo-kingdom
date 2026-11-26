@@ -8,14 +8,14 @@
   "orientation": "portrait",
   "background_color": "#0b1636",
   "theme_color": "#0b1636",
-  "icons": [
+    "icons": [
     {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
       "purpose": "any maskable"
     }
   ]
-}
+
 
 
