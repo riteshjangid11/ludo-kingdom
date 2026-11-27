@@ -1658,16 +1658,16 @@ body.theme-candy .cell.start-blue, body.theme-candy .cell.home-blue { background
 .cell.arrow-blue::after { color: var(--blue); }
 body.theme-halloween .cell.arrow-yellow::after, body.theme-lava .cell.arrow-yellow::after, body.theme-galaxy .cell.arrow-yellow::after, body.theme-neon .cell.arrow-yellow::after { color: #ffe047; }
 
-/* ==================== 4 CORNER YARDS (CLEAR FROSTED GLASS ACROSS ALL THEMES) ==================== */
+/* ==================== 4 CORNER YARDS (CLEAR FROSTED GLASS + 3D GLASS PEDESTALS ACROSS ALL THEMES) ==================== */
 .yard {
   padding: 10%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.24);
   position: relative;
-  backdrop-filter: blur(4.5px) saturate(1.12);
-  -webkit-backdrop-filter: blur(4.5px) saturate(1.12);
+  backdrop-filter: blur(5px) saturate(1.14);
+  -webkit-backdrop-filter: blur(5px) saturate(1.14);
   transition: box-shadow 0.25s ease;
 }
 
@@ -1682,10 +1682,10 @@ body.theme-halloween .cell.arrow-yellow::after, body.theme-lava .cell.arrow-yell
 .yard-pos-bl { grid-area: 10 / 1 / 16 / 7; border-bottom-left-radius: 8px; }
 
 /* Clear Single-Layer Color-Tinted Frosted Glass Across Every Theme */
-.yard-red { background: rgba(229, 57, 53, 0.20); }
-.yard-green { background: rgba(34, 177, 76, 0.20); }
-.yard-yellow { background: rgba(247, 195, 22, 0.20); }
-.yard-blue { background: rgba(30, 144, 255, 0.20); }
+.yard-red { background: rgba(229, 57, 53, 0.22); }
+.yard-green { background: rgba(34, 177, 76, 0.22); }
+.yard-yellow { background: rgba(247, 195, 22, 0.22); }
+.yard-blue { background: rgba(30, 144, 255, 0.22); }
 
 .yard-label {
   position: absolute;
@@ -1704,7 +1704,7 @@ body.theme-halloween .cell.arrow-yellow::after, body.theme-lava .cell.arrow-yell
 .yard-pos-tl .yard-label,
 .yard-pos-tr .yard-label { bottom: auto; top: 2px; }
 
-/* Seamless Yard Interior — Inner Box Outline & Starting Circles Removed Across All Themes */
+/* Seamless Borderless Yard Interior Holding 4 Raised 3D Glass Pedestals */
 .yard-inner {
   width: 100%;
   height: 100%;
@@ -1721,55 +1721,115 @@ body.theme-halloween .cell.arrow-yellow::after, body.theme-lava .cell.arrow-yell
   position: relative;
 }
 
+/* 3D Translucent Crystal Glass Pedestals Under Every Starting Piece */
 .yard-spot {
-  display: none !important;
+  display: block !important;
+  position: relative;
+  width: 90%;
+  height: 90%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.26) 36%, rgba(255, 255, 255, 0.08) 70%, rgba(0, 0, 0, 0.12) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.68);
+  box-shadow:
+    0 5px 10px rgba(0, 0, 0, 0.34),
+    0 2px 3px rgba(0, 0, 0, 0.24),
+    inset 0 3px 5px rgba(255, 255, 255, 0.78),
+    inset 0 -4px 7px rgba(0, 0, 0, 0.26),
+    inset 0 0 0 2.5px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(2.5px) saturate(1.2);
+  -webkit-backdrop-filter: blur(2.5px) saturate(1.2);
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* Subtle Per-Theme Clear Glass Tints (40% Clearer, Single Layer, No Inner Boxes) */
-body.theme-candy .yard-red { background: rgba(255, 68, 132, 0.20); }
-body.theme-candy .yard-green { background: rgba(74, 222, 68, 0.20); }
-body.theme-candy .yard-yellow { background: rgba(255, 212, 48, 0.20); }
-body.theme-candy .yard-blue { background: rgba(46, 174, 255, 0.20); }
+/* Glossy Top Glass Specular Shine Arc */
+.yard-spot::before {
+  content: "";
+  position: absolute;
+  top: 7%;
+  left: 16%;
+  width: 68%;
+  height: 36%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0.06) 100%);
+  pointer-events: none;
+}
 
-body.theme-egypt .yard-red { background: rgba(229, 68, 56, 0.20); }
-body.theme-egypt .yard-green { background: rgba(38, 186, 84, 0.20); }
-body.theme-egypt .yard-yellow { background: rgba(245, 200, 38, 0.20); }
-body.theme-egypt .yard-blue { background: rgba(36, 148, 240, 0.20); }
+/* Subtle Inner Recessed Crystal Rim */
+.yard-spot::after {
+  content: "";
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+}
 
-body.theme-oasis .yard-red { background: rgba(232, 84, 108, 0.19); }
-body.theme-oasis .yard-green { background: rgba(48, 179, 108, 0.19); }
-body.theme-oasis .yard-yellow { background: rgba(242, 168, 40, 0.19); }
-body.theme-oasis .yard-blue { background: rgba(28, 155, 227, 0.19); }
+/* Subtle Color-Matched Crystal Pedestal Reflections Per Yard */
+.yard-red .yard-spot {
+  background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 165, 165, 0.28) 42%, rgba(229, 57, 53, 0.16) 76%, rgba(120, 12, 12, 0.22) 100%);
+  border-color: rgba(255, 215, 215, 0.78);
+}
+.yard-green .yard-spot {
+  background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.75) 0%, rgba(168, 255, 192, 0.28) 42%, rgba(34, 177, 76, 0.16) 76%, rgba(10, 95, 36, 0.22) 100%);
+  border-color: rgba(215, 255, 224, 0.78);
+}
+.yard-yellow .yard-spot {
+  background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.78) 0%, rgba(255, 240, 162, 0.30) 42%, rgba(247, 195, 22, 0.16) 76%, rgba(155, 108, 0, 0.22) 100%);
+  border-color: rgba(255, 246, 196, 0.8);
+}
+.yard-blue .yard-spot {
+  background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.75) 0%, rgba(168, 220, 255, 0.28) 42%, rgba(30, 144, 255, 0.16) 76%, rgba(10, 62, 148, 0.22) 100%);
+  border-color: rgba(212, 238, 255, 0.78);
+}
 
-body.theme-halloween .yard-red { background: rgba(229, 57, 53, 0.22); }
-body.theme-halloween .yard-green { background: rgba(34, 177, 76, 0.22); }
-body.theme-halloween .yard-yellow { background: rgba(247, 195, 22, 0.22); }
-body.theme-halloween .yard-blue { background: rgba(30, 144, 255, 0.22); }
+/* Subtle Per-Theme Clear Glass Tints */
+body.theme-candy .yard-red { background: rgba(255, 68, 132, 0.22); }
+body.theme-candy .yard-green { background: rgba(74, 222, 68, 0.22); }
+body.theme-candy .yard-yellow { background: rgba(255, 212, 48, 0.22); }
+body.theme-candy .yard-blue { background: rgba(46, 174, 255, 0.22); }
 
-body.theme-winter .yard-red { background: rgba(229, 68, 72, 0.17); }
-body.theme-winter .yard-green { background: rgba(38, 184, 88, 0.17); }
-body.theme-winter .yard-yellow { background: rgba(247, 198, 36, 0.17); }
-body.theme-winter .yard-blue { background: rgba(36, 152, 255, 0.17); }
+body.theme-egypt .yard-red { background: rgba(229, 68, 56, 0.22); }
+body.theme-egypt .yard-green { background: rgba(38, 186, 84, 0.22); }
+body.theme-egypt .yard-yellow { background: rgba(245, 200, 38, 0.22); }
+body.theme-egypt .yard-blue { background: rgba(36, 148, 240, 0.22); }
 
-body.theme-lava .yard-red { background: rgba(235, 62, 48, 0.21); }
-body.theme-lava .yard-green { background: rgba(34, 177, 76, 0.21); }
-body.theme-lava .yard-yellow { background: rgba(247, 195, 22, 0.21); }
-body.theme-lava .yard-blue { background: rgba(30, 144, 255, 0.21); }
+body.theme-oasis .yard-red { background: rgba(232, 84, 108, 0.21); }
+body.theme-oasis .yard-green { background: rgba(48, 179, 108, 0.21); }
+body.theme-oasis .yard-yellow { background: rgba(242, 168, 40, 0.21); }
+body.theme-oasis .yard-blue { background: rgba(28, 155, 227, 0.21); }
 
-body.theme-galaxy .yard-red { background: rgba(229, 57, 53, 0.21); }
-body.theme-galaxy .yard-green { background: rgba(34, 177, 76, 0.21); }
-body.theme-galaxy .yard-yellow { background: rgba(247, 195, 22, 0.21); }
-body.theme-galaxy .yard-blue { background: rgba(30, 144, 255, 0.21); }
+body.theme-halloween .yard-red { background: rgba(229, 57, 53, 0.24); }
+body.theme-halloween .yard-green { background: rgba(34, 177, 76, 0.24); }
+body.theme-halloween .yard-yellow { background: rgba(247, 195, 22, 0.24); }
+body.theme-halloween .yard-blue { background: rgba(30, 144, 255, 0.24); }
 
-body.theme-neon .yard-red { background: rgba(229, 57, 53, 0.21); }
-body.theme-neon .yard-green { background: rgba(34, 177, 76, 0.21); }
-body.theme-neon .yard-yellow { background: rgba(247, 195, 22, 0.21); }
-body.theme-neon .yard-blue { background: rgba(30, 144, 255, 0.21); }
+body.theme-winter .yard-red { background: rgba(229, 68, 72, 0.19); }
+body.theme-winter .yard-green { background: rgba(38, 184, 88, 0.19); }
+body.theme-winter .yard-yellow { background: rgba(247, 198, 36, 0.19); }
+body.theme-winter .yard-blue { background: rgba(36, 152, 255, 0.19); }
 
-body.theme-dark .yard-red { background: rgba(229, 57, 53, 0.21); }
-body.theme-dark .yard-green { background: rgba(34, 177, 76, 0.21); }
-body.theme-dark .yard-yellow { background: rgba(247, 195, 22, 0.21); }
-body.theme-dark .yard-blue { background: rgba(30, 144, 255, 0.21); }
+body.theme-lava .yard-red { background: rgba(235, 62, 48, 0.23); }
+body.theme-lava .yard-green { background: rgba(34, 177, 76, 0.23); }
+body.theme-lava .yard-yellow { background: rgba(247, 195, 22, 0.23); }
+body.theme-lava .yard-blue { background: rgba(30, 144, 255, 0.23); }
+
+body.theme-galaxy .yard-red { background: rgba(229, 57, 53, 0.23); }
+body.theme-galaxy .yard-green { background: rgba(34, 177, 76, 0.23); }
+body.theme-galaxy .yard-yellow { background: rgba(247, 195, 22, 0.23); }
+body.theme-galaxy .yard-blue { background: rgba(30, 144, 255, 0.23); }
+
+body.theme-neon .yard-red { background: rgba(229, 57, 53, 0.23); }
+body.theme-neon .yard-green { background: rgba(34, 177, 76, 0.23); }
+body.theme-neon .yard-yellow { background: rgba(247, 195, 22, 0.23); }
+body.theme-neon .yard-blue { background: rgba(30, 144, 255, 0.23); }
+
+body.theme-dark .yard-red { background: rgba(229, 57, 53, 0.23); }
+body.theme-dark .yard-green { background: rgba(34, 177, 76, 0.23); }
+body.theme-dark .yard-yellow { background: rgba(247, 195, 22, 0.23); }
+body.theme-dark .yard-blue { background: rgba(30, 144, 255, 0.23); }
 
 /* Center 3x3 Home Zone (Triangles colored dynamically via inline background from game.js to match board rotation!) */
 .center-home {
@@ -2847,4 +2907,251 @@ body:not(.mode-online) .yard-label {
   font-weight: 800;
   color: var(--gold-light);
   letter-spacing: 0.2px;
+}
+
+
+/* ==================== UPDATE V6: AUTO-PAUSE MENU & LIVE ONLINE MULTIPLAYER UI ==================== */
+
+/* Live Online Badge on Home PLAY ONLINE Button */
+.btn-online-main.online-live {
+  padding-right: 64px;
+}
+
+.live-online-badge {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, #3fd96a, #178a35);
+  color: #ffffff;
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  line-height: 1.05;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #c4ffd2;
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+/* Auto-Pause State & Resume Button Inside ••• Menu */
+#game-screen.game-paused .ludo-board {
+  filter: brightness(0.84) saturate(0.88);
+  transition: filter 0.2s ease;
+}
+
+.menu-item-btn.resume-btn {
+  background: linear-gradient(180deg, #3fd16a, #1c8539);
+  border-color: #a9ffbe;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 900;
+  box-shadow: 0 3px 10px rgba(46, 158, 71, 0.55);
+}
+
+.menu-room-info {
+  padding: 6px 8px;
+  border-radius: 9px;
+  background: rgba(68, 181, 255, 0.18);
+  border: 1px solid rgba(114, 204, 255, 0.45);
+  color: var(--gold-light);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+/* Offline / Disconnected Indicator for Online Opponents */
+.player-panel.offline-player {
+  opacity: 0.62;
+  filter: grayscale(0.45);
+}
+
+/* Online Multiplayer Modal Styles */
+.online-status-banner {
+  background: rgba(68, 181, 255, 0.16);
+  border: 1px solid rgba(114, 204, 255, 0.45);
+  border-radius: 10px;
+  padding: 7px 10px;
+  margin-bottom: 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  text-align: center;
+}
+
+.online-join-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.room-code-input {
+  flex: 1;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.online-join-btn {
+  padding: 10px 18px;
+  flex-shrink: 0;
+}
+
+.online-code-box {
+  background: rgba(7, 16, 41, 0.8);
+  border: 1.8px solid var(--gold);
+  border-radius: 14px;
+  padding: 10px 12px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.online-code-lbl {
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 1.6px;
+  color: var(--text-muted);
+}
+
+.online-code-value {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--gold-light);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  line-height: 1.1;
+}
+
+.online-share-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.btn-wa-share {
+  background: linear-gradient(180deg, #2ee070, #169c47);
+  border: 1.5px solid #a9ffc7;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.online-search-pill {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(68, 181, 255, 0.22);
+  border: 1.6px solid var(--gold);
+  color: var(--gold-light);
+  font-size: 0.82rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.online-seats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.online-seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(7, 16, 41, 0.72);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+
+.online-seat-row.filled {
+  border-color: rgba(245, 197, 66, 0.55);
+}
+
+.online-seat-row.empty {
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+.online-seat-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.online-seat-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  flex-shrink: 0;
+}
+
+.online-seat-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.online-seat-name {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.online-seat-tag {
+  font-size: 0.62rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(245, 197, 66, 0.22);
+  color: var(--gold-light);
+  border: 1px solid rgba(245, 197, 66, 0.5);
+  white-space: nowrap;
+}
+
+.online-seat-tag.ready {
+  background: rgba(46, 158, 71, 0.3);
+  color: #9bf5ae;
+  border-color: #4cd964;
+}
+
+.online-seat-tag.me {
+  background: rgba(68, 181, 255, 0.3);
+  color: #d6eeff;
+  border-color: #56c8ff;
+}
+
+.online-seat-tag.open {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.online-wait-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

@@ -1234,6 +1234,7 @@ window.LUDO_UI = (() => {
           activeColors: [...match.activeColors],
           players: match.players
         };
+        updateInGameMenuForMode(false);
         showScreen("game-screen");
         if (window.LUDO_GAME && typeof window.LUDO_GAME.resumeMatch === "function") {
           window.LUDO_GAME.resumeMatch(match);
@@ -1566,9 +1567,30 @@ window.LUDO_UI = (() => {
     document.querySelectorAll(".modal-overlay").forEach((m) => m.classList.add("hidden"));
   }
 
-  function closeGameMenu() {
+  function closeGameMenu(shouldResume = true) {
     const pop = document.getElementById("game-menu-popover");
     if (pop) pop.classList.add("hidden");
+    if (shouldResume && window.LUDO_GAME && typeof window.LUDO_GAME.resumeGame === "function") {
+      window.LUDO_GAME.resumeGame();
+    }
+  }
+
+  function updateInGameMenuForMode(isOnline, roomCode = "", isPublic = false) {
+    const saveBtn = document.getElementById("btn-menu-save");
+    const exitSaveBtn = document.getElementById("btn-exit-save");
+    const roomInfo = document.getElementById("menu-room-info");
+    if (saveBtn) saveBtn.classList.toggle("hidden", isOnline);
+    if (exitSaveBtn) exitSaveBtn.classList.toggle("hidden", isOnline);
+    if (roomInfo) {
+      if (isOnline) {
+        roomInfo.textContent = !isPublic && roomCode
+          ? `🌐 Room: ${String(roomCode).slice(0, 3)} ${String(roomCode).slice(3)}`
+          : "🌐 Online Live Match";
+        roomInfo.classList.remove("hidden");
+      } else {
+        roomInfo.classList.add("hidden");
+      }
+    }
   }
 
   function showToast(message) {
@@ -3097,7 +3119,8 @@ window.LUDO_UI = (() => {
 
     lastMatchConfig = config;
     closeAllModals();
-    closeGameMenu();
+    closeGameMenu(false);
+    updateInGameMenuForMode(false);
     showScreen("game-screen");
 
     if (window.LUDO_GAME && typeof window.LUDO_GAME.startMatch === "function") {
@@ -3106,13 +3129,33 @@ window.LUDO_UI = (() => {
     return true;
   }
 
+  function enterOnlineGameScreen(config) {
+    if (config.stake > 0 && appData.profile.coins >= config.stake) {
+      appData.profile.coins -= config.stake;
+      saveData();
+      renderHomeUI();
+    }
+
+    lastMatchConfig = config;
+    closeAllModals();
+    closeGameMenu(false);
+    updateInGameMenuForMode(true, config.roomCode, config.isPublic);
+    showScreen("game-screen");
+
+    if (window.LUDO_GAME && typeof window.LUDO_GAME.startOnlineMatch === "function") {
+      window.LUDO_GAME.startOnlineMatch(config);
+    }
+  }
+
   // ==================== VICTORY, PODIUM & MATCH HISTORY ====================
-  function recordMatchResult({ saveId, rankings, mode, gameType, difficulty, isCup, cupRound, isTeam2v2, winningTeam, humanTeam, stake, pot }) {
+  function recordMatchResult({ saveId, rankings, mode, localColor, gameType, difficulty, isCup, cupRound, isTeam2v2, winningTeam, humanTeam, stake, pot }) {
     if (saveId) deleteSavedMatch(saveId);
     appData.profile.matches += 1;
 
     const first = rankings[0];
-    const humanEntry = rankings.find((r) => !r.isBot) || first;
+    const humanEntry = mode === "online" && localColor
+      ? (rankings.find((r) => r.color === localColor) || first)
+      : (rankings.find((r) => !r.isBot) || first);
     const humanPlace = humanEntry.place;
     const humanWonFirst = isTeam2v2
       ? (!humanTeam || winningTeam === humanTeam)
@@ -3176,6 +3219,22 @@ window.LUDO_UI = (() => {
         if (playAgainBtn) playAgainBtn.textContent = "Retry Cup 🏆";
         FX.launchConfetti(35);
       }
+    } else if (mode === "online") {
+      subText = `${gameType === "quick" ? "Online Quick Ludo" : "Online Classic Ludo"} • Final Standings`;
+      winNextAction = "online";
+      if (playAgainBtn) playAgainBtn.textContent = "Play Online 🌐";
+      if (stake > 0) {
+        if (humanPlace === 1) coinsEarned = pot;
+        else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = Math.floor(stake * 0.5);
+      } else {
+        if (humanPlace === 1) coinsEarned = 300;
+        else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = 120;
+        else coinsEarned = 60;
+      }
+      if (humanWonFirst) {
+        FX.launchConfetti(140);
+        FX.launchFireworks(4);
+      }
     } else if (mode === "pass-play") {
       coinsEarned = 150;
       FX.launchConfetti(110);
@@ -3204,11 +3263,13 @@ window.LUDO_UI = (() => {
 
     const modeLabel = isCup
       ? `🏆 Cup Round ${cupRound || 1}`
-      : isTeam2v2
-        ? "🤝 2v2 Team Up"
-        : mode === "pass-play"
-          ? "Pass & Play"
-          : "Vs Computer";
+      : mode === "online"
+        ? "🌐 Online Match"
+        : isTeam2v2
+          ? "🤝 2v2 Team Up"
+          : mode === "pass-play"
+            ? "Pass & Play"
+            : "Vs Computer";
     const resultLabel = isTeam2v2
       ? (humanWonFirst ? "TEAM WIN" : "TEAM LOSS")
       : (humanWonFirst ? "WIN 🥇" : `#${humanPlace}`);
@@ -3358,7 +3419,13 @@ window.LUDO_UI = (() => {
 
     // Home Main Play Picker + Play Online
     document.getElementById("btn-play-main").addEventListener("click", () => openModal("modal-play-picker"));
-    document.getElementById("btn-play-online").addEventListener("click", () => openModal("modal-online"));
+    document.getElementById("btn-play-online").addEventListener("click", () => {
+      if (window.LUDO_ONLINE && typeof window.LUDO_ONLINE.openOnlineModal === "function") {
+        window.LUDO_ONLINE.openOnlineModal();
+      } else {
+        openModal("modal-online");
+      }
+    });
 
     document.getElementById("btn-pick-vs-bot").addEventListener("click", () => {
       closeModal("modal-play-picker");
@@ -3669,7 +3736,7 @@ window.LUDO_UI = (() => {
     });
     document.getElementById("btn-social-share").addEventListener("click", handleShare);
 
-    // Single ••• In-Game Menu (Music, Sound, Save & Resume Later, Home)
+    // Single ••• In-Game Menu (Resume, Music, Sound, Save & Resume Later, Home)
     const menuBtn = document.getElementById("btn-game-menu");
     const menuPop = document.getElementById("game-menu-popover");
     if (menuBtn && menuPop) {
@@ -3677,14 +3744,32 @@ window.LUDO_UI = (() => {
         e.stopPropagation();
         const emojiPop = document.getElementById("emoji-popover");
         if (emojiPop) emojiPop.classList.add("hidden");
-        menuPop.classList.toggle("hidden");
+        const willOpen = menuPop.classList.contains("hidden");
+        menuPop.classList.toggle("hidden", !willOpen);
+        if (willOpen) {
+          if (window.LUDO_GAME && typeof window.LUDO_GAME.pauseGame === "function") {
+            window.LUDO_GAME.pauseGame({ openMenu: false });
+          }
+        } else {
+          if (window.LUDO_GAME && typeof window.LUDO_GAME.resumeGame === "function") {
+            window.LUDO_GAME.resumeGame();
+          }
+        }
         vibrate(10);
       });
 
       document.addEventListener("click", (e) => {
         if (!menuPop.classList.contains("hidden") && !menuPop.contains(e.target) && !menuBtn.contains(e.target)) {
-          menuPop.classList.add("hidden");
+          closeGameMenu(true);
         }
+      });
+    }
+
+    const menuResumeBtn = document.getElementById("btn-menu-resume");
+    if (menuResumeBtn) {
+      menuResumeBtn.addEventListener("click", () => {
+        closeGameMenu(true);
+        vibrate(12);
       });
     }
 
@@ -3703,7 +3788,7 @@ window.LUDO_UI = (() => {
     });
 
     document.getElementById("btn-menu-save").addEventListener("click", () => {
-      closeGameMenu();
+      closeGameMenu(false);
       if (window.LUDO_GAME && typeof window.LUDO_GAME.saveAndExit === "function") {
         window.LUDO_GAME.saveAndExit();
       }
@@ -3713,15 +3798,25 @@ window.LUDO_UI = (() => {
     });
 
     document.getElementById("btn-menu-home").addEventListener("click", () => {
-      closeGameMenu();
+      closeGameMenu(false);
       const matchActive = window.LUDO_GAME && window.LUDO_GAME.isMatchActive();
       if (!matchActive) {
+        if (window.LUDO_ONLINE && typeof window.LUDO_ONLINE.leaveActiveMatch === "function") {
+          window.LUDO_ONLINE.leaveActiveMatch();
+        }
         renderHomeUI();
         showScreen("home-screen");
         return;
       }
+      const isOnline = window.LUDO_GAME && typeof window.LUDO_GAME.isOnlineMode === "function" && window.LUDO_GAME.isOnlineMode();
       const desc = document.getElementById("exit-confirm-desc");
-      if (lastMatchConfig && lastMatchConfig.stake > 0) {
+      if (isOnline) {
+        if (lastMatchConfig && lastMatchConfig.stake > 0) {
+          desc.textContent = `Leave this live online match? A bot will take over your seat and your 🪙 ${lastMatchConfig.stake.toLocaleString("en-IN")} stake will be forfeited.`;
+        } else {
+          desc.textContent = "Leave this live online match? A bot will take over your seat for remaining players.";
+        }
+      } else if (lastMatchConfig && lastMatchConfig.stake > 0) {
         desc.textContent = `Save for Later to resume anytime, or Quit now (forfeits 🪙 ${lastMatchConfig.stake.toLocaleString("en-IN")} stake).`;
       } else {
         desc.textContent = "Save this match to your Saved Matches list, or quit completely.";
@@ -3739,8 +3834,17 @@ window.LUDO_UI = (() => {
       showToast("Saved! Open Saved Matches anytime.");
     });
 
+    document.getElementById("btn-exit-stay").addEventListener("click", () => {
+      if (window.LUDO_GAME && typeof window.LUDO_GAME.resumeGame === "function") {
+        window.LUDO_GAME.resumeGame();
+      }
+    });
+
     document.getElementById("btn-exit-leave").addEventListener("click", () => {
       closeModal("modal-exit-confirm");
+      if (window.LUDO_ONLINE && window.LUDO_GAME && typeof window.LUDO_GAME.isOnlineMode === "function" && window.LUDO_GAME.isOnlineMode()) {
+        window.LUDO_ONLINE.leaveActiveMatch();
+      }
       if (window.LUDO_GAME) {
         const activeId = typeof window.LUDO_GAME.getCurrentSaveId === "function"
           ? window.LUDO_GAME.getCurrentSaveId()
@@ -3767,6 +3871,15 @@ window.LUDO_UI = (() => {
         openCupModal();
         return;
       }
+      if (winNextAction === "online") {
+        closeModal("modal-win");
+        renderHomeUI();
+        showScreen("home-screen");
+        if (window.LUDO_ONLINE && typeof window.LUDO_ONLINE.openOnlineModal === "function") {
+          window.LUDO_ONLINE.openOnlineModal();
+        }
+        return;
+      }
       if (lastMatchConfig) {
         const started = launchMatch(lastMatchConfig);
         if (!started) {
@@ -3789,13 +3902,26 @@ window.LUDO_UI = (() => {
     });
 
     document.querySelectorAll("[data-close]").forEach((btn) => {
-      btn.addEventListener("click", () => closeModal(btn.dataset.close));
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.close;
+        closeModal(targetId);
+        if (targetId === "modal-exit-confirm" && window.LUDO_GAME && typeof window.LUDO_GAME.resumeGame === "function") {
+          window.LUDO_GAME.resumeGame();
+        }
+      });
     });
 
     document.querySelectorAll(".modal-overlay").forEach((overlay) => {
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay && overlay.id !== "modal-win" && !(overlay.id === "modal-spin" && isSpinning)) {
+          if (overlay.id === "modal-online" && window.LUDO_ONLINE && typeof window.LUDO_ONLINE.closeOnlineModal === "function") {
+            window.LUDO_ONLINE.closeOnlineModal();
+            return;
+          }
           overlay.classList.add("hidden");
+          if (overlay.id === "modal-exit-confirm" && window.LUDO_GAME && typeof window.LUDO_GAME.resumeGame === "function") {
+            window.LUDO_GAME.resumeGame();
+          }
         }
       });
     });
@@ -3811,7 +3937,7 @@ window.LUDO_UI = (() => {
 
     const menuPop = document.getElementById("game-menu-popover");
     if (menuPop && !menuPop.classList.contains("hidden")) {
-      menuPop.classList.add("hidden");
+      closeGameMenu(true);
       return;
     }
 
@@ -3827,6 +3953,9 @@ window.LUDO_UI = (() => {
       if (el && !el.classList.contains("hidden")) {
         if (id === "modal-buy-confirm") pendingPurchaseAction = null;
         el.classList.add("hidden");
+        if (id === "modal-exit-confirm" && window.LUDO_GAME && typeof window.LUDO_GAME.resumeGame === "function") {
+          window.LUDO_GAME.resumeGame();
+        }
         return;
       }
     }
@@ -3842,6 +3971,10 @@ window.LUDO_UI = (() => {
         topOverlay.classList.add("hidden");
         renderHomeUI();
         showScreen("home-screen");
+        return;
+      }
+      if (topOverlay.id === "modal-online" && window.LUDO_ONLINE && typeof window.LUDO_ONLINE.closeOnlineModal === "function") {
+        window.LUDO_ONLINE.closeOnlineModal();
         return;
       }
       topOverlay.classList.add("hidden");
@@ -3948,6 +4081,7 @@ window.LUDO_UI = (() => {
     closeModal,
     closeGameMenu,
     showToast,
+    enterOnlineGameScreen,
     recordMatchResult
   };
 })();

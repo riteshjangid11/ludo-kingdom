@@ -423,6 +423,18 @@ window.LUDO_GAME = (() => {
     blue: { x: 0, y: 0 }
   };
 
+  // ==================== PAUSE & ONLINE SYNC CONTROLLERS ====================
+  let isPaused = false;
+  let pauseWaiters = [];
+  let timerMeta = null;     // { color, session, onTimeout, remainingMs, totalMs, startedAt }
+  let autoMoveMeta = null;  // { callback, remainingMs, startedAt }
+
+  let onlineSeq = 0;
+  let onlineQueue = [];
+  let onlineQueueBusy = false;
+  let onlineActionSentSeq = 0;
+  let hostWatchdogTimer = null;
+
   function generateSaveId() {
     return `match_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   }
@@ -432,6 +444,10 @@ window.LUDO_GAME = (() => {
       active: false,
       saveId: "",
       mode: "vs-bot",
+      roomCode: "",
+      isPublic: false,
+      localColor: null,
+      localUid: "",
       gameType: "classic",
       difficulty: "normal",
       isCup: false,
@@ -457,7 +473,9 @@ window.LUDO_GAME = (() => {
   // ==================== BOARD ROTATION (HUMAN ALWAYS BOTTOM-LEFT) ====================
   function computeBoardRotation() {
     let targetBottomLeftColor = "blue";
-    if (state.mode === "vs-bot") {
+    if (state.mode === "online" && state.localColor) {
+      targetBottomLeftColor = state.localColor;
+    } else if (state.mode === "vs-bot") {
       const humanColor = state.activeColors.find((c) => state.players[c] && !state.players[c].isBot);
       if (humanColor) targetBottomLeftColor = humanColor;
     } else if (state.activeColors.length > 0) {
@@ -524,7 +542,145 @@ window.LUDO_GAME = (() => {
   }
 
   function wait(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => {
+      let remaining = Math.max(0, Number(ms) || 0);
+      let timerId = null;
+      let startedAt = 0;
+
+      const finish = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onPause = () => {
+        if (timerId !== null) {
+          clearTimeout(timerId);
+          timerId = null;
+          remaining = Math.max(0, remaining - (Date.now() - startedAt));
+        }
+      };
+
+      const onResume = () => {
+        if (!isPaused && timerId === null) {
+          startedAt = Date.now();
+          timerId = setTimeout(finish, remaining);
+        }
+      };
+
+      const waiter = { onPause, onResume, cancel: finish };
+      const cleanup = () => {
+        if (timerId !== null) {
+          clearTimeout(timerId);
+          timerId = null;
+        }
+        const idx = pauseWaiters.indexOf(waiter);
+        if (idx >= 0) pauseWaiters.splice(idx, 1);
+      };
+
+      pauseWaiters.push(waiter);
+      if (!isPaused || state.mode === "online") {
+        startedAt = Date.now();
+        timerId = setTimeout(finish, remaining);
+      }
+    });
+  }
+
+  function flushPauseWaiters() {
+    const copy = [...pauseWaiters];
+    pauseWaiters = [];
+    copy.forEach((w) => w.cancel());
+  }
+
+  function clearHostWatchdog() {
+    if (hostWatchdogTimer) {
+      clearTimeout(hostWatchdogTimer);
+      hostWatchdogTimer = null;
+    }
+  }
+
+  function scheduleAutoMove(delayMs, callback) {
+    clearAutoMoveTimer();
+    autoMoveMeta = {
+      callback,
+      remainingMs: Math.max(0, delayMs),
+      startedAt: Date.now()
+    };
+    if (!isPaused || state.mode === "online") {
+      autoMoveTimer = setTimeout(() => {
+        const cb = autoMoveMeta ? autoMoveMeta.callback : null;
+        autoMoveTimer = null;
+        autoMoveMeta = null;
+        if (typeof cb === "function") cb();
+      }, autoMoveMeta.remainingMs);
+    }
+  }
+
+  function pauseGame({ openMenu = true } = {}) {
+    if (!state.active || state.phase === "GAME_OVER" || state.phase === "IDLE") return;
+    if (state.mode === "online") {
+      SFX.stopCapture();
+      SFX.stopHome();
+      return;
+    }
+
+    if (!isPaused) {
+      isPaused = true;
+      const gs = document.getElementById("game-screen");
+      if (gs) gs.classList.add("game-paused");
+
+      pauseWaiters.forEach((w) => w.onPause());
+
+      if (turnTimerInterval && timerMeta) {
+        clearInterval(turnTimerInterval);
+        turnTimerInterval = null;
+        timerMeta.remainingMs = Math.max(0, timerMeta.remainingMs - (Date.now() - timerMeta.startedAt));
+      }
+
+      if (autoMoveTimer && autoMoveMeta) {
+        clearTimeout(autoMoveTimer);
+        autoMoveTimer = null;
+        autoMoveMeta.remainingMs = Math.max(0, autoMoveMeta.remainingMs - (Date.now() - autoMoveMeta.startedAt));
+      }
+
+      SFX.stopCapture();
+      SFX.stopHome();
+    }
+
+    const resumeBtn = document.getElementById("btn-menu-resume");
+    if (resumeBtn) resumeBtn.classList.remove("hidden");
+
+    if (openMenu) {
+      closeEmojiPopover();
+      const pop = document.getElementById("game-menu-popover");
+      if (pop) pop.classList.remove("hidden");
+    }
+  }
+
+  function resumeGame() {
+    const resumeBtn = document.getElementById("btn-menu-resume");
+    if (resumeBtn) resumeBtn.classList.add("hidden");
+
+    const gs = document.getElementById("game-screen");
+    if (gs) gs.classList.remove("game-paused");
+
+    if (!isPaused) return;
+    isPaused = false;
+
+    if (timerMeta && state.active && timerMeta.session === sessionId) {
+      runTurnTimerInterval();
+    }
+
+    if (autoMoveMeta && state.active && !autoMoveTimer) {
+      autoMoveMeta.startedAt = Date.now();
+      autoMoveTimer = setTimeout(() => {
+        const cb = autoMoveMeta ? autoMoveMeta.callback : null;
+        autoMoveTimer = null;
+        autoMoveMeta = null;
+        if (typeof cb === "function") cb();
+      }, autoMoveMeta.remainingMs);
+    }
+
+    pauseWaiters.forEach((w) => w.onResume());
   }
 
   function getCurrentColor() {
@@ -627,6 +783,7 @@ window.LUDO_GAME = (() => {
   // ==================== LUCKY RE-ROLL POWER-UP ====================
   function canOfferReroll(color, rolled) {
     if (!state.active || !color || !state.players[color]) return false;
+    if (state.mode === "online") return false;
     if (state.players[color].isBot) return false;
     if (rolled === 6) return false;
     if (state.rerollUsed[color]) return false;
@@ -638,6 +795,7 @@ window.LUDO_GAME = (() => {
       clearTimeout(autoMoveTimer);
       autoMoveTimer = null;
     }
+    autoMoveMeta = null;
   }
 
   function showRerollBtn(color) {
@@ -811,8 +969,14 @@ window.LUDO_GAME = (() => {
     applyDiceSkinToBox(diceBtn);
 
     diceBtn.addEventListener("click", () => {
-      if (!state.active || state.phase !== "WAITING_ROLL") return;
-      if (color !== getCurrentColor() || state.players[color].isBot) return;
+      if (!state.active || isPaused || state.phase !== "WAITING_ROLL") return;
+      if (color !== getCurrentColor()) return;
+      if (state.mode === "online") {
+        if (!isLocalOnlineHumanTurn()) return;
+        submitOnlineRoll(color, sessionId);
+        return;
+      }
+      if (state.players[color].isBot) return;
       rollDice(color, sessionId);
     });
 
@@ -871,13 +1035,15 @@ window.LUDO_GAME = (() => {
     return durationMs;
   }
 
-  // ==================== 15-SECOND TURN TIMER ====================
+  // ==================== 15-SECOND TURN TIMER (PAUSE-AWARE) ====================
   function clearTurnTimer() {
     clearAutoMoveTimer();
+    clearHostWatchdog();
     if (turnTimerInterval) {
       clearInterval(turnTimerInterval);
       turnTimerInterval = null;
     }
+    timerMeta = null;
     BD.COLORS.forEach((c) => {
       const fill = document.getElementById(`timer-${c}`);
       if (fill) {
@@ -887,38 +1053,61 @@ window.LUDO_GAME = (() => {
     });
   }
 
-  function startTurnTimer(color, mySession, onTimeout, customDurationMs = TURN_LIMIT_MS) {
-    clearTurnTimer();
-    if (!getSettings().timer && customDurationMs === TURN_LIMIT_MS) return;
-
-    const fill = document.getElementById(`timer-${color}`);
-    const startedAt = Date.now();
-
-    if (fill) {
-      fill.style.width = "100%";
-      fill.classList.remove("urgent");
+  function runTurnTimerInterval() {
+    if (!timerMeta) return;
+    if (turnTimerInterval) {
+      clearInterval(turnTimerInterval);
+      turnTimerInterval = null;
     }
+    timerMeta.startedAt = Date.now();
 
     turnTimerInterval = setInterval(() => {
-      if (!state.active || mySession !== sessionId) {
+      if (!state.active || !timerMeta || timerMeta.session !== sessionId) {
         clearTurnTimer();
         return;
       }
+      if (isPaused && state.mode !== "online") return;
 
-      const elapsed = Date.now() - startedAt;
-      const remaining = Math.max(0, customDurationMs - elapsed);
-      const pct = (remaining / customDurationMs) * 100;
+      const elapsed = Date.now() - timerMeta.startedAt;
+      const remaining = Math.max(0, timerMeta.remainingMs - elapsed);
+      const pct = Math.min(100, (remaining / timerMeta.totalMs) * 100);
 
+      const fill = document.getElementById(`timer-${timerMeta.color}`);
       if (fill) {
         fill.style.width = `${pct}%`;
         fill.classList.toggle("urgent", pct <= 30);
       }
 
       if (remaining <= 0) {
+        const cb = timerMeta.onTimeout;
         clearTurnTimer();
-        onTimeout();
+        if (typeof cb === "function") cb();
       }
     }, 100);
+  }
+
+  function startTurnTimer(color, mySession, onTimeout, customDurationMs = TURN_LIMIT_MS, forceEnable = false) {
+    clearTurnTimer();
+    if (!forceEnable && state.mode !== "online" && !getSettings().timer && customDurationMs === TURN_LIMIT_MS) return;
+
+    const fill = document.getElementById(`timer-${color}`);
+    if (fill) {
+      fill.style.width = "100%";
+      fill.classList.remove("urgent");
+    }
+
+    timerMeta = {
+      color,
+      session: mySession,
+      onTimeout,
+      remainingMs: customDurationMs,
+      totalMs: customDurationMs,
+      startedAt: Date.now()
+    };
+
+    if (!isPaused || state.mode === "online") {
+      runTurnTimerInterval();
+    }
   }
 
   // ==================== EMOJI & QUICK CHAT REACTIONS ====================
@@ -1260,9 +1449,8 @@ window.LUDO_GAME = (() => {
       if (!slotEl) return;
 
       const isRightSide = slotKey === "tr" || slotKey === "br";
-      const isBot = Boolean(player.isBot);
-
       const isOnline = state.mode === "online";
+      const isBot = Boolean(player.isBot) && !isOnline;
       const showOnlineOpponentName = isOnline && Boolean(player.isOnlineOpponent);
 
       const panel = document.createElement("div");
@@ -1454,11 +1642,15 @@ window.LUDO_GAME = (() => {
         el.style.top = `${pos.top + offsetY}%`;
 
         const isFinished = step === BD.FINAL_STEP;
+        const canLocalControl =
+          state.mode === "online"
+            ? isLocalOnlineHumanTurn()
+            : Boolean(state.players[turnColor] && !state.players[turnColor].isBot);
+
         const isMovable =
           state.phase === "WAITING_MOVE" &&
           color === ctrlColor &&
-          state.players[turnColor] &&
-          !state.players[turnColor].isBot &&
+          canLocalControl &&
           movableSet.has(idx);
 
         el.classList.toggle("finished", isFinished);
@@ -1494,7 +1686,10 @@ window.LUDO_GAME = (() => {
       if (yard) yard.classList.toggle("active-yard", state.active && color === ctrlColor);
 
       if (diceBtn) {
-        const canHumanRoll = isCurrent && state.phase === "WAITING_ROLL" && player && !player.isBot;
+        const canHumanRoll =
+          isCurrent &&
+          state.phase === "WAITING_ROLL" &&
+          (state.mode === "online" ? isLocalOnlineHumanTurn() : Boolean(player && !player.isBot));
         diceBtn.disabled = !canHumanRoll;
         diceBtn.classList.toggle("can-roll", canHumanRoll);
         if (!isCurrent) diceBtn.classList.remove("rolling");
@@ -1674,12 +1869,17 @@ window.LUDO_GAME = (() => {
     await wait(520);
     if (mySession !== sessionId) return;
 
+    if (state.mode === "online" && window.LUDO_ONLINE && typeof window.LUDO_ONLINE.markMatchFinished === "function") {
+      window.LUDO_ONLINE.markMatchFinished();
+    }
+
     SFX.win();
     if (window.LUDO_UI && typeof window.LUDO_UI.recordMatchResult === "function") {
       window.LUDO_UI.recordMatchResult({
         saveId: state.saveId,
         rankings,
         mode: state.mode,
+        localColor: state.localColor,
         gameType: state.gameType,
         difficulty: state.difficulty,
         isCup: state.isCup,
@@ -1690,6 +1890,292 @@ window.LUDO_GAME = (() => {
         stake: state.stake,
         pot: state.pot
       });
+    }
+  }
+
+  // ==================== ONLINE MULTIPLAYER SYNC ENGINE ====================
+  function isLocalOnlineHumanTurn() {
+    if (state.mode !== "online") return false;
+    const cur = getCurrentColor();
+    const p = cur ? state.players[cur] : null;
+    return Boolean(cur && cur === state.localColor && p && !p.isBot && !p.left);
+  }
+
+  function isLocalOnlineHost() {
+    if (state.mode !== "online" || !window.LUDO_ONLINE) return false;
+    return window.LUDO_ONLINE.isHostForRoom(state.players, state.activeColors);
+  }
+
+  function shouldHostPlayOnlineColor(color) {
+    if (state.mode !== "online" || !isLocalOnlineHost()) return false;
+    const p = state.players[color];
+    if (!p) return false;
+    return Boolean(p.isBot || p.disconnected || p.left);
+  }
+
+  function submitOnlineRoll(color, mySession) {
+    if (!state.active || mySession !== sessionId || state.mode !== "online") return;
+    if (state.phase !== "WAITING_ROLL" || color !== getCurrentColor()) return;
+    const nextSeq = onlineSeq + 1;
+    if (onlineActionSentSeq === nextSeq) return;
+    onlineActionSentSeq = nextSeq;
+
+    clearTurnTimer();
+    const diceBtn = document.getElementById(`dice-${color}`);
+    if (diceBtn) {
+      diceBtn.disabled = true;
+      diceBtn.classList.remove("can-roll");
+    }
+
+    const rolled = Math.floor(Math.random() * 6) + 1;
+    if (window.LUDO_ONLINE) {
+      window.LUDO_ONLINE.pushAction(nextSeq, {
+        type: "ROLL",
+        color,
+        rolled,
+        byUid: state.localUid
+      });
+    }
+  }
+
+  function submitOnlineMove(turnColor, ctrlColor, tokenIndex, mySession) {
+    if (!state.active || mySession !== sessionId || state.mode !== "online") return;
+    if (state.phase !== "WAITING_MOVE" || turnColor !== getCurrentColor()) return;
+    const nextSeq = onlineSeq + 1;
+    if (onlineActionSentSeq === nextSeq) return;
+    onlineActionSentSeq = nextSeq;
+
+    clearTurnTimer();
+    clearLandingPreviews();
+    renderTokens([]);
+
+    if (window.LUDO_ONLINE) {
+      window.LUDO_ONLINE.pushAction(nextSeq, {
+        type: "MOVE",
+        turnColor,
+        ctrlColor,
+        tokenIndex,
+        byUid: state.localUid
+      });
+    }
+  }
+
+  function scheduleHostOnlineTurnIfNeeded(mySession) {
+    if (!state.active || mySession !== sessionId || state.mode !== "online") return;
+    const color = getCurrentColor();
+    const player = state.players[color];
+    if (!player) return;
+    const spd = getSpeed();
+
+    if (state.phase === "WAITING_ROLL") {
+      if (shouldHostPlayOnlineColor(color)) {
+        const delay = player.isBot ? spd.botRollWait : 1400;
+        clearHostWatchdog();
+        hostWatchdogTimer = setTimeout(() => {
+          hostWatchdogTimer = null;
+          if (!state.active || mySession !== sessionId || state.phase !== "WAITING_ROLL") return;
+          if (getCurrentColor() !== color) return;
+          submitOnlineRoll(color, mySession);
+        }, delay);
+      } else if (isLocalOnlineHost() && color !== state.localColor) {
+        const expectedSeq = onlineSeq;
+        clearHostWatchdog();
+        hostWatchdogTimer = setTimeout(() => {
+          hostWatchdogTimer = null;
+          if (!state.active || mySession !== sessionId || onlineSeq !== expectedSeq) return;
+          if (state.phase === "WAITING_ROLL" && getCurrentColor() === color) {
+            submitOnlineRoll(color, mySession);
+          }
+        }, TURN_LIMIT_MS + 4200);
+      }
+    } else if (state.phase === "WAITING_MOVE") {
+      const ctrlColor = getControlledColor(color);
+      const movable = getMovableTokenIndices(ctrlColor, state.diceValue);
+      if (movable.length === 0) return;
+
+      if (shouldHostPlayOnlineColor(color)) {
+        const delay = player.isBot ? spd.botMoveWait : 1100;
+        clearHostWatchdog();
+        hostWatchdogTimer = setTimeout(() => {
+          hostWatchdogTimer = null;
+          if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
+          if (getCurrentColor() !== color) return;
+          const chosen = chooseBotMove(ctrlColor, movable, state.diceValue, true);
+          submitOnlineMove(color, ctrlColor, chosen, mySession);
+        }, delay);
+      } else if (isLocalOnlineHost() && color !== state.localColor) {
+        const expectedSeq = onlineSeq;
+        clearHostWatchdog();
+        hostWatchdogTimer = setTimeout(() => {
+          hostWatchdogTimer = null;
+          if (!state.active || mySession !== sessionId || onlineSeq !== expectedSeq) return;
+          if (state.phase === "WAITING_MOVE" && getCurrentColor() === color) {
+            const chosen = chooseBotMove(ctrlColor, movable, state.diceValue, true);
+            submitOnlineMove(color, ctrlColor, chosen, mySession);
+          }
+        }, TURN_LIMIT_MS + 4200);
+      }
+    }
+  }
+
+  function handleIncomingOnlineAction(action) {
+    if (!state.active || state.mode !== "online" || !action || typeof action.seq !== "number") return;
+    if (action.seq <= onlineSeq) return;
+    if (onlineQueue.some((a) => a.seq === action.seq)) return;
+    onlineQueue.push(action);
+    onlineQueue.sort((a, b) => a.seq - b.seq);
+    drainOnlineQueue(sessionId);
+  }
+
+  async function drainOnlineQueue(mySession) {
+    if (onlineQueueBusy) return;
+    onlineQueueBusy = true;
+
+    try {
+      while (state.active && mySession === sessionId && onlineQueue.length > 0) {
+        const next = onlineQueue[0];
+        if (next.seq <= onlineSeq) {
+          onlineQueue.shift();
+          continue;
+        }
+        if (next.seq !== onlineSeq + 1) break;
+
+        onlineQueue.shift();
+        onlineSeq = next.seq;
+        onlineActionSentSeq = Math.max(onlineActionSentSeq, onlineSeq);
+
+        if (next.type === "ROLL") {
+          await applyOnlineRollAction(next, mySession);
+        } else if (next.type === "MOVE") {
+          await executeMove(next.turnColor, next.ctrlColor, next.tokenIndex, mySession);
+        }
+      }
+    } finally {
+      onlineQueueBusy = false;
+    }
+
+    if (state.active && mySession === sessionId && onlineQueue.length > 0 && onlineQueue[0].seq === onlineSeq + 1) {
+      drainOnlineQueue(mySession);
+    }
+  }
+
+  async function applyOnlineRollAction(action, mySession) {
+    const turnColor = action.color;
+    const rolled = Math.min(6, Math.max(1, Number(action.rolled) || 1));
+    if (!state.active || mySession !== sessionId || turnColor !== getCurrentColor()) return;
+
+    clearTurnTimer();
+    clearLandingPreviews();
+    hideRerollBtn();
+
+    const ctrlColor = getControlledColor(turnColor);
+    const spd = getSpeed();
+    const isMe = turnColor === state.localColor;
+    prevConsecutiveSixes = state.consecutiveSixes;
+
+    state.phase = "ROLLING";
+    updateTurnUI();
+    SFX.stopCapture();
+    SFX.dice();
+    if (isMe) vibrate(18);
+
+    const spinDuration = spinDice3D(turnColor, rolled);
+    await wait(spinDuration + 45);
+    if (!state.active || mySession !== sessionId) return;
+
+    const diceBtn = document.getElementById(`dice-${turnColor}`);
+    if (diceBtn) diceBtn.classList.remove("rolling");
+
+    state.diceValue = rolled;
+    if (rolled === 6 && isMe) trackMission("roll6", 1);
+
+    if (rolled === 6) {
+      if (isMe) vibrate([22, 30, 38]);
+      if (diceBtn) {
+        diceBtn.classList.remove("rolled-six");
+        void diceBtn.offsetWidth;
+        diceBtn.classList.add("rolled-six");
+        setTimeout(() => {
+          if (diceBtn.isConnected) diceBtn.classList.remove("rolled-six");
+        }, 950);
+      }
+      state.consecutiveSixes += 1;
+      if (state.consecutiveSixes >= 3) {
+        SFX.forfeit();
+        vibrate([45, 35, 45]);
+        spawnBoardCallout(getRotatedYardCenter(turnColor), "3× SIXES! ❌", "callout-capture");
+        state.consecutiveSixes = 0;
+        await wait(spd.forfeitWait);
+        if (!state.active || mySession !== sessionId) return;
+        advanceToNextPlayer(mySession);
+        return;
+      }
+      spawnBoardCallout(getRotatedYardCenter(turnColor), "BONUS 6! 🎲", "callout-bonus");
+    } else {
+      state.consecutiveSixes = 0;
+    }
+
+    const movable = getMovableTokenIndices(ctrlColor, rolled);
+    if (movable.length === 0) {
+      state.consecutiveSixes = 0;
+      await wait(spd.noMoveWait);
+      if (!state.active || mySession !== sessionId) return;
+      advanceToNextPlayer(mySession);
+      return;
+    }
+
+    state.phase = "WAITING_MOVE";
+    renderTokens(movable);
+
+    if (isLocalOnlineHumanTurn()) {
+      renderLandingPreviews(ctrlColor, movable, rolled);
+
+      const autoMoveEnabled = getSettings().autoMove !== false;
+      const allInYard = movable.every((idx) => state.tokens[ctrlColor][idx] === -1);
+
+      if (autoMoveEnabled && (allInYard || movable.length === 1)) {
+        clearLandingPreviews();
+        scheduleAutoMove(spd.autoMoveWait, () => {
+          if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
+          submitOnlineMove(turnColor, ctrlColor, movable[0], mySession);
+        });
+        return;
+      }
+
+      startTurnTimer(turnColor, mySession, () => {
+        if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
+        clearLandingPreviews();
+        const autoIdx = chooseBotMove(ctrlColor, movable, rolled, true);
+        submitOnlineMove(turnColor, ctrlColor, autoIdx, mySession);
+      }, TURN_LIMIT_MS, true);
+    } else {
+      startTurnTimer(turnColor, mySession, null, TURN_LIMIT_MS, true);
+      scheduleHostOnlineTurnIfNeeded(mySession);
+    }
+  }
+
+  function handleOnlinePresenceChange(color, status) {
+    if (!state.active || state.mode !== "online" || !state.players[color]) return;
+    const p = state.players[color];
+    const prevDisconnected = Boolean(p.disconnected);
+    const prevLeft = Boolean(p.left);
+
+    p.left = status === "left";
+    p.disconnected = status === "offline" || status === "left";
+
+    const panel = document.getElementById(`panel-${color}`);
+    if (panel) panel.classList.toggle("offline-player", p.disconnected);
+
+    if (p.left && !prevLeft && window.LUDO_UI) {
+      window.LUDO_UI.showToast(`${p.name} left — Bot taking over`);
+    } else if (p.disconnected && !prevDisconnected && !p.left && window.LUDO_UI) {
+      window.LUDO_UI.showToast(`${p.name} disconnected — Bot assisting`);
+    } else if (!p.disconnected && prevDisconnected && !p.left && window.LUDO_UI) {
+      window.LUDO_UI.showToast(`${p.name} reconnected!`);
+    }
+
+    if (getCurrentColor() === color) {
+      scheduleHostOnlineTurnIfNeeded(sessionId);
     }
   }
 
@@ -1708,6 +2194,19 @@ window.LUDO_GAME = (() => {
     state.diceValue = null;
     updateTurnUI();
     renderTokens([]);
+
+    if (state.mode === "online") {
+      if (isLocalOnlineHumanTurn()) {
+        startTurnTimer(color, mySession, () => {
+          if (!state.active || mySession !== sessionId || state.phase !== "WAITING_ROLL") return;
+          submitOnlineRoll(color, mySession);
+        }, TURN_LIMIT_MS, true);
+      } else {
+        startTurnTimer(color, mySession, null, TURN_LIMIT_MS, true);
+        scheduleHostOnlineTurnIfNeeded(mySession);
+      }
+      return;
+    }
 
     if (player.isBot) {
       await wait(spd.botRollWait);
@@ -1827,23 +2326,21 @@ window.LUDO_GAME = (() => {
       if (allInYard || !hasAffordableReroll) {
         hideRerollBtn();
         clearLandingPreviews();
-        autoMoveTimer = setTimeout(() => {
-          autoMoveTimer = null;
+        scheduleAutoMove(spd.autoMoveWait, () => {
           if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
           executeMove(turnColor, ctrlColor, movable[0], mySession);
-        }, spd.autoMoveWait);
+        });
         return;
       }
 
       // Single movable piece + affordable Re-Roll: show compact chip on dice briefly, then auto-move automatically
       showRerollBtn(turnColor);
-      autoMoveTimer = setTimeout(() => {
-        autoMoveTimer = null;
+      scheduleAutoMove(1150, () => {
         if (!state.active || mySession !== sessionId || state.phase !== "WAITING_MOVE") return;
         hideRerollBtn();
         clearLandingPreviews();
         executeMove(turnColor, ctrlColor, movable[0], mySession);
-      }, 1150);
+      });
       return;
     }
 
@@ -1859,13 +2356,21 @@ window.LUDO_GAME = (() => {
   }
 
   function handleTokenClick(clickedColor, tokenIndex) {
-    if (!state.active || state.phase !== "WAITING_MOVE") return;
+    if (!state.active || isPaused || state.phase !== "WAITING_MOVE") return;
     const turnColor = getCurrentColor();
     const ctrlColor = getControlledColor(turnColor);
-    if (clickedColor !== ctrlColor || state.players[turnColor].isBot) return;
+    if (clickedColor !== ctrlColor) return;
 
     const movable = getMovableTokenIndices(ctrlColor, state.diceValue);
     if (!movable.includes(tokenIndex)) return;
+
+    if (state.mode === "online") {
+      if (!isLocalOnlineHumanTurn()) return;
+      submitOnlineMove(turnColor, ctrlColor, tokenIndex, sessionId);
+      return;
+    }
+
+    if (state.players[turnColor].isBot) return;
 
     clearTurnTimer();
     clearLandingPreviews();
@@ -1929,7 +2434,7 @@ window.LUDO_GAME = (() => {
       spawnBoardCallout({ left: 50, top: 50 }, "HOME! 👑", "callout-home");
       showComboBanner("HOME! 👑", "combo-home");
       if (window.LUDO_UI) window.LUDO_UI.launchFireworks(1);
-      if (!actingPlayer.isBot) trackMission("home", 1);
+      if (state.mode === "online" ? turnColor === state.localColor : !actingPlayer.isBot) trackMission("home", 1);
       triggerBotReaction(turnColor, "happy", 0.75);
 
       if (hasPlayerFinished(ctrlColor) && !state.finishedOrder.includes(ctrlColor)) {
@@ -1957,9 +2462,9 @@ window.LUDO_GAME = (() => {
         }
 
         const unfinishedColors = state.activeColors.filter((c) => !state.finishedOrder.includes(c));
-        const onlyBotsLeft = unfinishedColors.every((c) => state.players[c].isBot);
+        const onlyBotsLeft = unfinishedColors.every((c) => state.players[c].isBot || state.players[c].left);
 
-        if (unfinishedColors.length <= 1 || (state.mode === "vs-bot" && onlyBotsLeft)) {
+        if (unfinishedColors.length <= 1 || ((state.mode === "vs-bot" || state.mode === "online") && onlyBotsLeft)) {
           await finalizeMatch(mySession);
           return;
         }
@@ -2013,7 +2518,7 @@ window.LUDO_GAME = (() => {
         if (capturesThisTurn >= 2) showComboBanner("DOUBLE CAPTURE! 🔥", "combo-double");
         else showComboBanner("CAPTURE! 💥", "combo-capture");
 
-        if (!actingPlayer.isBot) trackMission("capture", capturedList.length);
+        if (state.mode === "online" ? turnColor === state.localColor : !actingPlayer.isBot) trackMission("capture", capturedList.length);
 
         triggerBotReaction(turnColor, "attack", 0.8);
         capturedVictims.forEach((victimColor) => triggerBotReaction(victimColor, "captured", 0.85));
@@ -2065,10 +2570,76 @@ window.LUDO_GAME = (() => {
   }
 
   // ==================== PUBLIC CONTROLS ====================
+  function resetPauseAndOnlineState() {
+    isPaused = false;
+    flushPauseWaiters();
+    clearHostWatchdog();
+    onlineSeq = 0;
+    onlineQueue = [];
+    onlineQueueBusy = false;
+    onlineActionSentSeq = 0;
+    const gs = document.getElementById("game-screen");
+    if (gs) gs.classList.remove("game-paused");
+    const resumeBtn = document.getElementById("btn-menu-resume");
+    if (resumeBtn) resumeBtn.classList.add("hidden");
+  }
+
+  function startOnlineMatch(config) {
+    sessionId += 1;
+    const mySession = sessionId;
+
+    resetPauseAndOnlineState();
+    clearTurnTimer();
+    clearAllEmojis();
+    clearLandingPreviews();
+    clearComboBanner();
+    hideRerollBtn();
+    SFX.stopAll();
+    capturesThisTurn = 0;
+
+    state = createEmptyState();
+    state.active = true;
+    state.saveId = "";
+    state.mode = "online";
+    state.roomCode = config.roomCode || "";
+    state.isPublic = Boolean(config.isPublic);
+    state.localColor = config.localColor;
+    state.localUid = config.localUid;
+    state.gameType = config.gameType || "classic";
+    state.difficulty = "normal";
+    state.stake = Number(config.stake) || 0;
+    state.pot = Number(config.pot) || 0;
+    state.activeColors = [...config.activeColors];
+    state.players = config.players;
+    state.finishedOrder = [];
+    state.turnIndex = 0;
+    state.tokens = BD.createInitialTokens(state.gameType);
+
+    document.body.classList.add("mode-online");
+    computeBoardRotation();
+    buildBoardDOM();
+    setupPlayerPanels();
+    renderTokens([]);
+
+    if (window.LUDO_ONLINE && typeof window.LUDO_ONLINE.setGameCallbacks === "function") {
+      window.LUDO_ONLINE.setGameCallbacks({
+        onAction: handleIncomingOnlineAction,
+        onReaction: (msg) => {
+          if (!state.active || state.mode !== "online") return;
+          showEmojiBubble(msg.color, msg.content, true, Boolean(msg.isChat));
+        },
+        onPlayerPresenceChange: handleOnlinePresenceChange
+      });
+    }
+
+    startTurn(mySession);
+  }
+
   function startMatch(config) {
     sessionId += 1;
     const mySession = sessionId;
 
+    resetPauseAndOnlineState();
     clearTurnTimer();
     clearAllEmojis();
     clearLandingPreviews();
@@ -2111,6 +2682,7 @@ window.LUDO_GAME = (() => {
     sessionId += 1;
     const mySession = sessionId;
 
+    resetPauseAndOnlineState();
     clearTurnTimer();
     clearAllEmojis();
     clearLandingPreviews();
@@ -2161,6 +2733,7 @@ window.LUDO_GAME = (() => {
 
   function stopMatch() {
     sessionId += 1;
+    resetPauseAndOnlineState();
     clearTurnTimer();
     clearAllEmojis();
     clearLandingPreviews();
@@ -2191,12 +2764,26 @@ window.LUDO_GAME = (() => {
   }
 
   function getReactionSenderColor() {
+    if (state.mode === "online" && state.localColor) return state.localColor;
     let senderColor = getCurrentColor();
     if (state.mode === "vs-bot") {
       const humanColor = state.activeColors.find((c) => state.players[c] && !state.players[c].isBot);
       if (humanColor) senderColor = humanColor;
     }
     return senderColor;
+  }
+
+  function triggerBackgroundAutoPause() {
+    const gameScreen = document.getElementById("game-screen");
+    if (!gameScreen || !gameScreen.classList.contains("active")) return;
+    if (!isMatchActive()) return;
+
+    const winModal = document.getElementById("modal-win");
+    const exitModal = document.getElementById("modal-exit-confirm");
+    if (winModal && !winModal.classList.contains("hidden")) return;
+    if (exitModal && !exitModal.classList.contains("hidden")) return;
+
+    pauseGame({ openMenu: true });
   }
 
   // ==================== ONE-TIME DOM EVENT BINDINGS ====================
@@ -2234,6 +2821,9 @@ window.LUDO_GAME = (() => {
         const senderColor = getReactionSenderColor();
         if (emoji && senderColor) {
           showEmojiBubble(senderColor, emoji, true, false);
+          if (state.mode === "online" && window.LUDO_ONLINE) {
+            window.LUDO_ONLINE.sendReaction(senderColor, emoji, false);
+          }
           vibrate(15);
           closeEmojiPopover();
         }
@@ -2249,9 +2839,13 @@ window.LUDO_GAME = (() => {
         const senderColor = getReactionSenderColor();
         if (msg && senderColor) {
           showEmojiBubble(senderColor, msg, true, true);
+          if (state.mode === "online" && window.LUDO_ONLINE) {
+            window.LUDO_ONLINE.sendReaction(senderColor, msg, true);
+          } else {
+            scheduleBotChatReply(senderColor, msg);
+          }
           vibrate(15);
           closeEmojiPopover();
-          scheduleBotChatReply(senderColor, msg);
         }
       });
     }
@@ -2269,21 +2863,45 @@ window.LUDO_GAME = (() => {
     };
     document.addEventListener("pointerdown", unlockOnce);
 
+    // Instant Auto-Pause whenever game goes even slightly into background or loses focus
     document.addEventListener("visibilitychange", () => {
       SFX.handleVisibilityChange();
+      if (document.hidden) triggerBackgroundAutoPause();
+    });
+
+    window.addEventListener("blur", () => {
+      triggerBackgroundAutoPause();
     });
 
     window.addEventListener("pagehide", () => {
       SFX.stopAll();
-      if (isMatchActive()) persistMatchSnapshot();
+      triggerBackgroundAutoPause();
+      if (isMatchActive() && state.mode !== "online") persistMatchSnapshot();
     });
+
+    const capApp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (capApp && typeof capApp.addListener === "function") {
+      capApp.addListener("appStateChange", (appState) => {
+        if (appState && appState.isActive === false) {
+          triggerBackgroundAutoPause();
+        }
+      });
+      capApp.addListener("pause", () => {
+        triggerBackgroundAutoPause();
+      });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", bindGameControls);
 
   return {
     startMatch,
+    startOnlineMatch,
     resumeMatch,
+    pauseGame,
+    resumeGame,
+    isGamePaused: () => isPaused,
+    isOnlineMode: () => state.mode === "online",
     saveAndExit,
     stopMatch,
     isMatchActive,

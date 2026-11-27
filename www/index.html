@@ -97,10 +97,10 @@
         <span class="play-star right">⭐</span>
       </button>
 
-      <!-- Compact PLAY ONLINE Button with COMING SOON Badge -->
-      <button id="btn-play-online" class="btn-mode btn-online-main">
+      <!-- Compact PLAY ONLINE Button with LIVE Badge -->
+      <button id="btn-play-online" class="btn-mode btn-online-main online-live">
         <span class="online-btn-label">🌐 PLAY ONLINE</span>
-        <span class="coming-soon-badge">COMING SOON</span>
+        <span class="live-online-badge">● LIVE</span>
       </button>
     </main>
 
@@ -255,6 +255,8 @@
 
       <!-- Single ••• Game Menu Popover -->
       <div id="game-menu-popover" class="game-menu-popover hidden" aria-label="Game Menu">
+        <div id="menu-room-info" class="menu-room-info hidden">🌐 Online Live Match</div>
+        <button id="btn-menu-resume" class="menu-item-btn resume-btn hidden">▶ Resume Game</button>
         <button id="btn-menu-music" class="menu-item-btn">🎵 Music: On</button>
         <button id="btn-menu-sound" class="menu-item-btn">🔊 Sound: On</button>
         <button id="btn-menu-save" class="menu-item-btn">💾 Save &amp; Resume Later</button>
@@ -723,24 +725,100 @@
     </div>
   </div>
 
-  <!-- Modal: Play Online -->
+  <!-- Modal: Play Online (Quick Online Match + Play with Friends) -->
   <div id="modal-online" class="modal-overlay hidden">
-    <div class="modal-box">
+    <div class="modal-box modal-wide">
       <div class="modal-header">
-        <h2>Play Online</h2>
-        <button class="modal-close" data-close="modal-online">✕</button>
+        <h2>🌐 Play Online</h2>
+        <button id="btn-online-close" class="modal-close" aria-label="Close">✕</button>
       </div>
-      <div class="modal-body center-text">
-        <div class="big-emoji">🌐</div>
-        <h3 class="online-heading">Online Multiplayer Coming Soon</h3>
-        <p class="online-desc">
-          Room codes and live matchmaking will be activated in the next update. Try <strong>Play vs Computer</strong>, <strong>Pass &amp; Play</strong>, or <strong>Kingdom Cup</strong> right now!
-        </p>
-        <div class="online-preview-btns">
-          <button class="btn-disabled" disabled>Create Room</button>
-          <button class="btn-disabled" disabled>Join Room</button>
+      <div class="modal-body">
+        <!-- View 1: Mode Selection (Quick Match / Play with Friends) -->
+        <div id="online-view-home">
+          <div id="online-tabs" class="shop-tabs two-tabs">
+            <button type="button" class="shop-tab active" data-otab="quick">⚡ Quick Match</button>
+            <button type="button" class="shop-tab" data-otab="friends">👥 Play with Friends</button>
+          </div>
+
+          <p id="online-connect-status" class="online-status-banner hidden"></p>
+
+          <!-- Tab A: Quick Online Matchmaking -->
+          <div id="online-tab-quick">
+            <label class="field-label">Game Format</label>
+            <div id="online-quick-type" class="choice-row two-col">
+              <button type="button" class="choice-btn active" data-ogtype="classic">Classic (4 Tokens)</button>
+              <button type="button" class="choice-btn" data-ogtype="quick">⚡ Quick (2 Tokens)</button>
+            </div>
+
+            <label class="field-label">Players</label>
+            <div id="online-quick-count" class="choice-row">
+              <button type="button" class="choice-btn active" data-ocount="2">2 Players</button>
+              <button type="button" class="choice-btn" data-ocount="3">3 Players</button>
+              <button type="button" class="choice-btn" data-ocount="4">4 Players</button>
+            </div>
+
+            <label class="field-label">Entry Stake</label>
+            <div id="online-quick-stake" class="choice-row four-col">
+              <button type="button" class="choice-btn active" data-ostake="0">Free</button>
+              <button type="button" class="choice-btn" data-ostake="100">🪙 100</button>
+              <button type="button" class="choice-btn" data-ostake="500">🪙 500</button>
+              <button type="button" class="choice-btn" data-ostake="1000">🪙 1K</button>
+            </div>
+
+            <p id="online-prize-preview" class="prize-preview">Free Online Match • 1st Place Reward: +300 Coins 🪙</p>
+            <button id="btn-online-find" type="button" class="btn-primary full-width">Find Online Match 🔍</button>
+          </div>
+
+          <!-- Tab B: Private Room (Play with Friends) -->
+          <div id="online-tab-friends" class="hidden">
+            <label class="field-label">Join Friend's Room</label>
+            <div class="online-join-row">
+              <input id="input-room-code" type="tel" inputmode="numeric" maxlength="6" class="text-input room-code-input" placeholder="6-digit room code" />
+              <button id="btn-online-join" type="button" class="btn-primary online-join-btn">Join</button>
+            </div>
+
+            <hr class="modal-divider" />
+
+            <label class="field-label">Create Private Room</label>
+            <div id="online-friend-type" class="choice-row two-col">
+              <button type="button" class="choice-btn active" data-oftype="classic">Classic (4 Tokens)</button>
+              <button type="button" class="choice-btn" data-oftype="quick">⚡ Quick (2 Tokens)</button>
+            </div>
+
+            <div id="online-friend-count" class="choice-row">
+              <button type="button" class="choice-btn active" data-ofcount="2">2 Players</button>
+              <button type="button" class="choice-btn" data-ofcount="3">3 Players</button>
+              <button type="button" class="choice-btn" data-ofcount="4">4 Players</button>
+            </div>
+
+            <button id="btn-online-create" type="button" class="btn-primary full-width">Create Room Code 🔑</button>
+          </div>
         </div>
-        <button class="btn-primary full-width" data-close="modal-online">Got It</button>
+
+        <!-- View 2: Live Waiting Lobby / Matchmaking Screen -->
+        <div id="online-view-waiting" class="hidden center-text">
+          <h3 id="online-wait-title" class="online-heading">Private Room Lobby</h3>
+          <p id="online-wait-subtitle" class="online-desc">Share the code below with your friends</p>
+
+          <div id="online-code-box" class="online-code-box hidden">
+            <span class="online-code-lbl">ROOM CODE</span>
+            <div id="online-code-value" class="online-code-value">123 456</div>
+            <div class="online-share-row">
+              <button id="btn-online-copy-code" type="button" class="btn-secondary small-btn">📋 Copy Code</button>
+              <button id="btn-online-share-wa" type="button" class="btn-wa-share small-btn">💬 WhatsApp</button>
+            </div>
+          </div>
+
+          <div id="online-search-pill" class="online-search-pill hidden">🔍 Searching (1/2) • 15s</div>
+
+          <div id="online-seats-list" class="online-seats-list"></div>
+
+          <div class="online-wait-actions">
+            <button id="btn-online-start-now" type="button" class="btn-primary full-width hidden">Start Match 🎲</button>
+            <button id="btn-online-fill-bots" type="button" class="btn-secondary full-width hidden">⚡ Play Now (Fill Bots)</button>
+            <button id="btn-online-leave-wait" type="button" class="btn-danger full-width">Leave Lobby</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -824,6 +902,7 @@
   <!-- Scripts in Exact Load Order -->
   <script src="board-data.js"></script>
   <script src="ui.js"></script>
+  <script src="online.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

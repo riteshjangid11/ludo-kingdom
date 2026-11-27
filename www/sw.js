@@ -1,10 +1,11 @@
-const CACHE_NAME = "ludo-kingdom-cache-v5";
+const CACHE_NAME = "ludo-kingdom-cache-v6";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./board-data.js",
   "./ui.js",
+  "./online.js",
   "./game.js",
   "./manifest.json",
   "./icon.webp",
