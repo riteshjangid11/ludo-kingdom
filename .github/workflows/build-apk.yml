@@ -44,6 +44,8 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
+          sed -i "s/versionCode [0-9]\+/versionCode $((100 + GITHUB_RUN_NUMBER))/" app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.$GITHUB_RUN_NUMBER\"/" app/build.gradle
           ./gradlew assembleRelease
 
       - name: Sign release APK
