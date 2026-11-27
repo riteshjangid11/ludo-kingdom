@@ -1066,8 +1066,32 @@ window.LUDO_UI = (() => {
     }
   }
 
-  function saveData() {
+  function saveData(skipCloudNotify = false) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch {}
+    if (!skipCloudNotify && window.LUDO_CLOUD && typeof window.LUDO_CLOUD.scheduleCloudSync === "function") {
+      window.LUDO_CLOUD.scheduleCloudSync(false);
+    }
+  }
+
+  function exportSaveData() {
+    return JSON.parse(JSON.stringify(appData));
+  }
+
+  function importCloudData(rawObj) {
+    if (!rawObj || typeof rawObj !== "object") return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rawObj));
+      appData = loadData();
+      selectedAvatarTemp = appData.profile.avatar;
+      selectedPhotoTemp = appData.profile.photo;
+      saveData(true);
+      applySettingsUI();
+      renderHomeUI();
+      renderProfileModal();
+      renderShop();
+      renderThemesModal();
+      renderMissionsModal();
+    } catch {}
   }
 
   function ensureDailyReset() {
@@ -1385,7 +1409,7 @@ window.LUDO_UI = (() => {
     const bgm = new Audio("./background-music.mp3");
     bgm.loop = true;
     bgm.preload = "auto";
-    bgm.volume = 0.55;
+    bgm.volume = 0.45;
 
     let retryBound = false;
 
@@ -1446,23 +1470,35 @@ window.LUDO_UI = (() => {
     return { start, stop, sync, unlockAndSync };
   })();
 
-  // ==================== MELODIOUS UI SOUND EFFECTS ====================
+  // ==================== MELODIOUS UI SOUND EFFECTS (LEVEL-MATCHED) ====================
   const UI_SFX = (() => {
     let ctx = null;
+    let masterBus = null;
 
     function getCtx() {
       if (!appData.settings.sound) return null;
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return null;
-      if (!ctx) ctx = new AudioCtx();
+      if (!ctx) {
+        ctx = new AudioCtx();
+        const comp = ctx.createDynamicsCompressor();
+        comp.threshold.setValueAtTime(-14, ctx.currentTime);
+        comp.knee.setValueAtTime(12, ctx.currentTime);
+        comp.ratio.setValueAtTime(4, ctx.currentTime);
+        comp.attack.setValueAtTime(0.003, ctx.currentTime);
+        comp.release.setValueAtTime(0.14, ctx.currentTime);
+        comp.connect(ctx.destination);
+        masterBus = comp;
+      }
       if (ctx.state === "suspended") ctx.resume().catch(() => {});
       return ctx;
     }
 
-    function playChime(freq, duration = 0.14, volume = 0.08, delay = 0, harmonicMix = 0.24) {
+    function playChime(freq, duration = 0.14, volume = 0.3, delay = 0, harmonicMix = 0.24) {
       const ac = getCtx();
       if (!ac) return;
       const now = ac.currentTime + delay;
+      const dest = masterBus || ac.destination;
 
       const osc1 = ac.createOscillator();
       const gain1 = ac.createGain();
@@ -1472,7 +1508,7 @@ window.LUDO_UI = (() => {
       gain1.gain.linearRampToValueAtTime(volume, now + 0.007);
       gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
       osc1.connect(gain1);
-      gain1.connect(ac.destination);
+      gain1.connect(dest);
       osc1.start(now);
       osc1.stop(now + duration + 0.02);
 
@@ -1485,7 +1521,7 @@ window.LUDO_UI = (() => {
         gain2.gain.linearRampToValueAtTime(volume * harmonicMix, now + 0.006);
         gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.65);
         osc2.connect(gain2);
-        gain2.connect(ac.destination);
+        gain2.connect(dest);
         osc2.start(now);
         osc2.stop(now + duration * 0.7 + 0.02);
       }
@@ -1493,19 +1529,19 @@ window.LUDO_UI = (() => {
 
     return {
       tap() {
-        playChime(659.25, 0.085, 0.048, 0, 0.2);
+        playChime(659.25, 0.085, 0.24, 0, 0.2);
       },
       reward() {
         const notes = [523.25, 659.25, 783.99, 987.77, 1046.5];
-        notes.forEach((n, idx) => playChime(n, 0.26, 0.095, idx * 0.06, 0.28));
+        notes.forEach((n, idx) => playChime(n, 0.26, 0.34, idx * 0.06, 0.28));
       },
       spinStart() {
         const notes = [440.0, 554.37, 659.25, 880.0];
-        notes.forEach((n, idx) => playChime(n, 0.16, 0.075, idx * 0.05, 0.22));
+        notes.forEach((n, idx) => playChime(n, 0.16, 0.3, idx * 0.05, 0.22));
       },
       error() {
-        playChime(392.0, 0.12, 0.075, 0, 0.14);
-        playChime(329.63, 0.18, 0.075, 0.085, 0.14);
+        playChime(392.0, 0.12, 0.3, 0, 0.14);
+        playChime(329.63, 0.18, 0.3, 0.085, 0.14);
       }
     };
   })();
@@ -1602,16 +1638,50 @@ window.LUDO_UI = (() => {
     toastTimer = setTimeout(() => toast.classList.add("hidden"), 2500);
   }
 
-  // ==================== SPLASH LOADING SCREEN (4-SECOND MINIMUM DELAY) ====================
+  // ==================== SPLASH LOADING SCREEN (ALIGNED TO ARTWORK GOLDEN BAR) ====================
+  function positionSplashBarToArtwork(natW, natH) {
+    const screen = document.getElementById("splash-screen");
+    const wrap = document.getElementById("splash-art-bar-wrap");
+    const track = document.getElementById("splash-art-track");
+    if (!screen || !wrap || !track) return;
+
+    const vw = screen.clientWidth || window.innerWidth || 360;
+    const vh = screen.clientHeight || window.innerHeight || 740;
+    const imgRatio = (natW && natH) ? (natW / natH) : (9 / 16);
+    const drawnH = Math.max(vh, vw / imgRatio);
+
+    // Exact coordinates measured from bg-loading.webp (pinned with background-position: center bottom)
+    const bottomPx = Math.max(10, drawnH * 0.0209);
+    const heightPx = Math.max(11, Math.min(20, drawnH * 0.0168));
+    const widthPx = Math.min(vw * 0.66, drawnH * 0.244);
+
+    wrap.style.bottom = `${bottomPx.toFixed(1)}px`;
+    wrap.style.width = `${widthPx.toFixed(1)}px`;
+    track.style.height = `${heightPx.toFixed(1)}px`;
+  }
+
   function runSplashScreen() {
     const bar = document.getElementById("splash-bar");
-    const status = document.getElementById("splash-status");
     const percent = document.getElementById("splash-percent");
-    const tip = document.getElementById("splash-tip");
 
-    if (tip) tip.textContent = SPLASH_TIPS[Math.floor(Math.random() * SPLASH_TIPS.length)];
+    let artW = 9;
+    let artH = 16;
+    positionSplashBarToArtwork(artW, artH);
 
-    const MIN_DURATION_MS = 4000;
+    const probe = new Image();
+    probe.onload = () => {
+      if (probe.naturalWidth && probe.naturalHeight) {
+        artW = probe.naturalWidth;
+        artH = probe.naturalHeight;
+        positionSplashBarToArtwork(artW, artH);
+      }
+    };
+    probe.src = "./assets/bg-loading.webp";
+
+    const onResize = () => positionSplashBarToArtwork(artW, artH);
+    window.addEventListener("resize", onResize);
+
+    const MIN_DURATION_MS = 3800;
     const startedAt = performance.now ? performance.now() : Date.now();
 
     function step() {
@@ -1631,16 +1701,10 @@ window.LUDO_UI = (() => {
       if (bar) bar.style.width = `${pct}%`;
       if (percent) percent.textContent = `${pct}%`;
 
-      if (status) {
-        if (pct < 35) status.textContent = "Loading Studio Worlds...";
-        else if (pct < 72) status.textContent = "Preparing 3D Dice & Frames...";
-        else if (pct < 100) status.textContent = "Entering Ludo Kingdom...";
-        else status.textContent = "Ready!";
-      }
-
       if (ratio < 1) {
         requestAnimationFrame(step);
       } else {
+        window.removeEventListener("resize", onResize);
         setTimeout(() => showScreen("home-screen"), 180);
       }
     }
@@ -4081,6 +4145,8 @@ window.LUDO_UI = (() => {
     closeModal,
     closeGameMenu,
     showToast,
+    exportSaveData,
+    importCloudData,
     enterOnlineGameScreen,
     recordMatchResult
   };

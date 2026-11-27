@@ -212,7 +212,8 @@ body.theme-dark {
 }
 
 /* Kept Normal Dice (Default in :root, Tri-Colour, Ruby) */
-body.dice-skin-classic {
+body.dice-skin-classic,
+.dice-box.dice-skin-classic {
   --dice-bg-top: #ffffff;
   --dice-bg-bot: #d8e1f2;
   --dice-border: #8a9bc4;
@@ -220,7 +221,8 @@ body.dice-skin-classic {
   --dice-pip-one: #e53935;
   --dice-six-glow: rgba(255, 224, 102, 0.9);
 }
-body.dice-skin-tricolour {
+body.dice-skin-tricolour,
+.dice-box.dice-skin-tricolour {
   --dice-bg-top: #ff9933;
   --dice-bg-bot: #138808;
   --dice-border: #ffffff;
@@ -228,7 +230,8 @@ body.dice-skin-tricolour {
   --dice-pip-one: #000080;
   --dice-six-glow: rgba(255, 165, 51, 0.92);
 }
-body.dice-skin-ruby {
+body.dice-skin-ruby,
+.dice-box.dice-skin-ruby {
   --dice-bg-top: #ff5c6c;
   --dice-bg-bot: #9e0b22;
   --dice-border: #ffd166;
@@ -238,7 +241,8 @@ body.dice-skin-ruby {
 }
 
 /* 8 New Full HD 3D Dice Skins */
-body.dice-skin-royal_crown {
+body.dice-skin-royal_crown,
+.dice-box.dice-skin-royal_crown {
   --dice-bg-top: #fff6bd;
   --dice-bg-bot: #b87408;
   --dice-border: #ffe885;
@@ -246,7 +250,8 @@ body.dice-skin-royal_crown {
   --dice-pip-one: #b91c1c;
   --dice-six-glow: rgba(255, 215, 0, 1);
 }
-body.dice-skin-glacier_crystal {
+body.dice-skin-glacier_crystal,
+.dice-box.dice-skin-glacier_crystal {
   --dice-bg-top: #e8faff;
   --dice-bg-bot: #1e88c7;
   --dice-border: #bae6fd;
@@ -254,7 +259,8 @@ body.dice-skin-glacier_crystal {
   --dice-pip-one: #0284c7;
   --dice-six-glow: rgba(125, 211, 252, 1);
 }
-body.dice-skin-cursed_relic {
+body.dice-skin-cursed_relic,
+.dice-box.dice-skin-cursed_relic {
   --dice-bg-top: #522985;
   --dice-bg-bot: #1a0b2e;
   --dice-border: #ff9838;
@@ -262,7 +268,8 @@ body.dice-skin-cursed_relic {
   --dice-pip-one: #4ade80;
   --dice-six-glow: rgba(192, 132, 252, 0.98);
 }
-body.dice-skin-magma_obsidian {
+body.dice-skin-magma_obsidian,
+.dice-box.dice-skin-magma_obsidian {
   --dice-bg-top: #382522;
   --dice-bg-bot: #0e0706;
   --dice-border: #ff571a;
@@ -270,7 +277,8 @@ body.dice-skin-magma_obsidian {
   --dice-pip-one: #ff3b1f;
   --dice-six-glow: rgba(255, 87, 26, 1);
 }
-body.dice-skin-cyber_core {
+body.dice-skin-cyber_core,
+.dice-box.dice-skin-cyber_core {
   --dice-bg-top: #15254d;
   --dice-bg-bot: #050a18;
   --dice-border: #25f4ee;
@@ -278,7 +286,8 @@ body.dice-skin-cyber_core {
   --dice-pip-one: #ff2e93;
   --dice-six-glow: rgba(37, 244, 238, 1);
 }
-body.dice-skin-pharaoh_gold {
+body.dice-skin-pharaoh_gold,
+.dice-box.dice-skin-pharaoh_gold {
   --dice-bg-top: #ffe08a;
   --dice-bg-bot: #9e6514;
   --dice-border: #40e0d0;
@@ -286,7 +295,8 @@ body.dice-skin-pharaoh_gold {
   --dice-pip-one: #0891b2;
   --dice-six-glow: rgba(245, 183, 38, 0.98);
 }
-body.dice-skin-dubai_diamond {
+body.dice-skin-dubai_diamond,
+.dice-box.dice-skin-dubai_diamond {
   --dice-bg-top: #ffffff;
   --dice-bg-bot: #9fd8f5;
   --dice-border: #50c878;
@@ -294,7 +304,8 @@ body.dice-skin-dubai_diamond {
   --dice-pip-one: #0ea5e9;
   --dice-six-glow: rgba(110, 231, 255, 1);
 }
-body.dice-skin-cosmic_nebula {
+body.dice-skin-cosmic_nebula,
+.dice-box.dice-skin-cosmic_nebula {
   --dice-bg-top: #4b1d96;
   --dice-bg-bot: #0c0624;
   --dice-border: #c084fc;
@@ -502,76 +513,67 @@ button:active:not(:disabled) { transform: scale(0.95); }
 .frame-76 .frame-overlay, .frame-84 .frame-overlay { border-width: 5px; }
 .frame-46 .frame-overlay, .frame-48 .frame-overlay { border-width: 3.5px; }
 
-/* ==================== 1. SPLASH / 4-SECOND LOADING SCREEN ==================== */
+/* ==================== 1. SPLASH SCREEN (SINGLE BAR ALIGNED TO ARTWORK) ==================== */
 #splash-screen {
   justify-content: flex-end;
   align-items: center;
-  padding: 20px 24px 34px;
+  padding: 0;
   position: fixed;
+  overflow: hidden;
 }
 
 .splash-bg-art {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(180deg, rgba(6, 14, 38, 0.08) 0%, rgba(6, 14, 38, 0.05) 68%, rgba(5, 12, 32, 0.72) 100%),
     url("./assets/bg-loading.webp"),
     radial-gradient(circle at 50% 35%, #1c3a85 0%, #0d1c45 70%, #071029 100%);
-  background-size: cover, cover, cover;
-  background-position: center, center, center;
+  background-size: cover, cover;
+  background-position: center bottom, center;
   z-index: 0;
   pointer-events: none;
 }
 
-.splash-content {
-  position: relative;
+.splash-art-bar-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: 2.09%;
+  transform: translateX(-50%);
+  width: 50%;
   z-index: 2;
-  width: 100%;
-  max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  background: rgba(7, 16, 41, 0.62);
-  border: 1.5px solid rgba(245, 197, 66, 0.45);
-  border-radius: 16px;
-  padding: 12px 14px 10px;
-  backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 
-.progress-wrapper { width: 100%; }
-.progress-track {
+.splash-art-percent {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: #ffe896;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.92), 0 0 8px rgba(245, 197, 66, 0.55);
+}
+
+.splash-art-track {
   width: 100%;
-  height: 13px;
-  background: rgba(6, 14, 34, 0.85);
-  border: 2px solid var(--gold);
+  height: 14px;
+  background: #0a132c;
   border-radius: 999px;
   overflow: hidden;
   padding: 1.5px;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
 }
-.progress-fill {
+
+.splash-art-fill {
   width: 0%;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #ff9900, #ffd633, #fff3a6);
-  box-shadow: 0 0 10px rgba(255, 214, 51, 0.85);
+  background: linear-gradient(90deg, #e08600 0%, #ffcb2f 58%, #fff4b5 100%);
+  box-shadow: 0 0 10px rgba(255, 214, 51, 0.9);
   transition: width 0.08s linear;
-}
-.progress-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  font-size: 0.76rem;
-  color: #e6f0ff;
-  font-weight: 700;
-}
-.splash-tip {
-  font-size: 0.72rem;
-  color: var(--gold-light);
-  text-align: center;
-  line-height: 1.3;
-  opacity: 0.94;
 }
 
 /* ==================== 2. REDESIGNED HOME LOBBY SCREEN ==================== */
@@ -3151,6 +3153,157 @@ body:not(.mode-online) .yard-label {
 }
 
 .online-wait-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+/* ==================== UPDATE V7: CLOUD SAVE & ACCOUNT AUTH UI ==================== */
+.profile-cloud-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(7, 16, 41, 0.72);
+  border: 1.4px solid rgba(245, 197, 66, 0.35);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.profile-cloud-status {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-cloud-status.synced {
+  color: #9bf5ae;
+}
+
+.cloud-setting-row {
+  border-bottom: 1px solid rgba(245, 197, 66, 0.28);
+  padding-bottom: 12px;
+  margin-bottom: 6px;
+}
+
+.cloud-intro {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.btn-google-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #dbe4f3;
+  background: linear-gradient(180deg, #ffffff, #edf2fb);
+  color: #1c2434;
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
+}
+
+.btn-google-auth:active {
+  transform: scale(0.98);
+}
+
+.google-g-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: conic-gradient(from -45deg, #ea4335 0deg 90deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg 360deg);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.cloud-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.cloud-or-divider::before,
+.cloud-or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.cloud-email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.cloud-link-btn {
+  display: block;
+  margin: 10px auto 0;
+  background: none;
+  border: none;
+  color: var(--gold-light);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cloud-signed-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(46, 158, 71, 0.25);
+  border: 1.5px solid #4cd964;
+  color: #a9ffbe;
+  font-size: 0.76rem;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.cloud-account-email {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.cloud-account-meta {
+  font-size: 0.78rem;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+}
+
+.cloud-sync-time {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.cloud-signed-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;

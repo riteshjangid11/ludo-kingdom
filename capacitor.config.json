@@ -2,5 +2,13 @@
   "appId": "com.ludokingdom.app",
   "appName": "Ludo Kingdom",
   "webDir": "www",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com"
+      ]
+    }
+  }
 }

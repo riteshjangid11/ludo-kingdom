@@ -92,6 +92,7 @@ window.LUDO_GAME = (() => {
   // ==================== MELODIOUS AUDIO & CUSTOM MP3 SOUND ENGINE ====================
   const SFX = (() => {
     let ctx = null;
+    let masterBus = null;
     let noiseBuffer = null;
     let captureStopTimer = null;
     let winningActive = false;
@@ -99,7 +100,10 @@ window.LUDO_GAME = (() => {
     const CAPTURE_MAX_MS = 3000;
     const HOP_SCALE = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
 
-    function createTrack(src, { loop = false, volume = 0.85 } = {}) {
+    // Uniform balanced loudness target across all MP3 & synthesized SFX
+    const UNIFORM_MP3_VOL = 0.46;
+
+    function createTrack(src, { loop = false, volume = UNIFORM_MP3_VOL } = {}) {
       const audio = new Audio(src);
       audio.preload = "auto";
       audio.loop = loop;
@@ -108,9 +112,9 @@ window.LUDO_GAME = (() => {
     }
 
     const tracks = {
-      capture: createTrack("./capture.mp3", { loop: false, volume: 0.88 }),
-      home: createTrack("./get-home.mp3", { loop: false, volume: 0.88 }),
-      winning: createTrack("./winning.mp3", { loop: true, volume: 0.82 })
+      capture: createTrack("./capture.mp3", { loop: false, volume: UNIFORM_MP3_VOL }),
+      home: createTrack("./get-home.mp3", { loop: false, volume: UNIFORM_MP3_VOL }),
+      winning: createTrack("./winning.mp3", { loop: true, volume: UNIFORM_MP3_VOL })
     };
 
     function isSoundEnabled() {
@@ -122,28 +126,48 @@ window.LUDO_GAME = (() => {
       if (!isSoundEnabled()) return null;
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return null;
-      if (!ctx) ctx = new AudioCtx();
+      if (!ctx) {
+        ctx = new AudioCtx();
+        const comp = ctx.createDynamicsCompressor();
+        comp.threshold.setValueAtTime(-14, ctx.currentTime);
+        comp.knee.setValueAtTime(12, ctx.currentTime);
+        comp.ratio.setValueAtTime(4, ctx.currentTime);
+        comp.attack.setValueAtTime(0.003, ctx.currentTime);
+        comp.release.setValueAtTime(0.14, ctx.currentTime);
+
+        const outGain = ctx.createGain();
+        outGain.gain.setValueAtTime(0.95, ctx.currentTime);
+
+        comp.connect(outGain);
+        outGain.connect(ctx.destination);
+        masterBus = comp;
+      }
       if (ctx.state === "suspended") ctx.resume().catch(() => {});
       return ctx;
     }
 
+    function getOutputNode(ac) {
+      return masterBus || ac.destination;
+    }
+
     function getNoiseBuffer(ac) {
       if (noiseBuffer && noiseBuffer.sampleRate === ac.sampleRate) return noiseBuffer;
-      const len = Math.floor(ac.sampleRate * 0.042);
+      const len = Math.floor(ac.sampleRate * 0.045);
       const buf = ac.createBuffer(1, len, ac.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < len; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.32));
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.34));
       }
       noiseBuffer = buf;
       return buf;
     }
 
-    // Warm marimba / bell / harp note with soft attack & gentle 2nd harmonic
-    function playMelodicNote(freq, duration = 0.16, volume = 0.12, delay = 0, harmonicMix = 0.22) {
+    // Warm marimba / bell / harp note level-matched to MP3 loudness
+    function playMelodicNote(freq, duration = 0.16, volume = 0.34, delay = 0, harmonicMix = 0.24) {
       const ac = getCtx();
       if (!ac) return;
       const now = ac.currentTime + delay;
+      const dest = getOutputNode(ac);
 
       const osc1 = ac.createOscillator();
       const gain1 = ac.createGain();
@@ -155,7 +179,7 @@ window.LUDO_GAME = (() => {
       gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
       osc1.connect(gain1);
-      gain1.connect(ac.destination);
+      gain1.connect(dest);
       osc1.start(now);
       osc1.stop(now + duration + 0.02);
 
@@ -170,15 +194,16 @@ window.LUDO_GAME = (() => {
         gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.65);
 
         osc2.connect(gain2);
-        gain2.connect(ac.destination);
+        gain2.connect(dest);
         osc2.start(now);
         osc2.stop(now + duration * 0.7 + 0.02);
       }
     }
 
-    // Warm wooden dice rattle tap
+    // Crisp wooden dice rattle tap level-matched to MP3 tracks
     function playDiceHit(ac, delay, pitch, vol) {
       const now = ac.currentTime + delay;
+      const dest = getOutputNode(ac);
 
       const src = ac.createBufferSource();
       src.buffer = getNoiseBuffer(ac);
@@ -186,30 +211,30 @@ window.LUDO_GAME = (() => {
       const filter = ac.createBiquadFilter();
       filter.type = "bandpass";
       filter.frequency.setValueAtTime(pitch, now);
-      filter.Q.setValueAtTime(3.6, now);
+      filter.Q.setValueAtTime(2.6, now);
 
       const nGain = ac.createGain();
-      nGain.gain.setValueAtTime(vol * 0.75, now);
-      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.036);
+      nGain.gain.setValueAtTime(vol * 1.15, now);
+      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.042);
 
       src.connect(filter);
       filter.connect(nGain);
-      nGain.connect(ac.destination);
+      nGain.connect(dest);
       src.start(now);
 
       const osc = ac.createOscillator();
       const oGain = ac.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(pitch * 0.32, now);
-      osc.frequency.exponentialRampToValueAtTime(pitch * 0.21, now + 0.045);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(pitch * 0.34, now);
+      osc.frequency.exponentialRampToValueAtTime(pitch * 0.2, now + 0.05);
       oGain.gain.setValueAtTime(0.0001, now);
-      oGain.gain.linearRampToValueAtTime(vol * 0.42, now + 0.004);
-      oGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.052);
+      oGain.gain.linearRampToValueAtTime(vol * 0.68, now + 0.004);
+      oGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.056);
 
       osc.connect(oGain);
-      oGain.connect(ac.destination);
+      oGain.connect(dest);
       osc.start(now);
-      osc.stop(now + 0.056);
+      osc.stop(now + 0.06);
     }
 
     function stopTrack(audio) {
@@ -278,14 +303,13 @@ window.LUDO_GAME = (() => {
 
     function unlockAudio() {
       if (isSoundEnabled()) {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          if (!ctx) ctx = new AudioCtx();
-          if (ctx.state === "suspended") ctx.resume().catch(() => {});
-        }
+        getCtx();
       }
       Object.values(tracks).forEach((t) => {
-        try { t.load(); } catch {}
+        try {
+          t.volume = UNIFORM_MP3_VOL;
+          t.load();
+        } catch {}
       });
     }
 
@@ -301,34 +325,35 @@ window.LUDO_GAME = (() => {
         const ac = getCtx();
         if (!ac) return;
         const hits = [
-          { d: 0.0, p: 1380, v: 0.22 },
-          { d: 0.075, p: 1680, v: 0.19 },
-          { d: 0.16, p: 1290, v: 0.2 },
-          { d: 0.255, p: 1560, v: 0.16 },
-          { d: 0.355, p: 1180, v: 0.14 }
+          { d: 0.0, p: 1380, v: 0.56 },
+          { d: 0.075, p: 1680, v: 0.52 },
+          { d: 0.16, p: 1290, v: 0.54 },
+          { d: 0.255, p: 1560, v: 0.48 },
+          { d: 0.355, p: 1180, v: 0.45 }
         ];
         hits.forEach((h) => playDiceHit(ac, h.d, h.p + (Math.random() * 110 - 55), h.v));
       },
       reroll() {
         const notes = [587.33, 739.99, 880.0, 1174.66, 1479.98];
-        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.1, idx * 0.055, 0.28));
+        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.32, idx * 0.055, 0.28));
       },
       hop(stepIdx = 0) {
         const freq = HOP_SCALE[Math.max(0, stepIdx) % HOP_SCALE.length];
-        playMelodicNote(freq, 0.14, 0.13, 0, 0.22);
+        playMelodicNote(freq, 0.14, 0.34, 0, 0.22);
       },
       unlock() {
         const notes = [523.25, 659.25, 783.99, 1046.5];
-        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.11, idx * 0.055, 0.26));
+        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.34, idx * 0.055, 0.26));
       },
       safe() {
         const notes = [587.33, 739.99, 880.0, 1174.66];
-        notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.095, idx * 0.05, 0.3));
+        notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.32, idx * 0.05, 0.3));
       },
       capture() {
         if (!isSoundEnabled()) return;
         stopCapture();
         const a = tracks.capture;
+        a.volume = UNIFORM_MP3_VOL;
         try {
           a.currentTime = 0;
           const p = a.play();
@@ -336,50 +361,51 @@ window.LUDO_GAME = (() => {
           if (p && typeof p.catch === "function") {
             p.catch(() => {
               stopCapture();
-              playMelodicNote(523.25, 0.12, 0.12, 0, 0.25);
-              playMelodicNote(392.0, 0.15, 0.12, 0.07, 0.22);
-              playMelodicNote(261.63, 0.24, 0.13, 0.14, 0.18);
+              playMelodicNote(523.25, 0.12, 0.34, 0, 0.25);
+              playMelodicNote(392.0, 0.15, 0.34, 0.07, 0.22);
+              playMelodicNote(261.63, 0.24, 0.36, 0.14, 0.18);
             });
           }
         } catch {
-          playMelodicNote(523.25, 0.12, 0.12, 0, 0.25);
-          playMelodicNote(392.0, 0.15, 0.12, 0.07, 0.22);
-          playMelodicNote(261.63, 0.24, 0.13, 0.14, 0.18);
+          playMelodicNote(523.25, 0.12, 0.34, 0, 0.25);
+          playMelodicNote(392.0, 0.15, 0.34, 0.07, 0.22);
+          playMelodicNote(261.63, 0.24, 0.36, 0.14, 0.18);
         }
       },
       slideTick() {
         if (isCapturePlaying()) return;
-        playMelodicNote(440.0, 0.06, 0.045, 0, 0.15);
+        playMelodicNote(440.0, 0.06, 0.22, 0, 0.15);
       },
       home() {
         if (!isSoundEnabled()) return;
         stopHome();
         const a = tracks.home;
+        a.volume = UNIFORM_MP3_VOL;
         try {
           a.currentTime = 0;
           const p = a.play();
           if (p && typeof p.catch === "function") {
             p.catch(() => {
               const notes = [523.25, 659.25, 783.99, 1046.5];
-              notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.12, idx * 0.07, 0.28));
+              notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.34, idx * 0.07, 0.28));
             });
           }
         } catch {
           const notes = [523.25, 659.25, 783.99, 1046.5];
-          notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.12, idx * 0.07, 0.28));
+          notes.forEach((n, idx) => playMelodicNote(n, 0.26, 0.34, idx * 0.07, 0.28));
         }
       },
       forfeit() {
         const notes = [392.0, 329.63, 261.63];
-        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.1, idx * 0.11, 0.14));
+        notes.forEach((n, idx) => playMelodicNote(n, 0.22, 0.34, idx * 0.11, 0.14));
       },
       emoji() {
-        playMelodicNote(783.99, 0.11, 0.085, 0, 0.25);
-        playMelodicNote(1046.5, 0.15, 0.085, 0.06, 0.25);
+        playMelodicNote(783.99, 0.11, 0.3, 0, 0.25);
+        playMelodicNote(1046.5, 0.15, 0.3, 0.06, 0.25);
       },
       playerFinish() {
         const notes = [523.25, 659.25, 783.99, 987.77, 1046.5];
-        notes.forEach((n, idx) => playMelodicNote(n, 0.28, 0.12, idx * 0.08, 0.3));
+        notes.forEach((n, idx) => playMelodicNote(n, 0.28, 0.36, idx * 0.08, 0.3));
       },
       win() {
         if (!isSoundEnabled()) return;
@@ -387,6 +413,7 @@ window.LUDO_GAME = (() => {
         stopHome();
         winningActive = true;
         const a = tracks.winning;
+        a.volume = UNIFORM_MP3_VOL;
         a.loop = true;
         try {
           a.currentTime = 0;
@@ -394,12 +421,12 @@ window.LUDO_GAME = (() => {
           if (p && typeof p.catch === "function") {
             p.catch(() => {
               const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
-              notes.forEach((n, idx) => playMelodicNote(n, 0.32, 0.14, idx * 0.11, 0.3));
+              notes.forEach((n, idx) => playMelodicNote(n, 0.32, 0.36, idx * 0.11, 0.3));
             });
           }
         } catch {
           const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
-          notes.forEach((n, idx) => playMelodicNote(n, 0.32, 0.14, idx * 0.11, 0.3));
+          notes.forEach((n, idx) => playMelodicNote(n, 0.32, 0.36, idx * 0.11, 0.3));
         }
       }
     };
@@ -465,6 +492,7 @@ window.LUDO_GAME = (() => {
       diceValue: null,
       phase: "IDLE",
       consecutiveSixes: 0,
+      dryYardRolls: { red: 0, green: 0, yellow: 0, blue: 0 },
       rerollUsed: { red: false, green: false, yellow: false, blue: false },
       tokens: BD.createInitialTokens("classic")
     };
@@ -886,6 +914,10 @@ window.LUDO_GAME = (() => {
     if (!diceBtn) return;
     const activeSkin = skinId || getSettings().diceSkin || "classic";
     diceBtn.dataset.diceSkin = activeSkin;
+    Array.from(diceBtn.classList).forEach((cls) => {
+      if (cls.startsWith("dice-skin-")) diceBtn.classList.remove(cls);
+    });
+    diceBtn.classList.add(`dice-skin-${activeSkin}`);
 
     const oldBg = diceBtn.querySelector(".dice-hd-art-bg");
     if (oldBg) oldBg.remove();
@@ -930,7 +962,15 @@ window.LUDO_GAME = (() => {
     const activeSkin = skinId || getSettings().diceSkin || "classic";
     BD.COLORS.forEach((color) => {
       const diceBtn = document.getElementById(`dice-${color}`);
-      if (diceBtn) applyDiceSkinToBox(diceBtn, activeSkin);
+      if (!diceBtn) return;
+      if (state.mode === "online") {
+        if (color === state.localColor) {
+          if (state.players[color]) state.players[color].diceSkin = activeSkin;
+          applyDiceSkinToBox(diceBtn, activeSkin);
+        }
+        return;
+      }
+      applyDiceSkinToBox(diceBtn, activeSkin);
     });
   }
 
@@ -966,7 +1006,11 @@ window.LUDO_GAME = (() => {
 
     stage.appendChild(cube);
     diceBtn.appendChild(stage);
-    applyDiceSkinToBox(diceBtn);
+    const playerDiceSkin =
+      state.mode === "online" && state.players[color] && state.players[color].diceSkin
+        ? state.players[color].diceSkin
+        : (getSettings().diceSkin || "classic");
+    applyDiceSkinToBox(diceBtn, playerDiceSkin);
 
     diceBtn.addEventListener("click", () => {
       if (!state.active || isPaused || state.phase !== "WAITING_ROLL") return;
@@ -1893,6 +1937,70 @@ window.LUDO_GAME = (() => {
     }
   }
 
+  // ==================== ANTI-DROUGHT FAIR DICE BALANCER ====================
+  function isStuckWithNoActiveTokens(ctrlColor) {
+    const toks = state.tokens && state.tokens[ctrlColor];
+    if (!Array.isArray(toks)) return false;
+    const hasYardToken = toks.some((s) => s === -1);
+    const hasBoardToken = toks.some((s) => s >= 0 && s < BD.HOME_STEP);
+    return hasYardToken && !hasBoardToken;
+  }
+
+  function hasOpponentAdvancedFar(turnColor) {
+    for (const c of state.activeColors) {
+      if (c === turnColor) continue;
+      const toks = state.tokens && state.tokens[c];
+      if (!Array.isArray(toks)) continue;
+      if (toks.some((s) => s >= 26)) return true;
+    }
+    return false;
+  }
+
+  function updateDryYardTracker(turnColor, rolled) {
+    if (!state.dryYardRolls) state.dryYardRolls = { red: 0, green: 0, yellow: 0, blue: 0 };
+    const ctrlColor = getControlledColor(turnColor);
+    if (!isStuckWithNoActiveTokens(ctrlColor) || rolled === 6) {
+      state.dryYardRolls[turnColor] = 0;
+    } else {
+      state.dryYardRolls[turnColor] = (state.dryYardRolls[turnColor] || 0) + 1;
+    }
+  }
+
+  function rollBalancedDie(turnColor) {
+    if (!state.dryYardRolls) state.dryYardRolls = { red: 0, green: 0, yellow: 0, blue: 0 };
+    const ctrlColor = getControlledColor(turnColor);
+
+    if (!isStuckWithNoActiveTokens(ctrlColor)) {
+      state.dryYardRolls[turnColor] = 0;
+      return Math.floor(Math.random() * 6) + 1;
+    }
+
+    const dry = state.dryYardRolls[turnColor] || 0;
+    const behindOpponent = hasOpponentAdvancedFar(turnColor);
+
+    // Smooth anti-drought probability curve so no player gets trapped in the box
+    let sixChance = 1 / 6;
+    if (behindOpponent) {
+      if (dry >= 5) sixChance = 1.0;
+      else if (dry === 4) sixChance = 0.72;
+      else if (dry === 3) sixChance = 0.50;
+      else if (dry === 2) sixChance = 0.34;
+      else sixChance = 0.22;
+    } else {
+      if (dry >= 7) sixChance = 1.0;
+      else if (dry === 6) sixChance = 0.65;
+      else if (dry === 5) sixChance = 0.48;
+      else if (dry === 4) sixChance = 0.35;
+      else if (dry === 3) sixChance = 0.25;
+      else sixChance = 1 / 6;
+    }
+
+    if (Math.random() < sixChance) {
+      return 6;
+    }
+    return Math.floor(Math.random() * 5) + 1;
+  }
+
   // ==================== ONLINE MULTIPLAYER SYNC ENGINE ====================
   function isLocalOnlineHumanTurn() {
     if (state.mode !== "online") return false;
@@ -1927,7 +2035,7 @@ window.LUDO_GAME = (() => {
       diceBtn.classList.remove("can-roll");
     }
 
-    const rolled = Math.floor(Math.random() * 6) + 1;
+    const rolled = rollBalancedDie(color);
     if (window.LUDO_ONLINE) {
       window.LUDO_ONLINE.pushAction(nextSeq, {
         type: "ROLL",
@@ -2087,6 +2195,7 @@ window.LUDO_GAME = (() => {
     if (diceBtn) diceBtn.classList.remove("rolling");
 
     state.diceValue = rolled;
+    updateDryYardTracker(turnColor, rolled);
     if (rolled === 6 && isMe) trackMission("roll6", 1);
 
     if (rolled === 6) {
@@ -2239,7 +2348,8 @@ window.LUDO_GAME = (() => {
     SFX.dice();
     if (!player.isBot) vibrate(18);
 
-    const rolled = Math.floor(Math.random() * 6) + 1;
+    const rolled = rollBalancedDie(turnColor);
+    updateDryYardTracker(turnColor, rolled);
     const spinDuration = spinDice3D(turnColor, rolled);
 
     await wait(spinDuration + 45);

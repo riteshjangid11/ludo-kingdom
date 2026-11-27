@@ -17,20 +17,14 @@
   <!-- Global Confetti & Fireworks Canvas -->
   <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
 
-  <!-- ==================== 1. SPLASH / 4-SECOND LOADING SCREEN ==================== -->
+  <!-- ==================== 1. SPLASH SCREEN (SINGLE BAR ALIGNED TO ARTWORK) ==================== -->
   <section id="splash-screen" class="screen active">
     <div class="splash-bg-art" aria-hidden="true"></div>
-    <div class="splash-content">
-      <div class="progress-wrapper">
-        <div class="progress-track">
-          <div id="splash-bar" class="progress-fill"></div>
-        </div>
-        <div class="progress-meta">
-          <span id="splash-status">Loading Ludo Kingdom...</span>
-          <span id="splash-percent">0%</span>
-        </div>
+    <div id="splash-art-bar-wrap" class="splash-art-bar-wrap">
+      <span id="splash-percent" class="splash-art-percent">0%</span>
+      <div id="splash-art-track" class="splash-art-track">
+        <div id="splash-bar" class="splash-art-fill"></div>
       </div>
-      <p id="splash-tip" class="splash-tip">Tip: Tap Themes on the right to explore HD worlds, 3D dice &amp; frames!</p>
     </div>
   </section>
 
@@ -399,6 +393,11 @@
               </div>
             </div>
 
+            <div class="profile-cloud-row">
+              <span id="profile-cloud-status" class="profile-cloud-status">☁️ Guest • Not Backed Up</span>
+              <button id="btn-open-cloud-auth" type="button" class="btn-secondary small-btn">Sign In</button>
+            </div>
+
             <button id="btn-save-profile" class="btn-primary full-width">Save Profile</button>
           </div>
 
@@ -555,6 +554,14 @@
         <button class="modal-close" data-close="modal-settings">✕</button>
       </div>
       <div class="modal-body">
+        <div class="setting-row cloud-setting-row">
+          <div>
+            <strong>☁️ Cloud Progress Save</strong>
+            <p id="settings-cloud-desc" class="setting-desc">Sign in to back up coins, themes &amp; rank</p>
+          </div>
+          <button id="btn-settings-cloud" type="button" class="btn-secondary small-btn">Sign In</button>
+        </div>
+
         <div class="setting-row">
           <div>
             <strong>Sound Effects</strong>
@@ -899,9 +906,61 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast hidden"></div>
 
+  <!-- Modal: Cloud Progress Save & Account Sign-In -->
+  <div id="modal-cloud-auth" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>☁️ Cloud Save</h2>
+        <button class="modal-close" data-close="modal-cloud-auth">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="cloud-auth-status" class="online-status-banner hidden"></p>
+
+        <!-- Guest View -->
+        <div id="cloud-view-guest">
+          <p class="cloud-intro">Back up your coins, gems, themes, 3D dice, frames, and rank so your progress stays safe across reinstalls and phones.</p>
+
+          <button id="btn-cloud-google" type="button" class="btn-google-auth full-width">
+            <span class="google-g-badge">G</span>
+            <span>Continue with Google</span>
+          </button>
+
+          <div class="cloud-or-divider"><span>OR EMAIL &amp; PASSWORD</span></div>
+
+          <div id="cloud-auth-tabs" class="shop-tabs two-tabs">
+            <button type="button" class="shop-tab active" data-ctab="signin">Sign In</button>
+            <button type="button" class="shop-tab" data-ctab="signup">Create Account</button>
+          </div>
+
+          <form id="cloud-email-form" class="cloud-email-form">
+            <input id="input-cloud-email" type="email" autocomplete="email" class="text-input" placeholder="Email address" required />
+            <input id="input-cloud-password" type="password" autocomplete="current-password" minlength="6" class="text-input" placeholder="Password (min 6 characters)" required />
+            <button id="btn-cloud-email-submit" type="submit" class="btn-primary full-width">Sign In with Email</button>
+          </form>
+
+          <button id="btn-cloud-forgot" type="button" class="cloud-link-btn">Forgot Password?</button>
+        </div>
+
+        <!-- Signed-In View -->
+        <div id="cloud-view-signed" class="hidden center-text">
+          <div class="cloud-signed-badge">☁️ Cloud Backup Active</div>
+          <h3 id="cloud-account-email" class="cloud-account-email">player@example.com</h3>
+          <p id="cloud-account-provider" class="cloud-account-meta">Signed in with Google</p>
+          <p id="cloud-last-sync" class="cloud-sync-time">Synced just now</p>
+
+          <div class="cloud-signed-actions">
+            <button id="btn-cloud-sync-now" type="button" class="btn-primary full-width">Sync Progress Now ☁️</button>
+            <button id="btn-cloud-signout" type="button" class="btn-danger full-width">Sign Out (Guest Mode)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts in Exact Load Order -->
   <script src="board-data.js"></script>
   <script src="ui.js"></script>
+  <script src="cloud.js"></script>
   <script src="online.js"></script>
   <script src="game.js"></script>
 </body>

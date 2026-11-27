@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "833178377395",
+    "firebase_url": "https://ludo-kingdom-8302-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "ludo-kingdom-8302",
+    "storage_bucket": "ludo-kingdom-8302.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833178377395:android:2b10f67f6dc4b3ffd224c6",
+        "android_client_info": {
+          "package_name": "com.ludokingdom.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "833178377395-lth200unrsftfl5j81k8b1i879tlovdn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFke4YI9P9DG0QSTl6Ik_BJ5w36n-m5Rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "833178377395-lth200unrsftfl5j81k8b1i879tlovdn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

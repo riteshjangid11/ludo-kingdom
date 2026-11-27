@@ -18,16 +18,41 @@ window.LUDO_ONLINE = (() => {
   const MATCHMAKING_WAIT_SEC = 15;
   const ROOM_STALE_MS = 55000;
 
-  const BOT_POOL = [
-    { name: "Aarav", avatar: "char_captain", frame: "silver" },
-    { name: "Priya", avatar: "char_party", frame: "royal_gold" },
-    { name: "Kabir", avatar: "char_rajni", frame: "bronze" },
-    { name: "Ananya", avatar: "char_kitten", frame: "glacier_ice" },
-    { name: "Rohan", avatar: "char_cricket", frame: "silver" },
-    { name: "Meera", avatar: "👸", frame: "dubai_emerald" },
-    { name: "Vikram", avatar: "🦁", frame: "pharaoh_sand" },
-    { name: "Zoya", avatar: "🦊", frame: "cosmic_void" }
+  const ALL_FRAMES = [
+    "bronze", "silver", "royal_gold", "glacier_ice",
+    "magma_obsidian", "cyber_neon", "pharaoh_sand", "dubai_emerald", "cosmic_void"
   ];
+
+  const ALL_DICE_SKINS = [
+    "classic", "tricolour", "ruby", "royal_crown", "glacier_crystal",
+    "cursed_relic", "magma_obsidian", "cyber_core", "pharaoh_gold", "dubai_diamond", "cosmic_nebula"
+  ];
+
+  const BOT_POOL = [
+    { name: "Aarav", avatar: "char_captain" },
+    { name: "Priya", avatar: "char_party" },
+    { name: "Kabir", avatar: "char_rajni" },
+    { name: "Ananya", avatar: "char_kitten" },
+    { name: "Rohan", avatar: "char_cricket" },
+    { name: "Meera", avatar: "👸" },
+    { name: "Vikram", avatar: "🦁" },
+    { name: "Zoya", avatar: "🦊" }
+  ];
+
+  // Pick a random frame or dice skin for an online opponent:
+  // 99% chance NOT to match the local player's equipped skin (1 in 100 can match!)
+  function pickIndependentSkin(pool, avoidLocalId, usedOthersSet) {
+    if (avoidLocalId && Math.random() < 0.01 && pool.includes(avoidLocalId)) {
+      return avoidLocalId;
+    }
+    const distinctFromAll = pool.filter((id) => id !== avoidLocalId && (!usedOthersSet || !usedOthersSet.has(id)));
+    if (distinctFromAll.length > 0) {
+      return distinctFromAll[Math.floor(Math.random() * distinctFromAll.length)];
+    }
+    const distinctFromLocal = pool.filter((id) => id !== avoidLocalId);
+    const list = distinctFromLocal.length > 0 ? distinctFromLocal : pool;
+    return list[Math.floor(Math.random() * list.length)];
+  }
 
   const COLOR_HEX = {
     red: "#e53935",
@@ -163,12 +188,13 @@ window.LUDO_ONLINE = (() => {
 
   function getLocalPlayerSeatInfo() {
     const p = window.LUDO_UI ? window.LUDO_UI.getProfile() : { name: "Player" };
-    const s = window.LUDO_UI ? window.LUDO_UI.getSettings() : { frame: "bronze" };
+    const s = window.LUDO_UI ? window.LUDO_UI.getSettings() : { frame: "bronze", diceSkin: "classic" };
     return {
       uid: myUid,
       name: (p.name || "Player").slice(0, 14),
       avatar: getSafeAvatar(),
       frame: s.frame || "bronze",
+      diceSkin: s.diceSkin || "classic",
       isBot: false,
       left: false
     };
@@ -669,19 +695,34 @@ window.LUDO_ONLINE = (() => {
 
     if (fillEmptyWithBots) {
       const shuffledBots = [...BOT_POOL].sort(() => Math.random() - 0.5);
+      const localSettings = window.LUDO_UI ? window.LUDO_UI.getSettings() : { frame: "bronze", diceSkin: "classic" };
       let botIdx = 0;
 
       await roomRef.child("seats").transaction((currentSeats) => {
         const seatsObj = currentSeats ? { ...currentSeats } : {};
+        const usedFrames = new Set();
+        const usedDice = new Set();
+        Object.values(seatsObj).forEach((s) => {
+          if (s && s.frame) usedFrames.add(s.frame);
+          if (s && s.diceSkin) usedDice.add(s.diceSkin);
+        });
+        const avoidFrame = localSettings.frame || "bronze";
+        const avoidDice = localSettings.diceSkin || "classic";
+
         activeColors.forEach((c) => {
           if (!seatsObj[c]) {
             const pick = shuffledBots[botIdx % shuffledBots.length];
             botIdx += 1;
+            const botFrame = pickIndependentSkin(ALL_FRAMES, avoidFrame, usedFrames);
+            const botDice = pickIndependentSkin(ALL_DICE_SKINS, avoidDice, usedDice);
+            usedFrames.add(botFrame);
+            usedDice.add(botDice);
             seatsObj[c] = {
               uid: `bot_${c}_${Date.now()}`,
               name: pick.name,
               avatar: pick.avatar,
-              frame: pick.frame,
+              frame: botFrame,
+              diceSkin: botDice,
               isBot: true,
               left: false
             };
@@ -746,18 +787,45 @@ window.LUDO_ONLINE = (() => {
     const seats = room.seats || {};
     const players = {};
 
+    const localSettings = window.LUDO_UI ? window.LUDO_UI.getSettings() : { frame: "bronze", diceSkin: "classic" };
+    const seenOppFrames = new Set();
+    const seenOppDice = new Set();
+
     activeColors.forEach((color) => {
       const s = seats[color];
       if (!s) return;
+      const isOpp = color !== currentMyColor;
+      let chosenFrame = s.frame || "bronze";
+      let chosenDice = s.diceSkin || "";
+
+      if (!isOpp) {
+        chosenFrame = localSettings.frame || chosenFrame;
+        chosenDice = localSettings.diceSkin || chosenDice || "classic";
+      } else {
+        if (!chosenDice) {
+          chosenDice = pickIndependentSkin(ALL_DICE_SKINS, localSettings.diceSkin || "classic", seenOppDice);
+        }
+        // If a bot joined from another host with matching local skin, keep 99% independent look
+        if (s.isBot && chosenFrame === (localSettings.frame || "bronze") && Math.random() >= 0.01) {
+          chosenFrame = pickIndependentSkin(ALL_FRAMES, localSettings.frame || "bronze", seenOppFrames);
+        }
+        if (s.isBot && chosenDice === (localSettings.diceSkin || "classic") && Math.random() >= 0.01) {
+          chosenDice = pickIndependentSkin(ALL_DICE_SKINS, localSettings.diceSkin || "classic", seenOppDice);
+        }
+        seenOppFrames.add(chosenFrame);
+        seenOppDice.add(chosenDice);
+      }
+
       players[color] = {
         uid: s.uid,
         name: s.name || "Player",
         avatar: s.avatar || "🤴",
-        frame: s.frame || "bronze",
+        frame: chosenFrame,
+        diceSkin: chosenDice,
         isBot: Boolean(s.isBot),
         left: Boolean(s.left),
         disconnected: false,
-        isOnlineOpponent: color !== currentMyColor
+        isOnlineOpponent: isOpp
       };
     });
 
