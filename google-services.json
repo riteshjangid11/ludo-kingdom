@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "833178377395-gb7l75m1phdr10fq6138mtrob7rljn08.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ludokingdom.app",
+            "certificate_hash": "a7eb2e2357d2f6f0d3030e7764100e1e8134853d"
+          }
+        },
+        {
           "client_id": "833178377395-lth200unrsftfl5j81k8b1i879tlovdn.apps.googleusercontent.com",
           "client_type": 3
         }
