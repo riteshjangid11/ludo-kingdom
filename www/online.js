@@ -65,9 +65,57 @@ window.LUDO_ONLINE = (() => {
   let firebaseReadyPromise = null;
   let myUid = getOrCreateUid();
 
+  // Quick mode (2 tokens) entry stakes are exactly HALF of Classic mode (4 tokens)
+  const ONLINE_STAKE_TIERS = {
+    classic: [0, 100, 500, 1000],
+    quick: [0, 50, 250, 500]
+  };
+
+  function formatStakeChip(val) {
+    if (!val || val <= 0) return "Free";
+    if (val >= 1000 && val % 1000 === 0) return `🪙 ${val / 1000}K`;
+    return `🪙 ${val.toLocaleString("en-IN")}`;
+  }
+
+  function getEffectivePayoutMode(playerCount, payoutMode) {
+    return playerCount >= 3 && payoutMode === "multi" ? "multi" : "single";
+  }
+
+  function computeOnlinePayoutSplit(pot, playerCount, stake, gameType, payoutMode) {
+    const eff = getEffectivePayoutMode(playerCount, payoutMode);
+    if (stake > 0) {
+      if (eff === "multi" && playerCount === 4) {
+        const p1 = Math.round(pot * 0.625); // 2,500 on 4,000 pot
+        const p2 = Math.round(pot * 0.25);  // 1,000 on 4,000 pot
+        const p3 = Math.max(0, pot - p1 - p2); // 500 on 4,000 pot
+        return [p1, p2, p3, 0];
+      }
+      if (eff === "multi" && playerCount === 3) {
+        const p1 = Math.round(pot * 0.7);
+        const p2 = Math.max(0, pot - p1);
+        return [p1, p2, 0];
+      }
+      return playerCount === 4 ? [pot, 0, 0, 0] : playerCount === 3 ? [pot, 0, 0] : [pot, 0];
+    }
+
+    const scale = gameType === "quick" ? 0.5 : 1;
+    if (eff === "multi" && playerCount === 4) {
+      return [Math.round(200 * scale), Math.round(120 * scale), Math.round(60 * scale), 0];
+    }
+    if (eff === "multi" && playerCount === 3) {
+      return [Math.round(220 * scale), Math.round(120 * scale), 0];
+    }
+    const winFree = Math.round(300 * scale);
+    return playerCount === 4
+      ? [winFree, Math.round(120 * scale), Math.round(60 * scale), 0]
+      : playerCount === 3
+        ? [winFree, Math.round(120 * scale), 0]
+        : [winFree, 0];
+  }
+
   // Online modal UI state
   let activeOnlineTab = "quick";
-  let quickState = { gameType: "classic", playerCount: 2, stake: 0 };
+  let quickState = { gameType: "classic", playerCount: 2, stakeTier: 0, stake: 0, payoutMode: "single" };
   let friendState = { gameType: "classic", playerCount: 2 };
 
   // Active room / match tracking
@@ -294,15 +342,37 @@ window.LUDO_ONLINE = (() => {
   function updateQuickPrizePreview() {
     const el = document.getElementById("online-prize-preview");
     if (!el) return;
+    const effPayout = getEffectivePayoutMode(quickState.playerCount, quickState.payoutMode);
+    const pot = quickState.stake * quickState.playerCount;
+    const split = computeOnlinePayoutSplit(pot, quickState.playerCount, quickState.stake, quickState.gameType, effPayout);
+
     if (quickState.stake === 0) {
-      el.textContent = "Free Online Match • 1st Place Reward: +300 Coins 🪙";
+      if (effPayout === "multi" && quickState.playerCount === 4) {
+        el.textContent = `Free Multi-Winner: 🥇 ${split[0]} • 🥈 ${split[1]} • 🥉 ${split[2]} Coins 🪙`;
+      } else if (effPayout === "multi" && quickState.playerCount === 3) {
+        el.textContent = `Free Multi-Winner: 🥇 ${split[0]} • 🥈 ${split[1]} Coins 🪙`;
+      } else {
+        el.textContent = `Free Online ${quickState.gameType === "quick" ? "Quick" : "Classic"} • 1st Reward: +${split[0]} Coins 🪙`;
+      }
+      return;
+    }
+
+    if (effPayout === "multi" && quickState.playerCount === 4) {
+      el.textContent = `Multi-Winner (🪙 ${pot.toLocaleString("en-IN")}): 🥇 ${split[0].toLocaleString("en-IN")} • 🥈 ${split[1].toLocaleString("en-IN")} • 🥉 ${split[2].toLocaleString("en-IN")}`;
+    } else if (effPayout === "multi" && quickState.playerCount === 3) {
+      el.textContent = `Multi-Winner (🪙 ${pot.toLocaleString("en-IN")}): 🥇 ${split[0].toLocaleString("en-IN")} • 🥈 ${split[1].toLocaleString("en-IN")}`;
     } else {
-      const pot = quickState.stake * quickState.playerCount;
       el.textContent = `Live Prize Pool: 🪙 ${pot.toLocaleString("en-IN")} (Winner takes pot!)`;
     }
   }
 
   function syncOnlineTabsUI() {
+    const tiers = ONLINE_STAKE_TIERS[quickState.gameType] || ONLINE_STAKE_TIERS.classic;
+    const safeTier = Math.max(0, Math.min(tiers.length - 1, quickState.stakeTier || 0));
+    quickState.stakeTier = safeTier;
+    quickState.stake = tiers[safeTier];
+    if (quickState.playerCount < 3) quickState.payoutMode = "single";
+
     document.querySelectorAll("#online-tabs .shop-tab").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.otab === activeOnlineTab);
     });
@@ -317,9 +387,22 @@ window.LUDO_ONLINE = (() => {
     document.querySelectorAll("#online-quick-count .choice-btn").forEach((b) => {
       b.classList.toggle("active", Number(b.dataset.ocount) === quickState.playerCount);
     });
-    document.querySelectorAll("#online-quick-stake .choice-btn").forEach((b) => {
-      b.classList.toggle("active", Number(b.dataset.ostake) === quickState.stake);
+    document.querySelectorAll("#online-quick-stake .choice-btn").forEach((b, idx) => {
+      const tierIdx = b.dataset.stier !== undefined ? Number(b.dataset.stier) : idx;
+      const val = tiers[tierIdx] ?? 0;
+      b.dataset.ostake = String(val);
+      b.textContent = formatStakeChip(val);
+      b.classList.toggle("active", tierIdx === quickState.stakeTier);
     });
+
+    const payoutSection = document.getElementById("online-payout-section");
+    if (payoutSection) {
+      payoutSection.classList.toggle("hidden", quickState.playerCount < 3);
+    }
+    document.querySelectorAll("#online-quick-payout .choice-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.opayout === quickState.payoutMode);
+    });
+
     document.querySelectorAll("#online-friend-type .choice-btn").forEach((b) => {
       b.classList.toggle("active", b.dataset.oftype === friendState.gameType);
     });
@@ -349,7 +432,8 @@ window.LUDO_ONLINE = (() => {
 
     if (room.isPublic) {
       if (titleEl) titleEl.textContent = "Finding Online Players...";
-      if (subEl) subEl.textContent = `${formatLbl} • ${room.playerCount}P` + (room.stake > 0 ? ` • Stake 🪙 ${room.stake}` : " • Free Match");
+      const payoutLbl = room.payoutMode === "multi" && room.playerCount >= 3 ? " • Multi-Winner" : "";
+      if (subEl) subEl.textContent = `${formatLbl} • ${room.playerCount}P` + (room.stake > 0 ? ` • Stake 🪙 ${room.stake}` : " • Free Match") + payoutLbl;
       if (codeBox) codeBox.classList.add("hidden");
       if (searchPill) {
         searchPill.classList.remove("hidden");
@@ -432,11 +516,12 @@ window.LUDO_ONLINE = (() => {
   }
 
   // ==================== ROOM CREATION, JOIN & MATCHMAKING ====================
-  async function createRoom({ isPublic, gameType, playerCount, stake }) {
+  async function createRoom({ isPublic, gameType, playerCount, stake, payoutMode = "single" }) {
     const database = await ensureFirebase();
     const activeColors = window.BOARD_DATA.getActiveColors(playerCount, "blue");
     const hostColor = activeColors[0];
-    const bucket = isPublic ? `${gameType}_${playerCount}_${stake}` : "";
+    const effPayout = getEffectivePayoutMode(playerCount, payoutMode);
+    const bucket = isPublic ? `${gameType}_${playerCount}_${stake}_${effPayout}` : "";
     const seatInfo = getLocalPlayerSeatInfo();
 
     let code = "";
@@ -460,6 +545,7 @@ window.LUDO_ONLINE = (() => {
       playerCount,
       stake: Number(stake) || 0,
       pot: (Number(stake) || 0) * playerCount,
+      payoutMode: effPayout,
       hostUid: myUid,
       createdAt: now,
       startedAt: 0,
@@ -571,15 +657,16 @@ window.LUDO_ONLINE = (() => {
     if (quickState.stake > 0 && window.LUDO_UI) {
       const coins = window.LUDO_UI.getProfile().coins;
       if (coins < quickState.stake) {
-        showToast("Not enough coins! Grab free coins in Shop 🛒.");
+        showToast("Not enough coins! Win matches, complete Missions, or check Shop 🛒.");
         return;
       }
     }
 
+    const effPayout = getEffectivePayoutMode(quickState.playerCount, quickState.payoutMode);
     setBusyState(true, "Connecting to online server...");
     try {
       const database = await ensureFirebase();
-      const bucket = `${quickState.gameType}_${quickState.playerCount}_${quickState.stake}`;
+      const bucket = `${quickState.gameType}_${quickState.playerCount}_${quickState.stake}_${effPayout}`;
       const listSnap = await database.ref(`matchmaking/${bucket}`).once("value");
       const entries = listSnap.val() || {};
       const now = Date.now();
@@ -607,7 +694,8 @@ window.LUDO_ONLINE = (() => {
         isPublic: true,
         gameType: quickState.gameType,
         playerCount: quickState.playerCount,
-        stake: quickState.stake
+        stake: quickState.stake,
+        payoutMode: effPayout
       });
       setBusyState(false, "");
       setOnlineView("waiting");
@@ -849,6 +937,7 @@ window.LUDO_ONLINE = (() => {
       playerCount: activeColors.length,
       stake: Number(room.stake) || 0,
       pot: (Number(room.stake) || 0) * activeColors.length,
+      payoutMode: getEffectivePayoutMode(activeColors.length, room.payoutMode || "single"),
       activeColors,
       players
     };
@@ -1073,9 +1162,16 @@ window.LUDO_ONLINE = (() => {
       });
     });
 
-    document.querySelectorAll("#online-quick-stake .choice-btn").forEach((btn) => {
+    document.querySelectorAll("#online-quick-stake .choice-btn").forEach((btn, idx) => {
       btn.addEventListener("click", () => {
-        quickState.stake = Number(btn.dataset.ostake);
+        quickState.stakeTier = btn.dataset.stier !== undefined ? Number(btn.dataset.stier) : idx;
+        syncOnlineTabsUI();
+      });
+    });
+
+    document.querySelectorAll("#online-quick-payout .choice-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        quickState.payoutMode = btn.dataset.opayout === "multi" ? "multi" : "single";
         syncOnlineTabsUI();
       });
     });

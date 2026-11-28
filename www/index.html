@@ -21,10 +21,10 @@
   <section id="splash-screen" class="screen active">
     <div class="splash-bg-art" aria-hidden="true"></div>
     <div id="splash-art-bar-wrap" class="splash-art-bar-wrap">
-      <span id="splash-percent" class="splash-art-percent">0%</span>
       <div id="splash-art-track" class="splash-art-track">
         <div id="splash-bar" class="splash-art-fill"></div>
       </div>
+      <span id="splash-percent" class="splash-art-percent">0%</span>
     </div>
   </section>
 
@@ -190,10 +190,17 @@
     </header>
 
     <div class="shop-screen-tabs-wrap">
-      <div id="shop-tabs" class="shop-tabs three-tabs">
+      <div id="shop-tabs" class="shop-tabs four-tabs">
         <button class="shop-tab active" data-tab="bundles">🎁 Offers</button>
-        <button class="shop-tab" data-tab="coins">🪙 Buy Coins</button>
-        <button class="shop-tab" data-tab="gems">💎 Buy Gems</button>
+        <button class="shop-tab" data-tab="combos">⚡ Combos</button>
+        <button class="shop-tab" data-tab="coins">🪙 Coins</button>
+        <button class="shop-tab" data-tab="gems">💎 Gems</button>
+      </div>
+      <div class="redeem-bar-wrap">
+        <div class="redeem-input-row">
+          <input id="input-redeem-code" type="text" maxlength="24" autocomplete="off" spellcheck="false" class="text-input redeem-code-input" placeholder="🎟️ Enter Redeem Code" />
+          <button id="btn-redeem-code" type="button" class="btn-primary redeem-btn">Redeem</button>
+        </div>
       </div>
     </div>
 
@@ -631,10 +638,21 @@
 
         <hr class="modal-divider" />
 
+        <div class="setting-row">
+          <div>
+            <strong>🎟️ Redeem Promo Code</strong>
+            <p class="setting-desc">Unlock Coins, Diamonds, Themes or Bundles</p>
+          </div>
+          <button id="btn-settings-redeem" type="button" class="btn-secondary small-btn">Redeem</button>
+        </div>
+
+        <hr class="modal-divider" />
+
         <label class="field-label">Connect &amp; Share</label>
         <div class="social-bar settings-social-bar">
-          <button id="btn-social-fb" class="social-btn fb" aria-label="Facebook">f</button>
           <button id="btn-social-ig" class="social-btn ig" aria-label="Instagram">📷</button>
+          <button id="btn-social-fb" class="social-btn fb" aria-label="Facebook">f</button>
+          <button id="btn-social-x" class="social-btn x-tw" aria-label="X (Twitter)">𝕏</button>
           <button id="btn-social-wa" class="social-btn wa" aria-label="WhatsApp">💬</button>
           <button id="btn-social-share" class="social-btn share" aria-label="Share Game">🔗</button>
         </div>
@@ -717,10 +735,10 @@
         <div id="setup-stake-section">
           <label class="field-label">Entry Stake &amp; Prize Pool</label>
           <div id="setup-stake-picker" class="choice-row four-col">
-            <button class="choice-btn active" data-stake="0">Free</button>
-            <button class="choice-btn" data-stake="100">🪙 100</button>
-            <button class="choice-btn" data-stake="500">🪙 500</button>
-            <button class="choice-btn" data-stake="1000">🪙 1K</button>
+            <button class="choice-btn active" data-stier="0" data-stake="0">Free</button>
+            <button class="choice-btn" data-stier="1" data-stake="100">🪙 100</button>
+            <button class="choice-btn" data-stier="2" data-stake="500">🪙 500</button>
+            <button class="choice-btn" data-stier="3" data-stake="1000">🪙 1K</button>
           </div>
           <p id="setup-prize-preview" class="prize-preview">Free Match • 1st Place Reward: +250 Coins 🪙</p>
         </div>
@@ -766,10 +784,18 @@
 
             <label class="field-label">Entry Stake</label>
             <div id="online-quick-stake" class="choice-row four-col">
-              <button type="button" class="choice-btn active" data-ostake="0">Free</button>
-              <button type="button" class="choice-btn" data-ostake="100">🪙 100</button>
-              <button type="button" class="choice-btn" data-ostake="500">🪙 500</button>
-              <button type="button" class="choice-btn" data-ostake="1000">🪙 1K</button>
+              <button type="button" class="choice-btn active" data-stier="0" data-ostake="0">Free</button>
+              <button type="button" class="choice-btn" data-stier="1" data-ostake="100">🪙 100</button>
+              <button type="button" class="choice-btn" data-stier="2" data-ostake="500">🪙 500</button>
+              <button type="button" class="choice-btn" data-stier="3" data-ostake="1000">🪙 1K</button>
+            </div>
+
+            <div id="online-payout-section" class="hidden">
+              <label class="field-label">Winner Payout</label>
+              <div id="online-quick-payout" class="choice-row two-col">
+                <button type="button" class="choice-btn active" data-opayout="single">🏆 1 Winner</button>
+                <button type="button" class="choice-btn" data-opayout="multi">🏅 Multi-Winner</button>
+              </div>
             </div>
 
             <p id="online-prize-preview" class="prize-preview">Free Online Match • 1st Place Reward: +300 Coins 🪙</p>

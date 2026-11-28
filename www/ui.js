@@ -3,8 +3,9 @@
    ========================================================= */
 
 window.LUDO_UI = (() => {
-  const STORAGE_KEY = "ludo_kingdom_save_v7";
+  const STORAGE_KEY = "ludo_kingdom_save_v8";
   const LEGACY_KEYS = [
+    "ludo_kingdom_save_v7",
     "ludo_kingdom_save_v6",
     "ludo_kingdom_save_v5",
     "ludo_kingdom_save_v4",
@@ -17,8 +18,9 @@ window.LUDO_UI = (() => {
   const MAX_HISTORY_ITEMS = 10;
 
   const SOCIAL_LINKS = {
-    facebook: "https://facebook.com",
-    instagram: "https://instagram.com",
+    facebook: "https://www.facebook.com/share/19qwepXZEp/",
+    instagram: "https://www.instagram.com/mahi_fan_ritesh?avpt=N2F4M2xyOHUyYTFv",
+    twitter: "https://x.com/jangid_mulesh",
     gameUrl: window.location.href
   };
 
@@ -61,44 +63,44 @@ window.LUDO_UI = (() => {
   ];
 
   // ==================== FULL-SCREEN THEMES, DICE, FRAMES & EMOJIS CATALOG ====================
-  // 3 Normal Themes + 5 Custom HD Themes
+  // 3 Normal Themes + 5 Custom HD Themes (3x Rebalanced Pricing)
   const THEMES_CATALOG = [
     { id: "classic", name: "Default", bg: "linear-gradient(135deg,#1d75c8,#0d458a)", boardBg: "#ffffff", price: 0, currency: "coins" },
-    { id: "lava", name: "Lava World", bg: "linear-gradient(135deg,#2b0d09,#ff571a,#ffd54f)", boardBg: "#1b0e0e", price: 3000, currency: "coins" },
-    { id: "galaxy", name: "Galaxy", bg: "linear-gradient(135deg,#0d072b,#8a4cff,#4ddbff)", boardBg: "#10092e", price: 3500, currency: "coins" },
-    { id: "candy", name: "Candy Land", isStudio: true, bg: "linear-gradient(135deg,#74c7ff,#ff85c0,#ffe352)", boardBg: "#ffeef8", price: 6000, currency: "coins" },
-    { id: "winter", name: "Winter Land", isStudio: true, bg: "linear-gradient(135deg,#0c264d,#7dd3fc,#ffffff)", boardBg: "#e6f6ff", price: 8000, currency: "coins" },
-    { id: "halloween", name: "Halloween", isStudio: true, bg: "linear-gradient(135deg,#2c144f,#ff8c1a)", boardBg: "#24153d", price: 10000, currency: "coins" },
-    { id: "egypt", name: "Golden Egypt", isStudio: true, bg: "linear-gradient(135deg,#ffe58f,#b57e2d)", boardBg: "#f5e2a8", price: 50, currency: "gems" },
-    { id: "oasis", name: "Dubai Oasis", isStudio: true, bg: "linear-gradient(135deg,#1d74b8,#f3dec1)", boardBg: "#f3dec1", price: 75, currency: "gems" }
+    { id: "lava", name: "Lava World", bg: "linear-gradient(135deg,#2b0d09,#ff571a,#ffd54f)", boardBg: "#1b0e0e", price: 9000, currency: "coins" },
+    { id: "galaxy", name: "Galaxy", bg: "linear-gradient(135deg,#0d072b,#8a4cff,#4ddbff)", boardBg: "#10092e", price: 10500, currency: "coins" },
+    { id: "candy", name: "Candy Land", isStudio: true, bg: "linear-gradient(135deg,#74c7ff,#ff85c0,#ffe352)", boardBg: "#ffeef8", price: 22500, currency: "coins" },
+    { id: "winter", name: "Winter Land", isStudio: true, bg: "linear-gradient(135deg,#0c264d,#7dd3fc,#ffffff)", boardBg: "#e6f6ff", price: 23400, currency: "coins" },
+    { id: "halloween", name: "Halloween", isStudio: true, bg: "linear-gradient(135deg,#2c144f,#ff8c1a)", boardBg: "#24153d", price: 24000, currency: "coins" },
+    { id: "egypt", name: "Golden Egypt", isStudio: true, bg: "linear-gradient(135deg,#ffe58f,#b57e2d)", boardBg: "#f5e2a8", price: 480, currency: "gems" },
+    { id: "oasis", name: "Dubai Oasis", isStudio: true, bg: "linear-gradient(135deg,#1d74b8,#f3dec1)", boardBg: "#f3dec1", price: 510, currency: "gems" }
   ];
 
-  // 3 Normal Dice + 8 Full HD 3D Dice
+  // 3 Normal Dice + 8 Full HD 3D Dice (Uniform ±100–200 Coin Band)
   const DICE_CATALOG = [
     { id: "classic", name: "Default", top: "#ffffff", bot: "#d8e1f2", border: "#8a9bc4", pip: "#14203b", pipOne: "#e53935", glow: "rgba(255,224,102,0.7)", price: 0, currency: "coins" },
     { id: "tricolour", name: "Tri-Colour", top: "#ff9933", bot: "#138808", border: "#ffffff", pip: "#0b1636", pipOne: "#000080", glow: "rgba(255,165,51,0.75)", price: 750, currency: "coins" },
-    { id: "ruby", name: "Ruby", top: "#ff5c6c", bot: "#9e0b22", border: "#ffd166", pip: "#ffffff", pipOne: "#ffe793", glow: "rgba(255,76,108,0.8)", price: 1200, currency: "coins" },
-    { id: "royal_crown", name: "Royal Crown", isHD: true, top: "#fff6bd", bot: "#b87408", border: "#ffe885", pip: "#3d1c00", pipOne: "#b91c1c", glow: "rgba(255,215,0,0.95)", price: 2500, currency: "coins" },
-    { id: "glacier_crystal", name: "Glacier Crystal", isHD: true, top: "#e8faff", bot: "#1e88c7", border: "#bae6fd", pip: "#072c4d", pipOne: "#0284c7", glow: "rgba(125,211,252,0.95)", price: 4500, currency: "coins" },
-    { id: "cursed_relic", name: "Cursed Relic", isHD: true, top: "#522985", bot: "#1a0b2e", border: "#ff9838", pip: "#ffb74d", pipOne: "#4ade80", glow: "rgba(192,132,252,0.95)", price: 5000, currency: "coins" },
-    { id: "magma_obsidian", name: "Magma Obsidian", isHD: true, top: "#382522", bot: "#0e0706", border: "#ff571a", pip: "#ff9e2c", pipOne: "#ff3b1f", glow: "rgba(255,87,26,0.95)", price: 6000, currency: "coins" },
-    { id: "cyber_core", name: "Cyber Core", isHD: true, top: "#15254d", bot: "#050a18", border: "#25f4ee", pip: "#25f4ee", pipOne: "#ff2e93", glow: "rgba(37,244,238,0.95)", price: 6500, currency: "coins" },
-    { id: "pharaoh_gold", name: "Pharaoh's Gold", isHD: true, top: "#ffe08a", bot: "#9e6514", border: "#40e0d0", pip: "#0d5c63", pipOne: "#0891b2", glow: "rgba(245,183,38,0.95)", price: 30, currency: "gems" },
-    { id: "dubai_diamond", name: "Dubai Diamond", isHD: true, top: "#ffffff", bot: "#9fd8f5", border: "#50c878", pip: "#065f46", pipOne: "#0ea5e9", glow: "rgba(110,231,255,0.95)", price: 40, currency: "gems" },
-    { id: "cosmic_nebula", name: "Cosmic Nebula", isHD: true, top: "#4b1d96", bot: "#0c0624", border: "#c084fc", pip: "#7ce8ff", pipOne: "#fde047", glow: "rgba(192,132,252,0.95)", price: 45, currency: "gems" }
+    { id: "ruby", name: "Ruby", top: "#ff5c6c", bot: "#9e0b22", border: "#ffd166", pip: "#ffffff", pipOne: "#ffe793", glow: "rgba(255,76,108,0.8)", price: 1000, currency: "coins" },
+    { id: "royal_crown", name: "Royal Crown", isHD: true, top: "#fff6bd", bot: "#b87408", border: "#ffe885", pip: "#3d1c00", pipOne: "#b91c1c", glow: "rgba(255,215,0,0.95)", price: 5000, currency: "coins" },
+    { id: "glacier_crystal", name: "Glacier Crystal", isHD: true, top: "#e8faff", bot: "#1e88c7", border: "#bae6fd", pip: "#072c4d", pipOne: "#0284c7", glow: "rgba(125,211,252,0.95)", price: 5100, currency: "coins" },
+    { id: "cursed_relic", name: "Cursed Relic", isHD: true, top: "#522985", bot: "#1a0b2e", border: "#ff9838", pip: "#ffb74d", pipOne: "#4ade80", glow: "rgba(192,132,252,0.95)", price: 5200, currency: "coins" },
+    { id: "magma_obsidian", name: "Magma Obsidian", isHD: true, top: "#382522", bot: "#0e0706", border: "#ff571a", pip: "#ff9e2c", pipOne: "#ff3b1f", glow: "rgba(255,87,26,0.95)", price: 5300, currency: "coins" },
+    { id: "cyber_core", name: "Cyber Core", isHD: true, top: "#15254d", bot: "#050a18", border: "#25f4ee", pip: "#25f4ee", pipOne: "#ff2e93", glow: "rgba(37,244,238,0.95)", price: 5400, currency: "coins" },
+    { id: "pharaoh_gold", name: "Pharaoh's Gold", isHD: true, top: "#ffe08a", bot: "#9e6514", border: "#40e0d0", pip: "#0d5c63", pipOne: "#0891b2", glow: "rgba(245,183,38,0.95)", price: 102, currency: "gems" },
+    { id: "dubai_diamond", name: "Dubai Diamond", isHD: true, top: "#ffffff", bot: "#9fd8f5", border: "#50c878", pip: "#065f46", pipOne: "#0ea5e9", glow: "rgba(110,231,255,0.95)", price: 104, currency: "gems" },
+    { id: "cosmic_nebula", name: "Cosmic Nebula", isHD: true, top: "#4b1d96", bot: "#0c0624", border: "#c084fc", pip: "#7ce8ff", pipOne: "#fde047", glow: "rgba(192,132,252,0.95)", price: 106, currency: "gems" }
   ];
 
-  // 9 Square Profile Frames
+  // 9 Square Profile Frames (First 3 are Win-Milestone Achievements; 6 Uniform Store Frames)
   const FRAMES_CATALOG = [
-    { id: "bronze", name: "Bronze", price: 0, currency: "coins" },
-    { id: "silver", name: "Silver", price: 750, currency: "coins" },
-    { id: "royal_gold", name: "Royal Gold", price: 1500, currency: "coins" },
-    { id: "glacier_ice", name: "Glacier Ice", price: 3000, currency: "coins" },
-    { id: "magma_obsidian", name: "Magma Obsidian", price: 4000, currency: "coins" },
-    { id: "cyber_neon", name: "Cyber Neon", price: 5500, currency: "coins" },
-    { id: "pharaoh_sand", name: "Pharaoh's Sand", price: 30, currency: "gems" },
-    { id: "dubai_emerald", name: "Dubai Emerald", price: 40, currency: "gems" },
-    { id: "cosmic_void", name: "Cosmic Void", price: 45, currency: "gems" }
+    { id: "bronze", name: "Bronze", price: 0, currency: "coins", milestoneWins: 3, achievementId: "a_frame_bronze" },
+    { id: "silver", name: "Silver", price: 0, currency: "coins", milestoneWins: 10, achievementId: "a_frame_silver" },
+    { id: "royal_gold", name: "Royal Gold", price: 0, currency: "coins", milestoneWins: 25, achievementId: "a_frame_gold" },
+    { id: "glacier_ice", name: "Glacier Ice", price: 4000, currency: "coins" },
+    { id: "magma_obsidian", name: "Magma Obsidian", price: 4200, currency: "coins" },
+    { id: "cyber_neon", name: "Cyber Neon", price: 4400, currency: "coins" },
+    { id: "pharaoh_sand", name: "Pharaoh's Sand", price: 82, currency: "gems" },
+    { id: "dubai_emerald", name: "Dubai Emerald", price: 86, currency: "gems" },
+    { id: "cosmic_void", name: "Cosmic Void", price: 90, currency: "gems" }
   ];
 
   const EMOJI_PACKS = [
@@ -136,75 +138,180 @@ window.LUDO_UI = (() => {
     }
   ];
 
-  // ==================== SHOP CATALOG (OFFER BUNDLES, COINS & GEMS ONLY) ====================
+  // ==================== 24-PACK LOCKED INR STORE CATALOG (ZERO FREE CLAIMS) ====================
+  // 8 Unique Theme + 3D Dice Bundles (Zero Overlap, No Milestone Frames)
   const SHOP_BUNDLES = [
+    {
+      id: "bundle_tiranga",
+      title: "Tiranga Starter Pack",
+      tag: "55% OFF",
+      themeId: "",
+      diceIds: ["tricolour"],
+      frameIds: [],
+      emojiIds: ["royal"],
+      cosmeticLines: ["🎲 Tri-Colour Dice", "😎 Ludo King Emojis"],
+      coins: 1800,
+      gems: 22,
+      priceInr: 29,
+      mrpInr: 65,
+      bg: "linear-gradient(135deg,#ff9933,#ffffff,#138808)",
+      icon: "🇮🇳"
+    },
     {
       id: "bundle_candy",
       title: "Candy Feast Offer",
-      tag: "BEST VALUE",
+      tag: "48% OFF",
       themeId: "candy",
-      themeName: "Candy Land 3D",
+      diceIds: ["ruby"],
+      frameIds: [],
+      emojiIds: ["festival"],
+      cosmeticLines: ["🎨 Candy Land 3D + Pieces", "🎲 Ruby Dice • 😎 Holi & Diya Emojis"],
       coins: 2500,
       gems: 35,
-      price: 500,
-      currency: "coins",
+      priceInr: 79,
+      mrpInr: 155,
       bg: "linear-gradient(135deg,#74c7ff,#ff85c0)",
       icon: "🍭"
     },
     {
-      id: "bundle_egypt",
-      title: "Pharaoh Treasure Offer",
-      tag: "HOT DEAL",
-      themeId: "egypt",
-      themeName: "Golden Egypt 3D",
-      coins: 0,
-      gems: 60,
-      price: 700,
-      currency: "coins",
-      bg: "linear-gradient(135deg,#ffe58f,#b57e2d)",
-      icon: "⚱️"
-    },
-    {
-      id: "bundle_halloween",
-      title: "Spooky Night Offer",
-      tag: "LIMITED",
-      themeId: "halloween",
-      themeName: "Halloween 3D",
-      coins: 3500,
+      id: "bundle_lava",
+      title: "Magma Inferno Offer",
+      tag: "50% OFF",
+      themeId: "lava",
+      diceIds: ["magma_obsidian"],
+      frameIds: ["magma_obsidian"],
+      emojiIds: [],
+      cosmeticLines: ["🎨 Lava World + Pieces", "🎲 Magma Obsidian 3D Dice • 🖼️ Magma Frame"],
+      coins: 3000,
       gems: 40,
-      price: 15,
-      currency: "gems",
-      bg: "linear-gradient(135deg,#2c144f,#ff8c1a)",
-      icon: "🎃"
+      priceInr: 99,
+      mrpInr: 199,
+      bg: "linear-gradient(135deg,#2b0d09,#ff571a,#ffd54f)",
+      icon: "🌋"
     },
     {
       id: "bundle_winter",
       title: "Frost Kingdom Offer",
-      tag: "POPULAR",
+      tag: "49% OFF",
       themeId: "winter",
-      themeName: "Winter Land 3D",
-      coins: 2000,
+      diceIds: ["glacier_crystal"],
+      frameIds: ["glacier_ice"],
+      emojiIds: [],
+      cosmeticLines: ["🎨 Winter Land 3D + Pieces", "🎲 Glacier Crystal 3D Dice • 🖼️ Glacier Frame"],
+      coins: 3000,
       gems: 50,
-      price: 650,
-      currency: "coins",
+      priceInr: 129,
+      mrpInr: 255,
       bg: "linear-gradient(135deg,#0c264d,#7dd3fc)",
       icon: "❄️"
+    },
+    {
+      id: "bundle_halloween",
+      title: "Spooky Night Offer",
+      tag: "48% OFF",
+      themeId: "halloween",
+      diceIds: ["cursed_relic"],
+      frameIds: [],
+      emojiIds: ["spooky"],
+      cosmeticLines: ["🎨 Halloween 3D + Pieces", "🎲 Cursed Relic 3D Dice • 😎 Spooky Ice Emojis"],
+      coins: 4000,
+      gems: 55,
+      priceInr: 139,
+      mrpInr: 269,
+      bg: "linear-gradient(135deg,#2c144f,#ff8c1a)",
+      icon: "🎃"
+    },
+    {
+      id: "bundle_egypt",
+      title: "Pharaoh Treasure Offer",
+      tag: "47% OFF",
+      themeId: "egypt",
+      diceIds: ["pharaoh_gold"],
+      frameIds: ["pharaoh_sand"],
+      emojiIds: [],
+      cosmeticLines: ["🎨 Golden Egypt 3D + Pieces", "🎲 Pharaoh's Gold 3D Dice • 🖼️ Pharaoh Frame"],
+      coins: 3000,
+      gems: 65,
+      priceInr: 169,
+      mrpInr: 319,
+      bg: "linear-gradient(135deg,#ffe58f,#b57e2d)",
+      icon: "⚱️"
+    },
+    {
+      id: "bundle_galaxy",
+      title: "Cosmic Cyber Offer",
+      tag: "48% OFF",
+      themeId: "galaxy",
+      diceIds: ["cosmic_nebula", "cyber_core"],
+      frameIds: ["cosmic_void"],
+      emojiIds: [],
+      cosmeticLines: ["🎨 Galaxy World + Pieces", "🎲 Cosmic Nebula & Cyber Core 3D • 🖼️ Cosmic Frame"],
+      coins: 5000,
+      gems: 80,
+      priceInr: 199,
+      mrpInr: 385,
+      bg: "linear-gradient(135deg,#0d072b,#8a4cff,#4ddbff)",
+      icon: "🪐"
+    },
+    {
+      id: "bundle_oasis",
+      title: "Dubai Royal VIP Pack",
+      tag: "50% OFF",
+      themeId: "oasis",
+      diceIds: ["dubai_diamond", "royal_crown"],
+      frameIds: ["dubai_emerald"],
+      emojiIds: [],
+      cosmeticLines: ["🎨 Dubai Oasis 3D + Pieces", "🎲 Dubai Diamond & Royal Crown 3D • 🖼️ Emerald Frame"],
+      coins: 10500,
+      gems: 155,
+      priceInr: 329,
+      mrpInr: 659,
+      bg: "linear-gradient(135deg,#1d74b8,#f3dec1)",
+      icon: "👑"
     }
   ];
 
-  const SHOP_COINS = [
-    { id: "pack_c1000", name: "+1,000 Coins", preview: "🪙", bg: "linear-gradient(135deg,#ffe27a,#c58b16)", amount: 1000 },
-    { id: "pack_c3000", name: "+3,000 Coins", preview: "🪙", bg: "linear-gradient(135deg,#ffd54f,#b36b00)", amount: 3000 },
-    { id: "pack_c5000", name: "+5,000 Coins", preview: "💰", bg: "linear-gradient(135deg,#ffca28,#a85f00)", amount: 5000 },
-    { id: "pack_c10000", name: "+10,000 Coins", preview: "👑", bg: "linear-gradient(135deg,#fff0a6,#9c5200)", amount: 10000 }
+  // 4 Diamond + Coin Combo Packs
+  const SHOP_COMBOS = [
+    { id: "combo_mini", name: "Mini Starter Combo", tag: "POPULAR", preview: "⚡", bg: "linear-gradient(135deg,#38bdf8,#f59e0b)", coins: 1500, gems: 30, priceInr: 39 },
+    { id: "combo_pro", name: "Pro Player Combo", tag: "BEST VALUE", preview: "🎁", bg: "linear-gradient(135deg,#6366f1,#f59e0b)", coins: 4500, gems: 85, priceInr: 99 },
+    { id: "combo_king", name: "Kingdom Mega Combo", tag: "HOT DEAL", preview: "👑", bg: "linear-gradient(135deg,#ec4899,#f59e0b)", coins: 12000, gems: 200, priceInr: 199 },
+    { id: "combo_legend", name: "Emperor Legend Combo", tag: "MAX VALUE", preview: "🏆", bg: "linear-gradient(135deg,#a855f7,#eab308)", coins: 30000, gems: 500, priceInr: 449 }
   ];
 
-  const SHOP_GEMS = [
-    { id: "pack_g25", name: "+25 Gems", preview: "💎", bg: "linear-gradient(135deg,#56c8ff,#1456b8)", amount: 25 },
-    { id: "pack_g60", name: "+60 Gems", preview: "💎", bg: "linear-gradient(135deg,#38bdf8,#1e40af)", amount: 60 },
-    { id: "pack_g120", name: "+120 Gems", preview: "💠", bg: "linear-gradient(135deg,#a86bff,#5115b8)", amount: 120 },
-    { id: "pack_g250", name: "+250 Gems", preview: "✨", bg: "linear-gradient(135deg,#ff6ec7,#7b1fa2)", amount: 250 }
+  // 6 Coin Tiers (Strictly Monotonic Value per ₹)
+  const SHOP_COINS = [
+    { id: "pack_c500", name: "500 Coins", sub: "Quick Stake Pouch", preview: "🪙", bg: "linear-gradient(135deg,#ffe27a,#c58b16)", amount: 500, priceInr: 9 },
+    { id: "pack_c1200", name: "1,200 Coins", sub: "Bronze Stack", preview: "🪙", bg: "linear-gradient(135deg,#ffd54f,#b36b00)", amount: 1200, priceInr: 19 },
+    { id: "pack_c3500", name: "3,500 Coins", sub: "Silver Bag", preview: "💰", bg: "linear-gradient(135deg,#ffca28,#a85f00)", amount: 3500, priceInr: 49 },
+    { id: "pack_c6500", name: "6,500 Coins", sub: "Gold Chest", preview: "💰", bg: "linear-gradient(135deg,#ffb300,#9c5200)", amount: 6500, priceInr: 79 },
+    { id: "pack_c15000", name: "15,000 Coins", sub: "Royal Vault", preview: "👑", bg: "linear-gradient(135deg,#fff0a6,#b56b00)", amount: 15000, priceInr: 149 },
+    { id: "pack_c40000", name: "40,000 Coins", sub: "Emperor Treasury", preview: "🏆", bg: "linear-gradient(135deg,#fff6bd,#8f4c00)", amount: 40000, priceInr: 299 }
   ];
+
+  // 6 Diamond Tiers (Strictly Monotonic Value per ₹)
+  const SHOP_GEMS = [
+    { id: "pack_g25", name: "25 Diamonds", sub: "Pocket Gems", preview: "💎", bg: "linear-gradient(135deg,#56c8ff,#1456b8)", amount: 25, priceInr: 29 },
+    { id: "pack_g60", name: "60 Diamonds", sub: "Crystal Pouch", preview: "💎", bg: "linear-gradient(135deg,#38bdf8,#1e40af)", amount: 60, priceInr: 59 },
+    { id: "pack_g120", name: "120 Diamonds", sub: "Royal Gems", preview: "💠", bg: "linear-gradient(135deg,#818cf8,#4338ca)", amount: 120, priceInr: 99 },
+    { id: "pack_g250", name: "250 Diamonds", sub: "Crown Cache", preview: "💠", bg: "linear-gradient(135deg,#a86bff,#5115b8)", amount: 250, priceInr: 199 },
+    { id: "pack_g550", name: "550 Diamonds", sub: "Imperial Vault", preview: "✨", bg: "linear-gradient(135deg,#e879f9,#7e22ce)", amount: 550, priceInr: 399 },
+    { id: "pack_g1200", name: "1,200 Diamonds", sub: "Emperor Diamonds", preview: "👑", bg: "linear-gradient(135deg,#ff6ec7,#7b1fa2)", amount: 1200, priceInr: 799 }
+  ];
+
+  // Built-in Starter Promo Codes (One-Time Per Account; Live Firebase promoCodes Also Supported)
+  const BUILTIN_PROMO_CODES = {
+    WELCOME500: { coins: 500, gems: 15, label: "Welcome Gift" },
+    LUDOKINGDOM: { coins: 1000, gems: 25, label: "Ludo Kingdom Launch Gift" },
+    ROYAL2026: { coins: 1500, gems: 30, label: "Royal Bonus" },
+    LUCKYSPIN: { coins: 300, spinTickets: 3, label: "Lucky Spin Pack" }
+  };
+
+  // Offline Setup Stake Tiers (Quick Mode = Half of Classic Mode)
+  const SETUP_STAKE_TIERS = {
+    classic: [0, 100, 500, 1000],
+    quick: [0, 50, 250, 500]
+  };
 
   const PIECE_PALETTES = {
     red: { main: "#e53935", light: "#ff8582", dark: "#961212", accent: "#ffd6d6" },
@@ -451,12 +558,13 @@ window.LUDO_UI = (() => {
 
   function applyFrameVisual(overlayEl, frameId) {
     if (!overlayEl) return;
-    const fId = frameId || "bronze";
+    const fId = frameId || "none";
     overlayEl.dataset.targetFrame = fId;
     overlayEl.className = `frame-overlay frame-${fId}`;
     overlayEl.innerHTML = "";
     const parentBox = overlayEl.closest(".avatar-frame-box");
     if (parentBox) parentBox.classList.remove("has-png-frame");
+    if (fId === "none") return;
 
     loadTransparentDarkAsset(`./assets/frames/${fId}.webp`, true).then((res) => {
       if (!res.ok || !overlayEl.isConnected || overlayEl.dataset.targetFrame !== fId) return;
@@ -795,12 +903,14 @@ window.LUDO_UI = (() => {
   ];
 
   const ACHIEVEMENTS_DEF = [
+    { id: "a_frame_bronze", title: "Unlock Bronze Frame", sub: "Win 3 Matches", stat: "win", target: 3, reward: 300, currency: "coins", rewardFrame: "bronze", rewardFrameName: "Bronze Frame" },
+    { id: "a_frame_silver", title: "Unlock Silver Frame", sub: "Win 10 Matches", stat: "win", target: 10, reward: 30, currency: "gems", rewardFrame: "silver", rewardFrameName: "Silver Frame" },
+    { id: "a_frame_gold", title: "Unlock Royal Gold Frame", sub: "Win 25 Matches", stat: "win", target: 25, reward: 75, currency: "gems", rewardFrame: "royal_gold", rewardFrameName: "Royal Gold Frame" },
     { id: "a_first_win", title: "First Victory", stat: "win", target: 1, reward: 300, currency: "coins" },
     { id: "a_cup_champ", title: "Win a Kingdom Cup 🏆", stat: "cup", target: 1, reward: 30, currency: "gems" },
     { id: "a_hunter", title: "Capture 10 Opponents", stat: "capture", target: 10, reward: 20, currency: "gems" },
     { id: "a_roller", title: "Roll twenty-five 6s", stat: "roll6", target: 25, reward: 600, currency: "coins" },
-    { id: "a_home_hero", title: "Bring 20 Tokens Home", stat: "home", target: 20, reward: 25, currency: "gems" },
-    { id: "a_legend", title: "Win 10 Matches", stat: "win", target: 10, reward: 50, currency: "gems" }
+    { id: "a_home_hero", title: "Bring 20 Tokens Home", stat: "home", target: 20, reward: 25, currency: "gems" }
   ];
 
   const SPLASH_TIPS = [
@@ -846,15 +956,16 @@ window.LUDO_UI = (() => {
         theme: "classic",
         diceSkin: "classic",
         tokenSkin: "pin",
-        frame: "bronze",
+        frame: "none",
         emojiPack: "classic"
       },
       inventory: {
         themes: ["classic"],
         dice: ["classic"],
-        frames: ["bronze"],
+        frames: [],
         emojis: ["classic"],
-        bundlesClaimed: []
+        bundlesClaimed: [],
+        redeemedCodes: []
       },
       cup: {
         active: false,
@@ -890,6 +1001,7 @@ window.LUDO_UI = (() => {
     humanColor: "blue",
     teamPlay: "local",   // "local" | "bot"
     teamPair: "ry",
+    stakeTier: 0,
     stake: 0
   };
 
@@ -1004,7 +1116,7 @@ window.LUDO_UI = (() => {
       if (mergedSettings.theme === "classicpin") mergedSettings.theme = "classic";
       if (!validThemeIds.has(mergedSettings.theme)) mergedSettings.theme = "classic";
       if (!validDiceIds.has(mergedSettings.diceSkin)) mergedSettings.diceSkin = "classic";
-      if (!validFrameIds.has(mergedSettings.frame)) mergedSettings.frame = "bronze";
+      if (mergedSettings.frame !== "none" && !validFrameIds.has(mergedSettings.frame)) mergedSettings.frame = "none";
       if (!validEmojiIds.has(mergedSettings.emojiPack)) mergedSettings.emojiPack = "classic";
       if (typeof mergedSettings.autoMove !== "boolean") mergedSettings.autoMove = true;
       mergedSettings.tokenSkin = getPieceSkinForTheme(mergedSettings.theme);
@@ -1018,14 +1130,26 @@ window.LUDO_UI = (() => {
       const rawDice = ((parsed.inventory && parsed.inventory.dice) || []).filter((id) => validDiceIds.has(id));
       const mergedDice = Array.from(new Set(["classic", ...rawDice]));
 
+      const mergedProfile = { ...base.profile, ...(parsed.profile || {}) };
       const rawFrames = ((parsed.inventory && parsed.inventory.frames) || []).filter((id) => validFrameIds.has(id));
-      const mergedFrames = Array.from(new Set(["bronze", ...rawFrames]));
+      const mergedFramesSet = new Set(rawFrames);
+      const totalWins = Math.max(
+        Number(mergedProfile.wins) || 0,
+        Number(parsed.missions && parsed.missions.lifetime && parsed.missions.lifetime.win) || 0
+      );
+      if (totalWins >= 3) mergedFramesSet.add("bronze");
+      if (totalWins >= 10) mergedFramesSet.add("silver");
+      if (totalWins >= 25) mergedFramesSet.add("royal_gold");
+      const mergedFrames = Array.from(mergedFramesSet);
+      if (mergedSettings.frame !== "none" && !mergedFrames.includes(mergedSettings.frame)) {
+        mergedSettings.frame = mergedFrames[0] || "none";
+      }
 
       const rawEmojis = ((parsed.inventory && parsed.inventory.emojis) || []).filter((id) => validEmojiIds.has(id));
       const mergedEmojis = Array.from(new Set(["classic", ...rawEmojis]));
 
       const merged = {
-        profile: { ...base.profile, ...(parsed.profile || {}) },
+        profile: mergedProfile,
         settings: mergedSettings,
         inventory: {
           themes: mergedThemes,
@@ -1034,6 +1158,9 @@ window.LUDO_UI = (() => {
           emojis: mergedEmojis,
           bundlesClaimed: Array.isArray(parsed.inventory && parsed.inventory.bundlesClaimed)
             ? [...parsed.inventory.bundlesClaimed]
+            : [],
+          redeemedCodes: Array.isArray(parsed.inventory && parsed.inventory.redeemedCodes)
+            ? [...parsed.inventory.redeemedCodes]
             : []
         },
         cup: { ...base.cup, ...(parsed.cup || {}) },
@@ -1087,10 +1214,9 @@ window.LUDO_UI = (() => {
       saveData(true);
       applySettingsUI();
       renderHomeUI();
-      renderProfileModal();
-      renderShop();
-      renderThemesModal();
-      renderMissionsModal();
+      if (document.getElementById("shop-screen") && document.getElementById("shop-screen").classList.contains("active")) renderShopScreen();
+      if (document.getElementById("themes-screen") && document.getElementById("themes-screen").classList.contains("active")) renderThemesScreen();
+      if (document.getElementById("modal-missions") && !document.getElementById("modal-missions").classList.contains("hidden")) renderMissionsList();
     } catch {}
   }
 
@@ -1650,10 +1776,10 @@ window.LUDO_UI = (() => {
     const imgRatio = (natW && natH) ? (natW / natH) : (9 / 16);
     const drawnH = Math.max(vh, vw / imgRatio);
 
-    // Exact coordinates measured from bg-loading.webp (pinned with background-position: center bottom)
-    const bottomPx = Math.max(10, drawnH * 0.0209);
-    const heightPx = Math.max(11, Math.min(20, drawnH * 0.0168));
-    const widthPx = Math.min(vw * 0.66, drawnH * 0.244);
+    // Seated directly inside the ornate gold frame on bg-loading.webp so only ONE animated 0%-100% bar shows
+    const bottomPx = Math.max(36, drawnH * 0.0698);
+    const heightPx = Math.max(12, Math.min(22, drawnH * 0.0156));
+    const widthPx = Math.min(vw * 0.64, drawnH * 0.234);
 
     wrap.style.bottom = `${bottomPx.toFixed(1)}px`;
     wrap.style.width = `${widthPx.toFixed(1)}px`;
@@ -1775,7 +1901,7 @@ window.LUDO_UI = (() => {
   }
 
   function applyEquippedFrameOverlays() {
-    const activeFrame = appData.settings.frame || "bronze";
+    const activeFrame = appData.settings.frame || "none";
     const homeTopFrame = document.getElementById("home-top-frame");
     const homeCardFrame = document.getElementById("home-avatar-frame");
     const profileFrame = document.getElementById("profile-frame-preview");
@@ -1848,11 +1974,11 @@ window.LUDO_UI = (() => {
     document.body.classList.add(`dice-skin-${s.diceSkin || "classic"}`);
 
     document.body.classList.remove(
-      "frame-bronze", "frame-silver", "frame-royal_gold", "frame-glacier_ice",
+      "frame-none", "frame-bronze", "frame-silver", "frame-royal_gold", "frame-glacier_ice",
       "frame-magma_obsidian", "frame-cyber_neon", "frame-pharaoh_sand",
       "frame-dubai_emerald", "frame-cosmic_void"
     );
-    document.body.classList.add(`frame-${s.frame || "bronze"}`);
+    document.body.classList.add(`frame-${s.frame || "none"}`);
 
     document.body.classList.remove(
       "token-skin-pin", "token-skin-candy", "token-skin-egypt", "token-skin-oasis",
@@ -2022,7 +2148,9 @@ window.LUDO_UI = (() => {
       box.appendChild(overlay);
       visualEl.appendChild(box);
       applyFrameVisual(overlay, item.id);
-      subtitleEl.textContent = "Square profile frame displayed on your Home card, Profile & In-Game corner.";
+      subtitleEl.textContent = item.milestoneWins
+        ? `Win ${item.milestoneWins} matches to unlock this free Achievement frame (${Math.min(appData.missions.lifetime.win || 0, item.milestoneWins)}/${item.milestoneWins} wins).`
+        : "Square profile frame displayed on your Home card, Profile & In-Game corner.";
     } else if (category === "emojis") {
       const eGrid = document.createElement("div");
       eGrid.className = "preview-emoji-grid";
@@ -2059,6 +2187,16 @@ window.LUDO_UI = (() => {
       actionBtn.onclick = () => {
         equipCollectionItem(category, item);
         closeModal("modal-item-preview");
+      };
+    } else if (category === "frames" && item.milestoneWins) {
+      const winsNow = Math.max(appData.profile.wins || 0, appData.missions.lifetime.win || 0);
+      actionBtn.textContent = winsNow >= item.milestoneWins
+        ? "Claim in Achievements 🏆"
+        : `Win ${item.milestoneWins} Matches (${winsNow}/${item.milestoneWins}) • Goals`;
+      actionBtn.onclick = () => {
+        closeModal("modal-item-preview");
+        activeMissionTab = "achievements";
+        openMissionsModal();
       };
     } else {
       const icon = item.currency === "gems" ? "💎" : "🪙";
@@ -2215,6 +2353,11 @@ window.LUDO_UI = (() => {
         pill.className = "lk-action-pill equip-ready";
         pill.textContent = "EQUIP";
         card.appendChild(pill);
+      } else if (activeThemesTab === "frames" && item.milestoneWins) {
+        const pill = document.createElement("div");
+        pill.className = "lk-action-pill milestone-lock";
+        pill.textContent = `🏆 ${item.milestoneWins} Wins`;
+        card.appendChild(pill);
       } else {
         const pill = document.createElement("div");
         pill.className = "lk-action-pill";
@@ -2282,6 +2425,18 @@ window.LUDO_UI = (() => {
     openShopScreen(tab, fromId);
   }
 
+  function handlePaidShopTap(itemName, priceInr) {
+    UI_SFX.tap();
+    vibrate(14);
+    showToast(`${itemName} (₹${priceInr}) — Payments coming soon! Use a Redeem Code above.`);
+  }
+
+  function isBundleOwned(b) {
+    if (appData.inventory.bundlesClaimed.includes(b.id)) return true;
+    if (b.themeId && appData.inventory.themes.includes(b.themeId)) return true;
+    return false;
+  }
+
   function renderShopScreen() {
     document.getElementById("shop-coins").textContent = appData.profile.coins.toLocaleString("en-IN");
     document.getElementById("shop-gems").textContent = appData.profile.gems.toLocaleString("en-IN");
@@ -2295,7 +2450,7 @@ window.LUDO_UI = (() => {
 
     if (activeShopTab === "bundles") {
       SHOP_BUNDLES.forEach((b) => {
-        const claimed = appData.inventory.bundlesClaimed.includes(b.id);
+        const owned = isBundleOwned(b);
 
         const card = document.createElement("div");
         card.className = "shop-card bundle-card";
@@ -2308,43 +2463,77 @@ window.LUDO_UI = (() => {
         mid.className = "bundle-mid";
 
         const thumb = document.createElement("div");
-        thumb.className = "bundle-thumb";
-        thumb.style.backgroundImage = `url("./assets/${b.themeId}/bg.webp"), ${b.bg}`;
-        thumb.textContent = "";
+        thumb.className = "bundle-thumb bundle-thumb-dice";
+        if (b.themeId && STUDIO_PACKS.has(b.themeId)) {
+          thumb.style.backgroundImage = `url("./assets/${b.themeId}/bg.webp"), ${b.bg}`;
+          thumb.textContent = "";
+        } else {
+          thumb.style.background = b.bg;
+          thumb.textContent = b.icon;
+        }
 
         const itemsCol = document.createElement("div");
         itemsCol.className = "bundle-items";
-        const themeLine = `<span>🎨 ${b.themeName} + Exclusive Pieces</span>`;
-        const coinsLine = b.coins > 0 ? `<span>🪙 +${b.coins.toLocaleString("en-IN")} Coins</span>` : "";
-        const gemsLine = b.gems > 0 ? `<span>💎 +${b.gems} Gems</span>` : "";
-        itemsCol.innerHTML = themeLine + coinsLine + gemsLine;
+        const cosLines = (b.cosmeticLines || []).map((line) => `<span>${line}</span>`).join("");
+        const currLine = `<span>🪙 +${b.coins.toLocaleString("en-IN")} Coins • 💎 +${b.gems} Diamonds</span>`;
+        const priceMeta = `<div class="bundle-price-line"><span class="bundle-price-old">Worth ₹${b.mrpInr}</span><span>One-Time Offer</span></div>`;
+        itemsCol.innerHTML = cosLines + currLine + priceMeta;
 
         mid.appendChild(thumb);
         mid.appendChild(itemsCol);
 
         const btn = document.createElement("button");
         btn.type = "button";
-        if (claimed) {
+        if (owned) {
           btn.className = "shop-btn equipped";
-          btn.textContent = "Bundle Owned ✓";
+          btn.textContent = "Owned ✓";
           btn.disabled = true;
         } else {
-          const icon = b.currency === "gems" ? "💎" : "🪙";
-          const priceLabel = `${icon} ${b.price.toLocaleString("en-IN")}`;
-          btn.className = "shop-btn free-claim";
-          btn.textContent = `Get Offer • ${priceLabel}`;
-          btn.addEventListener("click", () => {
-            openBuyConfirm({
-              title: b.title,
-              desc: `Unlock ${b.themeName} bundle with bonus rewards?`,
-              priceText: priceLabel,
-              onConfirm: () => buyOfferBundle(b)
-            });
-          });
+          btn.className = "shop-btn bundle-inr";
+          btn.textContent = `Buy Offer • ₹${b.priceInr}`;
+          btn.addEventListener("click", () => handlePaidShopTap(b.title, b.priceInr));
         }
 
         card.appendChild(top);
         card.appendChild(mid);
+        card.appendChild(btn);
+        grid.appendChild(card);
+      });
+      return;
+    }
+
+    if (activeShopTab === "combos") {
+      SHOP_COMBOS.forEach((combo) => {
+        const card = document.createElement("div");
+        card.className = "shop-card";
+
+        const tag = document.createElement("span");
+        tag.className = "shop-pack-tag";
+        tag.textContent = combo.tag;
+
+        const preview = document.createElement("div");
+        preview.className = "shop-preview";
+        preview.textContent = combo.preview;
+        preview.style.background = combo.bg;
+
+        const name = document.createElement("div");
+        name.className = "shop-item-name";
+        name.textContent = combo.name;
+
+        const sub = document.createElement("div");
+        sub.className = "shop-pack-sub";
+        sub.textContent = `🪙 ${combo.coins.toLocaleString("en-IN")} + 💎 ${combo.gems}`;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "shop-btn paid-inr";
+        btn.textContent = `Buy • ₹${combo.priceInr}`;
+        btn.addEventListener("click", () => handlePaidShopTap(combo.name, combo.priceInr));
+
+        card.appendChild(tag);
+        card.appendChild(preview);
+        card.appendChild(name);
+        card.appendChild(sub);
         card.appendChild(btn);
         grid.appendChild(card);
       });
@@ -2365,53 +2554,122 @@ window.LUDO_UI = (() => {
       name.className = "shop-item-name";
       name.textContent = pack.name;
 
+      const sub = document.createElement("div");
+      sub.className = "shop-pack-sub";
+      sub.textContent = pack.sub || "";
+
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "shop-btn free-claim";
-      btn.textContent = "Claim FREE ✨";
-      btn.addEventListener("click", () => {
-        if (activeShopTab === "gems") appData.profile.gems += pack.amount;
-        else appData.profile.coins += pack.amount;
-        saveData();
-        renderHomeUI();
-        renderShopScreen();
-        if (document.getElementById("themes-screen").classList.contains("active")) renderThemesScreen();
-        UI_SFX.reward();
-        vibrate(20);
-        showToast(`Added ${pack.name}!`);
-      });
+      btn.className = "shop-btn paid-inr";
+      btn.textContent = `Buy • ₹${pack.priceInr}`;
+      btn.addEventListener("click", () => handlePaidShopTap(pack.name, pack.priceInr));
 
       card.appendChild(preview);
       card.appendChild(name);
+      if (pack.sub) card.appendChild(sub);
       card.appendChild(btn);
       grid.appendChild(card);
     });
   }
 
-  function buyOfferBundle(bundle) {
-    const balanceKey = bundle.currency === "gems" ? "gems" : "coins";
-    if (appData.profile[balanceKey] < bundle.price) {
-      UI_SFX.error();
-      showToast(`Need ${bundle.price} ${balanceKey}! Grab packs in the ${balanceKey === "gems" ? "💎 Buy Gems" : "🪙 Buy Coins"} tab.`);
-      vibrate([30, 40, 30]);
-      return;
+  function grantBundleRewards(bundle) {
+    if (!bundle) return [];
+    const unlockedLabels = [];
+    if (bundle.coins > 0) {
+      appData.profile.coins += bundle.coins;
+      unlockedLabels.push(`+${bundle.coins.toLocaleString("en-IN")} 🪙`);
     }
-
-    appData.profile[balanceKey] -= bundle.price;
-    appData.profile.coins += bundle.coins;
-    appData.profile.gems += bundle.gems;
-
-    if (!appData.inventory.themes.includes(bundle.themeId)) {
+    if (bundle.gems > 0) {
+      appData.profile.gems += bundle.gems;
+      unlockedLabels.push(`+${bundle.gems} 💎`);
+    }
+    if (bundle.themeId && !appData.inventory.themes.includes(bundle.themeId)) {
       appData.inventory.themes.push(bundle.themeId);
+      appData.settings.theme = bundle.themeId;
+      appData.settings.tokenSkin = getPieceSkinForTheme(bundle.themeId);
+      unlockedLabels.push(bundle.title);
     }
+    (bundle.diceIds || []).forEach((dId) => {
+      if (!appData.inventory.dice.includes(dId)) appData.inventory.dice.push(dId);
+    });
+    (bundle.frameIds || []).forEach((fId) => {
+      if (!appData.inventory.frames.includes(fId)) appData.inventory.frames.push(fId);
+    });
+    (bundle.emojiIds || []).forEach((eId) => {
+      if (!appData.inventory.emojis.includes(eId)) appData.inventory.emojis.push(eId);
+    });
     if (!appData.inventory.bundlesClaimed.includes(bundle.id)) {
       appData.inventory.bundlesClaimed.push(bundle.id);
     }
+    return unlockedLabels;
+  }
 
-    appData.settings.theme = bundle.themeId;
-    appData.settings.tokenSkin = getPieceSkinForTheme(bundle.themeId);
+  function applyRedeemReward(code, reward) {
+    const parts = [];
+    if (reward.bundle) {
+      const b = SHOP_BUNDLES.find((x) => x.id === reward.bundle);
+      if (b) {
+        grantBundleRewards(b);
+        parts.push(b.title);
+      }
+    }
+    if (reward.combo) {
+      const c = SHOP_COMBOS.find((x) => x.id === reward.combo);
+      if (c) {
+        appData.profile.coins += c.coins;
+        appData.profile.gems += c.gems;
+        parts.push(c.name);
+      }
+    }
+    if (reward.pack) {
+      const cPack = SHOP_COINS.find((x) => x.id === reward.pack);
+      const gPack = SHOP_GEMS.find((x) => x.id === reward.pack);
+      if (cPack) {
+        appData.profile.coins += cPack.amount;
+        parts.push(cPack.name);
+      } else if (gPack) {
+        appData.profile.gems += gPack.amount;
+        parts.push(gPack.name);
+      }
+    }
+    if (reward.coins > 0) {
+      appData.profile.coins += Number(reward.coins);
+      parts.push(`+${Number(reward.coins).toLocaleString("en-IN")} 🪙`);
+    }
+    if (reward.gems > 0) {
+      appData.profile.gems += Number(reward.gems);
+      parts.push(`+${Number(reward.gems)} 💎`);
+    }
+    if (reward.spinTickets > 0) {
+      appData.profile.spinTickets = (appData.profile.spinTickets || 0) + Number(reward.spinTickets);
+      parts.push(`+${Number(reward.spinTickets)} Spins 🎟️`);
+    }
+    if (reward.theme && THEMES_CATALOG.some((t) => t.id === reward.theme)) {
+      if (!appData.inventory.themes.includes(reward.theme)) appData.inventory.themes.push(reward.theme);
+      parts.push("Theme Unlocked");
+    }
+    if (reward.dice && DICE_CATALOG.some((d) => d.id === reward.dice)) {
+      if (!appData.inventory.dice.includes(reward.dice)) appData.inventory.dice.push(reward.dice);
+      parts.push("Dice Unlocked");
+    }
+    if (reward.frame && FRAMES_CATALOG.some((f) => f.id === reward.frame)) {
+      if (!appData.inventory.frames.includes(reward.frame)) appData.inventory.frames.push(reward.frame);
+      parts.push("Frame Unlocked");
+    }
+    if (reward.emoji && EMOJI_PACKS.some((e) => e.id === reward.emoji)) {
+      if (!appData.inventory.emojis.includes(reward.emoji)) appData.inventory.emojis.push(reward.emoji);
+      parts.push("Emoji Pack Unlocked");
+    }
+
+    if (!Array.isArray(appData.inventory.redeemedCodes)) appData.inventory.redeemedCodes = [];
+    if (!appData.inventory.redeemedCodes.includes(code)) {
+      appData.inventory.redeemedCodes.push(code);
+    }
 
     saveData();
+    if (window.LUDO_CLOUD && typeof window.LUDO_CLOUD.scheduleCloudSync === "function") {
+      window.LUDO_CLOUD.scheduleCloudSync(true);
+    }
     applySettingsUI();
     renderHomeUI();
     renderShopScreen();
@@ -2420,8 +2678,64 @@ window.LUDO_UI = (() => {
     UI_SFX.reward();
     FX.launchConfetti(90);
     FX.launchFireworks(2);
-    vibrate([25, 30, 60]);
-    showToast(`${bundle.title} Unlocked & Equipped!`);
+    vibrate([25, 30, 55]);
+    const summary = parts.length > 0 ? parts.join(" • ") : (reward.label || "Reward Unlocked!");
+    showToast(`Code Redeemed! ${summary}`);
+  }
+
+  async function handleRedeemCode() {
+    const inp = document.getElementById("input-redeem-code");
+    const btn = document.getElementById("btn-redeem-code");
+    if (!inp) return;
+
+    const code = inp.value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+    if (!code) {
+      UI_SFX.error();
+      showToast("Please enter a redeem code first.");
+      return;
+    }
+
+    if (!Array.isArray(appData.inventory.redeemedCodes)) appData.inventory.redeemedCodes = [];
+    if (appData.inventory.redeemedCodes.includes(code)) {
+      UI_SFX.error();
+      showToast("You already redeemed this code!");
+      vibrate([25, 35, 25]);
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(BUILTIN_PROMO_CODES, code)) {
+      applyRedeemReward(code, BUILTIN_PROMO_CODES[code]);
+      inp.value = "";
+      return;
+    }
+
+    if (window.LUDO_CLOUD && typeof window.LUDO_CLOUD.redeemLivePromoCode === "function") {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Checking...";
+      }
+      try {
+        const res = await window.LUDO_CLOUD.redeemLivePromoCode(code);
+        if (res && res.ok && res.reward) {
+          applyRedeemReward(code, res.reward);
+          inp.value = "";
+        } else {
+          UI_SFX.error();
+          vibrate([25, 35, 25]);
+          showToast((res && res.reason) || "Invalid or expired redeem code.");
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Redeem";
+        }
+      }
+      return;
+    }
+
+    UI_SFX.error();
+    vibrate([25, 35, 25]);
+    showToast("Invalid redeem code.");
   }
 
   // ==================== PROFILE, ROYAL RANK, AVATAR PICKER & FIXED-HEIGHT HISTORY ====================
@@ -2430,7 +2744,7 @@ window.LUDO_UI = (() => {
     const frameEl = document.getElementById("profile-frame-preview");
     const removeBtn = document.getElementById("btn-remove-photo");
     renderAvatar(previewEl, selectedPhotoTemp || selectedAvatarTemp);
-    if (frameEl) applyFrameVisual(frameEl, appData.settings.frame || "bronze");
+    if (frameEl) applyFrameVisual(frameEl, appData.settings.frame || "none");
     if (removeBtn) removeBtn.classList.toggle("hidden", !selectedPhotoTemp);
   }
 
@@ -2675,7 +2989,7 @@ window.LUDO_UI = (() => {
       players[color] = {
         name: isHuman ? appData.profile.name : botNames[botIdx++] || `Computer ${botIdx + 1}`,
         avatar: isHuman ? getActiveAvatarValue() : "🤖",
-        frame: isHuman ? (appData.settings.frame || "bronze") : "bronze",
+        frame: isHuman ? (appData.settings.frame || "none") : "none",
         isBot: !isHuman
       };
     });
@@ -2871,21 +3185,56 @@ window.LUDO_UI = (() => {
       const ready = current >= item.target && !claimed;
 
       const card = document.createElement("div");
-      card.className = "mission-card" + (ready ? " claimable" : "");
+      card.className = "mission-card" + (ready ? " claimable" : "") + (item.rewardFrame ? " has-frame-preview" : "");
 
-      card.innerHTML = `
-        <div class="mission-header">
-          <span class="mission-title">${item.title}</span>
-          <span class="mission-reward">${item.currency === "gems" ? "💎" : "🪙"} +${item.reward}</span>
-        </div>
-        <div class="mission-bar-track"><div class="mission-bar-fill" style="width:${pct}%"></div></div>
-      `;
+      const rewardBadgeText = item.rewardFrame
+        ? `🖼️ + ${item.currency === "gems" ? "💎" : "🪙"}${item.reward}`
+        : `${item.currency === "gems" ? "💎" : "🪙"} +${item.reward}`;
+
+      if (item.rewardFrame) {
+        const row = document.createElement("div");
+        row.className = "mission-frame-row";
+
+        const frameBox = document.createElement("div");
+        frameBox.className = "avatar-frame-box frame-56";
+        const avInner = document.createElement("div");
+        avInner.className = "square-avatar-inner";
+        renderAvatar(avInner, getActiveAvatarValue());
+        const overlay = document.createElement("div");
+        overlay.className = `frame-overlay frame-${item.rewardFrame}`;
+        frameBox.appendChild(avInner);
+        frameBox.appendChild(overlay);
+        applyFrameVisual(overlay, item.rewardFrame);
+
+        const body = document.createElement("div");
+        body.className = "mission-frame-body";
+        body.innerHTML = `
+          <div class="mission-header">
+            <span class="mission-title">${item.title}</span>
+            <span class="mission-reward">${rewardBadgeText}</span>
+          </div>
+          ${item.sub ? `<span class="mission-sub">${item.sub}</span>` : ""}
+          <div class="mission-bar-track"><div class="mission-bar-fill" style="width:${pct}%"></div></div>
+        `;
+
+        row.appendChild(frameBox);
+        row.appendChild(body);
+        card.appendChild(row);
+      } else {
+        card.innerHTML = `
+          <div class="mission-header">
+            <span class="mission-title">${item.title}</span>
+            <span class="mission-reward">${rewardBadgeText}</span>
+          </div>
+          <div class="mission-bar-track"><div class="mission-bar-fill" style="width:${pct}%"></div></div>
+        `;
+      }
 
       const footer = document.createElement("div");
       footer.className = "mission-footer";
       const prog = document.createElement("span");
       prog.className = "mission-progress-text";
-      prog.textContent = `${current} / ${item.target}`;
+      prog.textContent = item.rewardFrame ? `${current} / ${item.target} Wins` : `${current} / ${item.target}`;
 
       const btn = document.createElement("button");
       btn.type = "button";
@@ -2895,7 +3244,7 @@ window.LUDO_UI = (() => {
         btn.disabled = true;
       } else if (ready) {
         btn.className = "mission-claim-btn";
-        btn.textContent = "Claim";
+        btn.textContent = item.rewardFrame ? "Unlock & Claim" : "Claim";
         btn.addEventListener("click", () => claimMissionReward(isDaily, item));
       } else {
         btn.className = "mission-claim-btn locked";
@@ -2918,13 +3267,24 @@ window.LUDO_UI = (() => {
     if (item.currency === "gems") appData.profile.gems += item.reward;
     else appData.profile.coins += item.reward;
 
+    if (item.rewardFrame && !appData.inventory.frames.includes(item.rewardFrame)) {
+      appData.inventory.frames.push(item.rewardFrame);
+      if (!appData.settings.frame || appData.settings.frame === "none") {
+        appData.settings.frame = item.rewardFrame;
+      }
+    }
+
     saveData();
+    applySettingsUI();
     renderHomeUI();
     renderMissionsList();
+    if (document.getElementById("themes-screen").classList.contains("active")) renderThemesScreen();
     UI_SFX.reward();
-    FX.launchFireworks(1);
+    if (item.rewardFrame) FX.launchConfetti(85);
+    FX.launchFireworks(item.rewardFrame ? 2 : 1);
     vibrate([25, 30, 45]);
-    showToast(`Claimed ${item.currency === "gems" ? "💎" : "🪙"} +${item.reward}!`);
+    const bonusText = `${item.currency === "gems" ? "💎" : "🪙"} +${item.reward}`;
+    showToast(item.rewardFrame ? `Unlocked ${item.rewardFrameName} & ${bonusText}! 🏆` : `Claimed ${bonusText}!`);
   }
 
   function spendGems(amount) {
@@ -2944,13 +3304,28 @@ window.LUDO_UI = (() => {
     return setupState.mode === "pass-play" && setupState.passStyle === "team";
   }
 
+  function syncSetupStakeButtons() {
+    const tiers = SETUP_STAKE_TIERS[setupState.gameType] || SETUP_STAKE_TIERS.classic;
+    const safeTier = Math.max(0, Math.min(tiers.length - 1, setupState.stakeTier || 0));
+    setupState.stakeTier = safeTier;
+    setupState.stake = tiers[safeTier];
+    document.querySelectorAll("#setup-stake-picker .choice-btn").forEach((btn, idx) => {
+      const tIdx = btn.dataset.stier !== undefined ? Number(btn.dataset.stier) : idx;
+      const val = tiers[tIdx] ?? 0;
+      btn.dataset.stake = String(val);
+      btn.textContent = val === 0 ? "Free" : (val >= 1000 && val % 1000 === 0 ? `🪙 ${val / 1000}K` : `🪙 ${val}`);
+      btn.classList.toggle("active", tIdx === setupState.stakeTier);
+    });
+  }
+
   function updatePrizePreview() {
     const el = document.getElementById("setup-prize-preview");
     if (!el) return;
+    const quickScale = setupState.gameType === "quick" ? 0.5 : 1;
 
     if (isEffectiveTeam2v2()) {
       if (setupState.stake === 0) {
-        el.textContent = "Free 2v2 Team Match • Team Win Reward: +350 Coins 🪙";
+        el.textContent = `Free 2v2 Team Match • Team Win Reward: +${Math.round(350 * quickScale)} Coins 🪙`;
       } else {
         el.textContent = `Team Prize Pool: 🪙 ${(setupState.stake * 2).toLocaleString("en-IN")} (Win with partner!)`;
       }
@@ -2958,8 +3333,9 @@ window.LUDO_UI = (() => {
     }
 
     if (setupState.stake === 0) {
-      const diffBonus = setupState.difficulty === "pro" ? 350 : setupState.difficulty === "easy" ? 200 : 250;
-      el.textContent = `Free Match • 1st Place Reward: +${diffBonus} Coins 🪙`;
+      const baseBonus = setupState.difficulty === "pro" ? 350 : setupState.difficulty === "easy" ? 200 : 250;
+      const diffBonus = Math.round(baseBonus * quickScale);
+      el.textContent = `Free ${setupState.gameType === "quick" ? "Quick" : "Classic"} Match • 1st Reward: +${diffBonus} Coins 🪙`;
     } else {
       const pot = setupState.stake * setupState.playerCount;
       el.textContent = `Prize Pool: 🪙 ${pot.toLocaleString("en-IN")} (1st wins pot!)`;
@@ -2980,15 +3356,21 @@ window.LUDO_UI = (() => {
     document.getElementById("setup-color-section").classList.toggle("hidden", !isBot);
     document.getElementById("setup-stake-section").classList.toggle("hidden", !(isBot || isTeamBot));
 
-    if (!isBot && !isTeamBot) setupState.stake = 0;
-
+    if (!isBot && !isTeamBot) {
+      setupState.stakeTier = 0;
+      setupState.stake = 0;
+    }
+    syncSetupStakeButtons();
     updatePrizePreview();
     renderPassPlayNameInputs();
   }
 
   function openSetupModal(mode) {
     setupState.mode = mode;
-    if (mode === "pass-play") setupState.stake = 0;
+    if (mode === "pass-play") {
+      setupState.stakeTier = 0;
+      setupState.stake = 0;
+    }
 
     document.getElementById("setup-title").textContent = mode === "vs-bot" ? "Play vs Computer" : "Pass & Play Setup";
 
@@ -3013,9 +3395,7 @@ window.LUDO_UI = (() => {
     document.querySelectorAll("#setup-color-picker .color-dot").forEach((dot) => {
       dot.classList.toggle("active", dot.dataset.color === setupState.humanColor);
     });
-    document.querySelectorAll("#setup-stake-picker .choice-btn").forEach((btn) => {
-      btn.classList.toggle("active", Number(btn.dataset.stake) === setupState.stake);
-    });
+    syncSetupStakeButtons();
 
     syncSetupVisibility();
     openModal("modal-setup");
@@ -3081,7 +3461,7 @@ window.LUDO_UI = (() => {
           players[color] = {
             name: isHuman ? appData.profile.name : isPartner ? "Partner Bot" : `Computer ${oppIdx++ + 1}`,
             avatar: isHuman ? getActiveAvatarValue() : isPartner ? "🤝" : "🤖",
-            frame: isHuman ? (appData.settings.frame || "bronze") : "bronze",
+            frame: isHuman ? (appData.settings.frame || "none") : "none",
             isBot: !isHuman
           };
         });
@@ -3094,7 +3474,7 @@ window.LUDO_UI = (() => {
           players[color] = {
             name: customNames[color] || `Player ${idx + 1}`,
             avatar: localAvatars[idx % localAvatars.length],
-            frame: idx === 0 ? (appData.settings.frame || "bronze") : "bronze",
+            frame: idx === 0 ? (appData.settings.frame || "none") : "none",
             isBot: false
           };
         });
@@ -3133,7 +3513,7 @@ window.LUDO_UI = (() => {
         players[color] = {
           name: isHuman ? appData.profile.name : `Computer ${botNum++}`,
           avatar: isHuman ? getActiveAvatarValue() : "🤖",
-          frame: isHuman ? (appData.settings.frame || "bronze") : "bronze",
+          frame: isHuman ? (appData.settings.frame || "none") : "none",
           isBot: !isHuman
         };
       });
@@ -3146,7 +3526,7 @@ window.LUDO_UI = (() => {
         players[color] = {
           name: customNames[color] || `Player ${idx + 1}`,
           avatar: localAvatars[idx % localAvatars.length],
-          frame: idx === 0 ? (appData.settings.frame || "bronze") : "bronze",
+          frame: idx === 0 ? (appData.settings.frame || "none") : "none",
           isBot: false
         };
       });
@@ -3172,7 +3552,7 @@ window.LUDO_UI = (() => {
   function launchMatch(config) {
     if (config.stake > 0) {
       if (appData.profile.coins < config.stake) {
-        showToast("Not enough coins! Open Shop 🛒 to grab free coins.");
+        showToast("Not enough coins! Win matches, complete Missions, or check Shop 🛒.");
         vibrate([30, 40, 30]);
         return false;
       }
@@ -3212,7 +3592,38 @@ window.LUDO_UI = (() => {
   }
 
   // ==================== VICTORY, PODIUM & MATCH HISTORY ====================
-  function recordMatchResult({ saveId, rankings, mode, localColor, gameType, difficulty, isCup, cupRound, isTeam2v2, winningTeam, humanTeam, stake, pot }) {
+  function computeMultiWinnerPayouts(pot, playerCount, stake, gameType, payoutMode) {
+    const isMulti = payoutMode === "multi" && playerCount >= 3;
+    if (stake > 0) {
+      if (isMulti && playerCount === 4) {
+        const p1 = Math.round(pot * 0.625); // 2,500 on 4,000 pot
+        const p2 = Math.round(pot * 0.25);  // 1,000 on 4,000 pot
+        const p3 = Math.max(0, pot - p1 - p2); // 500 on 4,000 pot
+        return [p1, p2, p3, 0];
+      }
+      if (isMulti && playerCount === 3) {
+        const p1 = Math.round(pot * 0.7);
+        const p2 = Math.max(0, pot - p1);
+        return [p1, p2, 0];
+      }
+      return playerCount === 4 ? [pot, 0, 0, 0] : playerCount === 3 ? [pot, 0, 0] : [pot, 0];
+    }
+    const scale = gameType === "quick" ? 0.5 : 1;
+    if (isMulti && playerCount === 4) {
+      return [Math.round(200 * scale), Math.round(120 * scale), Math.round(60 * scale), 0];
+    }
+    if (isMulti && playerCount === 3) {
+      return [Math.round(220 * scale), Math.round(120 * scale), 0];
+    }
+    const winFree = Math.round(300 * scale);
+    return playerCount === 4
+      ? [winFree, Math.round(120 * scale), Math.round(60 * scale), 0]
+      : playerCount === 3
+        ? [winFree, Math.round(120 * scale), 0]
+        : [winFree, 0];
+  }
+
+  function recordMatchResult({ saveId, rankings, mode, localColor, gameType, difficulty, isCup, cupRound, isTeam2v2, winningTeam, humanTeam, stake, pot, payoutMode = "single" }) {
     if (saveId) deleteSavedMatch(saveId);
     appData.profile.matches += 1;
 
@@ -3284,23 +3695,21 @@ window.LUDO_UI = (() => {
         FX.launchConfetti(35);
       }
     } else if (mode === "online") {
-      subText = `${gameType === "quick" ? "Online Quick Ludo" : "Online Classic Ludo"} • Final Standings`;
+      const isMulti = payoutMode === "multi" && rankings.length >= 3;
+      const payouts = computeMultiWinnerPayouts(pot, rankings.length, stake, gameType, payoutMode);
+      subText = `${gameType === "quick" ? "Online Quick Ludo" : "Online Classic Ludo"}${isMulti ? " • Multi-Winner" : ""} • Final Standings`;
       winNextAction = "online";
       if (playAgainBtn) playAgainBtn.textContent = "Play Online 🌐";
-      if (stake > 0) {
-        if (humanPlace === 1) coinsEarned = pot;
-        else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = Math.floor(stake * 0.5);
-      } else {
-        if (humanPlace === 1) coinsEarned = 300;
-        else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = 120;
-        else coinsEarned = 60;
-      }
+      coinsEarned = payouts[humanPlace - 1] || 0;
       if (humanWonFirst) {
         FX.launchConfetti(140);
         FX.launchFireworks(4);
+      } else if (isMulti && coinsEarned > 0) {
+        FX.launchConfetti(85);
+        FX.launchFireworks(2);
       }
     } else if (mode === "pass-play") {
-      coinsEarned = 150;
+      coinsEarned = gameType === "quick" ? 75 : 150;
       FX.launchConfetti(110);
       FX.launchFireworks(3);
     } else if (stake > 0) {
@@ -3308,10 +3717,11 @@ window.LUDO_UI = (() => {
       else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = Math.floor(stake * 0.5);
       if (humanWonFirst) { FX.launchConfetti(120); FX.launchFireworks(3); }
     } else {
-      const freeWin = difficulty === "pro" ? 350 : difficulty === "easy" ? 200 : 250;
+      const quickScale = gameType === "quick" ? 0.5 : 1;
+      const freeWin = Math.round((difficulty === "pro" ? 350 : difficulty === "easy" ? 200 : 250) * quickScale);
       if (humanPlace === 1) coinsEarned = freeWin;
-      else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = 100;
-      else coinsEarned = 50;
+      else if (humanPlace === 2 && rankings.length >= 3) coinsEarned = Math.round(100 * quickScale);
+      else coinsEarned = Math.round(50 * quickScale);
       if (humanWonFirst) { FX.launchConfetti(120); FX.launchFireworks(3); }
     }
 
@@ -3359,11 +3769,17 @@ window.LUDO_UI = (() => {
     document.getElementById("win-title").textContent = titleText;
     document.getElementById("win-subtitle").textContent = subText;
 
+    const onlineMultiPayouts = (mode === "online" && payoutMode === "multi" && rankings.length >= 3)
+      ? computeMultiWinnerPayouts(pot, rankings.length, stake, gameType, payoutMode)
+      : null;
+
     const list = document.getElementById("win-rankings-list");
     list.innerHTML = "";
     rankings.forEach((entry, idx) => {
       const row = document.createElement("div");
-      const isWinnerRow = isTeam2v2 ? (entry.team === winningTeam) : (idx === 0);
+      const isWinnerRow = isTeam2v2
+        ? (entry.team === winningTeam)
+        : (onlineMultiPayouts ? (onlineMultiPayouts[idx] > 0) : (idx === 0));
       row.className = "rank-row" + (isWinnerRow ? " first-place" : "");
 
       const left = document.createElement("div");
@@ -3385,13 +3801,24 @@ window.LUDO_UI = (() => {
       left.appendChild(av);
       left.appendChild(name);
 
+      const rightGroup = document.createElement("div");
+      rightGroup.className = "rank-right-group";
+
+      if (onlineMultiPayouts && onlineMultiPayouts[idx] > 0) {
+        const payChip = document.createElement("span");
+        payChip.className = "rank-payout-chip";
+        payChip.textContent = `+${onlineMultiPayouts[idx].toLocaleString("en-IN")} 🪙`;
+        rightGroup.appendChild(payChip);
+      }
+
       const tag = document.createElement("span");
       tag.className = "rank-color-tag";
       tag.style.background = COLOR_HEX[entry.color];
       tag.textContent = isTeam2v2 ? `Team ${entry.team}` : COLOR_NAMES[entry.color];
+      rightGroup.appendChild(tag);
 
       row.appendChild(left);
-      row.appendChild(tag);
+      row.appendChild(rightGroup);
       list.appendChild(row);
     });
 
@@ -3734,6 +4161,8 @@ window.LUDO_UI = (() => {
         setupState.gameType = btn.dataset.gametype;
         document.querySelectorAll("#setup-game-type .choice-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
+        syncSetupStakeButtons();
+        updatePrizePreview();
       });
     });
     document.querySelectorAll("#setup-team-play .choice-btn").forEach((btn) => {
@@ -3775,11 +4204,10 @@ window.LUDO_UI = (() => {
         dot.classList.add("active");
       });
     });
-    document.querySelectorAll("#setup-stake-picker .choice-btn").forEach((btn) => {
+    document.querySelectorAll("#setup-stake-picker .choice-btn").forEach((btn, idx) => {
       btn.addEventListener("click", () => {
-        setupState.stake = Number(btn.dataset.stake);
-        document.querySelectorAll("#setup-stake-picker .choice-btn").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
+        setupState.stakeTier = btn.dataset.stier !== undefined ? Number(btn.dataset.stier) : idx;
+        syncSetupStakeButtons();
         updatePrizePreview();
       });
     });
@@ -3791,9 +4219,35 @@ window.LUDO_UI = (() => {
     document.getElementById("btn-daily-bonus").addEventListener("click", openRewardsModal);
     document.getElementById("btn-claim-reward").addEventListener("click", claimDailyReward);
 
+    // Redeem Code Input (Inside Shop) & Shortcut (Inside Settings)
+    const redeemBtn = document.getElementById("btn-redeem-code");
+    const redeemInput = document.getElementById("input-redeem-code");
+    if (redeemBtn) redeemBtn.addEventListener("click", handleRedeemCode);
+    if (redeemInput) {
+      redeemInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleRedeemCode();
+        }
+      });
+    }
+    const settingsRedeemBtn = document.getElementById("btn-settings-redeem");
+    if (settingsRedeemBtn) {
+      settingsRedeemBtn.addEventListener("click", () => {
+        closeModal("modal-settings");
+        openShopScreen("bundles", "home-screen");
+        setTimeout(() => {
+          const el = document.getElementById("input-redeem-code");
+          if (el) el.focus();
+        }, 120);
+      });
+    }
+
     // Social Links (Inside Settings)
     document.getElementById("btn-social-fb").addEventListener("click", () => window.open(SOCIAL_LINKS.facebook, "_blank", "noopener"));
     document.getElementById("btn-social-ig").addEventListener("click", () => window.open(SOCIAL_LINKS.instagram, "_blank", "noopener"));
+    const xBtn = document.getElementById("btn-social-x");
+    if (xBtn) xBtn.addEventListener("click", () => window.open(SOCIAL_LINKS.twitter, "_blank", "noopener"));
     document.getElementById("btn-social-wa").addEventListener("click", () => {
       const text = encodeURIComponent(`Come play Ludo Kingdom! ${SOCIAL_LINKS.gameUrl}`);
       window.open(`https://wa.me/?text=${text}`, "_blank", "noopener");

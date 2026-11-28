@@ -485,6 +485,7 @@ window.LUDO_GAME = (() => {
       humanTeam: null,
       stake: 0,
       pot: 0,
+      payoutMode: "single",
       activeColors: [],
       players: {},
       finishedOrder: [],
@@ -796,6 +797,7 @@ window.LUDO_GAME = (() => {
       humanTeam: state.humanTeam || null,
       stake: state.stake,
       pot: state.pot,
+      payoutMode: state.payoutMode || "single",
       activeColors: [...state.activeColors],
       players: JSON.parse(JSON.stringify(state.players)),
       finishedOrder: [...state.finishedOrder],
@@ -1565,7 +1567,7 @@ window.LUDO_GAME = (() => {
         }
 
         const frameOverlay = document.createElement("div");
-        const activeFrame = player.frame || getSettings().frame || "bronze";
+        const activeFrame = player.frame || getSettings().frame || "none";
         frameOverlay.id = `frame-${color}`;
         frameOverlay.className = `frame-overlay frame-${activeFrame}`;
         frameOverlay.setAttribute("aria-hidden", "true");
@@ -1932,7 +1934,8 @@ window.LUDO_GAME = (() => {
         winningTeam,
         humanTeam: state.humanTeam,
         stake: state.stake,
-        pot: state.pot
+        pot: state.pot,
+        payoutMode: state.payoutMode || "single"
       });
     }
   }
@@ -1942,7 +1945,7 @@ window.LUDO_GAME = (() => {
     const toks = state.tokens && state.tokens[ctrlColor];
     if (!Array.isArray(toks)) return false;
     const hasYardToken = toks.some((s) => s === -1);
-    const hasBoardToken = toks.some((s) => s >= 0 && s < BD.HOME_STEP);
+    const hasBoardToken = toks.some((s) => s >= 0 && s < BD.FINAL_STEP);
     return hasYardToken && !hasBoardToken;
   }
 
@@ -2719,6 +2722,7 @@ window.LUDO_GAME = (() => {
     state.difficulty = "normal";
     state.stake = Number(config.stake) || 0;
     state.pot = Number(config.pot) || 0;
+    state.payoutMode = config.payoutMode || "single";
     state.activeColors = [...config.activeColors];
     state.players = config.players;
     state.finishedOrder = [];
@@ -2772,6 +2776,7 @@ window.LUDO_GAME = (() => {
     state.humanTeam = config.humanTeam || null;
     state.stake = Number(config.stake) || 0;
     state.pot = Number(config.pot) || 0;
+    state.payoutMode = config.payoutMode || "single";
     state.activeColors = [...config.activeColors];
     state.players = config.players;
     state.finishedOrder = [];
@@ -2815,6 +2820,7 @@ window.LUDO_GAME = (() => {
     state.humanTeam = saved.humanTeam || null;
     state.stake = Number(saved.stake) || 0;
     state.pot = Number(saved.pot) || 0;
+    state.payoutMode = saved.payoutMode || "single";
     state.activeColors = [...saved.activeColors];
     state.players = saved.players;
     state.finishedOrder = Array.isArray(saved.finishedOrder) ? [...saved.finishedOrder] : [];
@@ -3023,7 +3029,7 @@ window.LUDO_GAME = (() => {
     refreshPieceSkins,
     refreshDiceSkins,
     refreshPlayerFrames(frameId) {
-      const f = frameId || getSettings().frame || "bronze";
+      const f = frameId || getSettings().frame || "none";
       BD.COLORS.forEach((color) => {
         const el = document.getElementById(`frame-${color}`);
         if (!el) return;

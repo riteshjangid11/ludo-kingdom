@@ -180,7 +180,8 @@ window.LUDO_CLOUD = (() => {
       dice: unionArrays(ci.dice, li.dice),
       frames: unionArrays(ci.frames, li.frames),
       emojis: unionArrays(ci.emojis, li.emojis),
-      bundlesClaimed: unionArrays(ci.bundlesClaimed, li.bundlesClaimed)
+      bundlesClaimed: unionArrays(ci.bundlesClaimed, li.bundlesClaimed),
+      redeemedCodes: unionArrays(ci.redeemedCodes, li.redeemedCodes)
     };
 
     const lm = localData.missions || {};
@@ -568,6 +569,75 @@ window.LUDO_CLOUD = (() => {
     }
   }
 
+  // ==================== LIVE FIREBASE REDEEM CODE LOOKUP ====================
+  async function redeemLivePromoCode(rawCode) {
+    const cleanCode = String(rawCode || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+    if (!cleanCode) return { ok: false, reason: "Enter a valid redeem code." };
+
+    try {
+      const { db: fbDb } = await ensureFirebaseAuth();
+      const codeRef = fbDb.ref(`promoCodes/${cleanCode}`);
+      const snap = await codeRef.once("value");
+      if (!snap.exists()) {
+        return { ok: false, notFound: true, reason: "Invalid or expired redeem code." };
+      }
+
+      const promo = snap.val();
+      if (!promo || promo.active === false) {
+        return { ok: false, reason: "This redeem code is no longer active." };
+      }
+
+      const uid = currentUser ? currentUser.uid : null;
+      if (uid && promo.claimedBy && promo.claimedBy[uid]) {
+        return { ok: false, reason: "You have already claimed this code." };
+      }
+
+      const maxClaims = Number(promo.maxClaims) || 0;
+      const currentClaims = Number(promo.claimedCount) || 0;
+      if (maxClaims > 0 && currentClaims >= maxClaims) {
+        return { ok: false, reason: "This redeem code has reached its claim limit." };
+      }
+
+      if (maxClaims > 0) {
+        const tx = await codeRef.child("claimedCount").transaction((curr) => {
+          const n = Number(curr) || 0;
+          if (n >= maxClaims) return undefined;
+          return n + 1;
+        });
+        if (!tx.committed) {
+          return { ok: false, reason: "This redeem code has reached its claim limit." };
+        }
+      }
+
+      if (uid) {
+        await codeRef.child(`claimedBy/${uid}`).set(Date.now()).catch(() => {});
+      }
+
+      return {
+        ok: true,
+        code: cleanCode,
+        reward: {
+          coins: Number(promo.coins) || 0,
+          gems: Number(promo.gems) || 0,
+          spinTickets: Number(promo.spinTickets) || 0,
+          theme: promo.theme || "",
+          dice: promo.dice || "",
+          frame: promo.frame || "",
+          emoji: promo.emoji || "",
+          bundle: promo.bundle || "",
+          combo: promo.combo || "",
+          pack: promo.pack || "",
+          label: promo.label || ""
+        }
+      };
+    } catch (err) {
+      if (err && err.message === "OFFLINE") {
+        return { ok: false, offline: true, reason: "No internet connection to verify live code." };
+      }
+      return { ok: false, notFound: true, reason: "Invalid or expired redeem code." };
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", bindCloudUI);
 
   return {
@@ -575,6 +645,7 @@ window.LUDO_CLOUD = (() => {
     scheduleCloudSync,
     syncNow: handleManualSync,
     ensureFirebaseAuth,
+    redeemLivePromoCode,
     getAuthState: () => ({
       signedIn: Boolean(currentUser),
       uid: currentUser ? currentUser.uid : null,
